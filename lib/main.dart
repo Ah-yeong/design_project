@@ -56,7 +56,7 @@ class _MyHomePage extends State<MyHomePage> {
       appBar: AppBar(
         elevation: 1,
         title: Text(
-          '로그인',
+          '로그 인',
           style: TextStyle(
               fontSize: 16,
               color: Colors.black
