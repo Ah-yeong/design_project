@@ -56,7 +56,7 @@ class _MyHomePage extends State<MyHomePage> {
       appBar: AppBar(
         elevation: 1,
         title: Text(
-          '로그 인',
+          '로그인',
           style: TextStyle(
               fontSize: 16,
               color: Colors.black
@@ -76,7 +76,7 @@ class _MyHomePage extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Hero(tag: 'detail', child: Icon(Icons.arrow_right_alt)),
-                    Text('- 페이지 강제이동 - ')
+                    Text('- 페이지 강제이동 - 커밋테스트')
                   ],
                 ),
                 onPressed: () {
