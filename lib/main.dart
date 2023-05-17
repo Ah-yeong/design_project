@@ -1,8 +1,9 @@
-import 'package:design_project/Board/BoardLocationPage.dart';
-import 'package:design_project/Board/BoardPageDesign.dart';
-import 'package:design_project/WritingPageDesign.dart';
+import 'package:design_project/Boards/BoardLocationPage.dart';
+import 'package:design_project/Boards/BoardPageMainHub.dart';
+import 'package:design_project/Boards/BoardWritingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'resources.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -17,8 +18,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Design Demo',
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('ko', 'KR'),
+      ],
       home: MyHomePage(),
     );
   }
@@ -52,11 +60,11 @@ class _MyHomePage extends State<MyHomePage> {
                     padding: const EdgeInsets.all(0),
                     onPressed: () {},
                     minSize: 0,
-                    color: Strings.styleColor,
+                    color: styleColor,
                     child: const Icon(Icons.settings),
                   ),
                 ),
-                backgroundColor: Strings.styleColor),
+                backgroundColor: styleColor),
             child: Scaffold(
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.endDocked,
@@ -65,7 +73,7 @@ class _MyHomePage extends State<MyHomePage> {
                 width: 85,
                 child: FittedBox(
                   child: FloatingActionButton.extended(
-                    backgroundColor: Strings.styleColor,
+                    backgroundColor: styleColor,
                     icon: const Icon(CupertinoIcons.list_bullet),
                     onPressed: () {},
                     label: const Text(
@@ -99,7 +107,7 @@ class _MyHomePage extends State<MyHomePage> {
                                         EdgeInsets.only(left: 10, right: 10),
                                     child: CupertinoButton(
                                       child: Text('게시판 디자인'),
-                                      color: Strings.styleColor,
+                                      color: styleColor,
                                       padding: EdgeInsets.all(10),
                                       minSize: 0,
                                       onPressed: () {Navigator.of(context).push(MaterialPageRoute(
@@ -113,11 +121,11 @@ class _MyHomePage extends State<MyHomePage> {
                                         EdgeInsets.only(left: 10, right: 10),
                                     child: CupertinoButton(
                                       child: Text('글쓰기 디자인'),
-                                      color: Strings.styleColor,
+                                      color: styleColor,
                                       minSize: 0,
                                       padding: EdgeInsets.all(10),
                                       onPressed: () {Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => const WritingPageDesign()));
+                                        builder: (context) => BoardWritingPage()));
                                       },
                                     ),
                                   )),
@@ -127,7 +135,7 @@ class _MyHomePage extends State<MyHomePage> {
                                         EdgeInsets.only(left: 10, right: 10),
                                         child: CupertinoButton(
                                           child: Text('예시'),
-                                          color: Strings.styleColor,
+                                          color: styleColor,
                                           minSize: 0,
                                           padding: EdgeInsets.all(10),
                                           onPressed: () {Navigator.of(context).push(MaterialPageRoute(
