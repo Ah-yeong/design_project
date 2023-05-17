@@ -76,7 +76,7 @@ class _MyHomePage extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Hero(tag: 'detail', child: Icon(Icons.arrow_right_alt)),
-                    Text('- 페이지 강제이동 - 커밋테스트')
+                    Text('- 페이지 강제이동 - 커밋 풀')
                   ],
                 ),
                 onPressed: () {
