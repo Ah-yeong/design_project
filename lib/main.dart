@@ -54,7 +54,15 @@ class _MyHomePage extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("로그인"),
+        elevation: 1,
+        title: Text(
+          '로그인',
+          style: TextStyle(
+              fontSize: 16,
+              color: Colors.black
+          ),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: SafeArea(
         bottom: true,
