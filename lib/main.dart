@@ -2,13 +2,18 @@ import 'package:design_project/Boards/BoardLocationPage.dart';
 import 'package:design_project/Boards/BoardPageMainHub.dart';
 import 'package:design_project/Boards/BoardWritingPage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'Auth/SignUpPage.dart';
 import 'resources.dart';
+import 'package:get/get.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -18,11 +23,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Design Demo',
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate
       ],
       supportedLocales: [
         const Locale('ko', 'KR'),
@@ -40,125 +46,159 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePage extends State<MyHomePage> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController? controllerId;
+  TextEditingController? controllerPw;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: CupertinoPageScaffold(
-            backgroundColor: Colors.white,
-            navigationBar: CupertinoNavigationBar(
-                middle: const Text(
-                  'APP NAME',
-                  style: TextStyle(color: Colors.white),
-                ),
-                trailing: SizedBox(
-                  height: 45,
-                  width: 45,
-                  child: CupertinoButton(
-                    padding: const EdgeInsets.all(0),
-                    onPressed: () {},
-                    minSize: 0,
-                    color: styleColor,
-                    child: const Icon(Icons.settings),
-                  ),
-                ),
-                backgroundColor: styleColor),
-            child: Scaffold(
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.endDocked,
-              floatingActionButton: SizedBox(
-                height: 34,
-                width: 85,
-                child: FittedBox(
-                  child: FloatingActionButton.extended(
-                    backgroundColor: styleColor,
-                    icon: const Icon(CupertinoIcons.list_bullet),
-                    onPressed: () {},
-                    label: const Text(
-                      "INFO",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-              ),
-              body: SafeArea(
-                bottom: false,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox(
-                        height: 200,
-                        child: Card(
-                            child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            children: [
-                              const Padding(padding: EdgeInsets.only(top: 20)),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 10, right: 10),
-                                    child: CupertinoButton(
-                                      child: Text('게시판 디자인'),
-                                      color: styleColor,
-                                      padding: EdgeInsets.all(10),
-                                      minSize: 0,
-                                      onPressed: () {Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => const BoardPageDesign()));
-                                      },
-                                    ),
-                                  )),
-                                  Expanded(
-                                      child: Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 10, right: 10),
-                                    child: CupertinoButton(
-                                      child: Text('글쓰기 디자인'),
-                                      color: styleColor,
-                                      minSize: 0,
-                                      padding: EdgeInsets.all(10),
-                                      onPressed: () {Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => BoardWritingPage()));
-                                      },
-                                    ),
-                                  )),
-                                  Expanded(
-                                      child: Padding(
-                                        padding:
-                                        EdgeInsets.only(left: 10, right: 10),
-                                        child: CupertinoButton(
-                                          child: Text('예시'),
-                                          color: styleColor,
-                                          minSize: 0,
-                                          padding: EdgeInsets.all(10),
-                                          onPressed: () {Navigator.of(context).push(MaterialPageRoute(
-                                              builder: (context) => const BoardLocationPage()));
-                                          },
-                                        ),
-                                      )),
-                                ],
-                              ),
-                              const Padding(padding: EdgeInsets.only(top: 20)),
-                              Row(
-                                children: [
-                                ],
-                              )
-                            ],
-                          ),
-                        )),
-                      ),
-                    )
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("로그인"),
+      ),
+      body: SafeArea(
+        bottom: true,
+          child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            Center(
+              child: ElevatedButton(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Hero(tag: 'detail', child: Icon(Icons.arrow_right_alt)),
+                    Text('페이지 강제이동')
                   ],
                 ),
+                onPressed: () {
+                  Get.off(() => BoardPageMainHub());
+                },
               ),
-            )),
-      );
+            ),
+            SizedBox(
+              height: 100,
+            ),
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: controllerId,
+                          decoration: const InputDecoration(
+                          hintText: "글 제목 (최대 20자)",
+                          border: OutlineInputBorder(),
+                          counterText: "",
+                          )
+                        ),
+                        TextField(
+                          controller: controllerPw,
+                          obscureText: true,
+                            decoration: const InputDecoration(
+                              hintText: "글 제목 (최대 20자)",
+                              border: OutlineInputBorder(),
+                              counterText: "",
+                            )
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: ElevatedButton(
+                      onPressed: () => _login(),
+                      child: const Text('로그인'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            ElevatedButton(
+                child: Text('회원가입'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (cont) => const SignUpPage()));
+                }),
+          ],
+        ),
+      )),
+    );
+  }
+
+  _auth() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (FirebaseAuth.instance.currentUser != null) {
+        Get.off(() => const BoardPageMainHub());
+      }
+    });
+  }
+
+  _login() async {
+    if (controllerId!.text.isEmpty) {
+      showAlert("이메일을 입력해주세요!", context);
+      return;
+    }
+    if (controllerPw!.text.isEmpty) {
+      showAlert("비밀번호를 입력해주세요!", context);
+      return;
+    }
+    if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).requestFocus(FocusNode());
+
+      // Firebase 사용자 인증, 등록
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: controllerId!.text, password: controllerPw!.text);
+        if (FirebaseAuth.instance.currentUser!.emailVerified) {
+          Get.off(() => const BoardPageMainHub());
+        } else {
+          showPopup("이메일 인증을 확인해주세요.", 1250);
+          return;
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = '';
+
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          message = '사용자 이름 및 암호를 확인하세요';
+        } else if (e.code == 'invalid-email') {
+          message = '이메일을 확인하세요';
+        } else {
+          message = e.code;
+        }
+        showPopup(message, 1250);
+      }
+    }
+  }
+
+  void showPopup(String message, int duration) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(milliseconds: duration),
+    );
+
+    // Find the ScaffoldMessenger in the widget tree
+    // and use it to show a SnackBar.
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  _logout() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  @override
+  dispose() async {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controllerId = TextEditingController();
+    controllerPw = TextEditingController();
+
+    _auth();
   }
 }

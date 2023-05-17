@@ -7,14 +7,14 @@ import 'package:flutter/cupertino.dart';
 
 import '../PageAlert.dart';
 
-class BoardPageDesign extends StatefulWidget {
-  const BoardPageDesign({super.key});
+class BoardPageMainHub extends StatefulWidget {
+  const BoardPageMainHub({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BoardPageDesign();
+  State<StatefulWidget> createState() => _BoardPageMainHub();
 }
 
-class _BoardPageDesign extends State<BoardPageDesign> {
+class _BoardPageMainHub extends State<BoardPageMainHub> {
   int _page = 1;
 
   @override
