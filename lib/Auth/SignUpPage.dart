@@ -140,7 +140,7 @@ class _SignUpPage extends State<SignUpPage> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: fontGrey,
+                        color: colorGrey,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -258,7 +258,7 @@ class _SignUpPage extends State<SignUpPage> {
             .doc('classIds').get();
         print(nickList.data().toString());
         print(classIdList.data().toString());
-        showAlert("이메일로 인증 주소가 발급되었습니다!", context);
+        showAlert("이메일로 인증 주소가 발급되었습니다!", context, colorSuccess);
         if (credential.user != null) {
             await FirebaseFirestore.instance
               .collection('UserData')
@@ -269,6 +269,12 @@ class _SignUpPage extends State<SignUpPage> {
             'nickName' : controllerNick!.value.text,
             'classId' : controllerClassId!.value.text,
           });
+            await FirebaseFirestore.instance
+                .collection('UserProfile')
+                .doc(credential.user!.uid)
+                .set({
+              'uid' : _auth.currentUser!.uid
+            });
           await FirebaseFirestore.instance
               .collection('NickClassData')
               .doc('nickNames')
@@ -297,7 +303,7 @@ class _SignUpPage extends State<SignUpPage> {
           message = e.code;
         }
 
-        showAlert(message ?? "", context);
+        showAlert(message ?? "", context, colorError);
       }
     }
   }

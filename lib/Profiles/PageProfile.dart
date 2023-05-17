@@ -1,3 +1,4 @@
+import 'package:design_project/Profiles/ProfileEarlySetting/inputForm1.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'PageProfileEdit.dart';
@@ -70,7 +71,8 @@ class PageProfile extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => PageProfileEdit()),
+                                    //MaterialPageRoute(builder: (context) => PageProfileEdit()),
+                                    MaterialPageRoute(builder: (context) => NameSignUpScreen()),
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(

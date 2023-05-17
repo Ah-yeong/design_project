@@ -1,14 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-const Color styleColor = const Color(0xFF6ACA89);
-const Color fontGrey = const Color(0xFF777777);
+const Color colorSuccess = const Color(0xFF6ACA89);
+const Color colorGrey = const Color(0xFF777777);
+const Color colorWarning = const Color(0xFFFFae69);
+const Color colorError = const Color(0xFFEE7070);
 
-void showAlert(String message, BuildContext cont) {
+void showAlert(String message, BuildContext cont, Color color) {
   final snackBar = SnackBar(
-    content: Text(message),
-    duration: Duration(milliseconds: 1250),
-    backgroundColor: Color(0xFFFF5555),
+    elevation: 2,
+    content: Text(
+      message,
+      style: TextStyle(color: Colors.white, fontSize: 15),
+      textAlign: TextAlign.center,
+    ),
+    duration: Duration(milliseconds: 1300),
+    backgroundColor: color,
   );
 
   // Find the ScaffoldMessenger in the widget tree

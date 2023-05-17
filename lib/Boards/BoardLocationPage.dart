@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
 
 class BoardLocationPage extends StatefulWidget {
@@ -16,7 +19,11 @@ class _BoardLocationPage extends State<BoardLocationPage> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  String? nowPosition;
   List<Marker> _markers = [];
+
+  double lat = 36.833068;
+  double lng = 127.178419;
 
   static const CameraPosition _kSeoul = CameraPosition(
     target: LatLng(36.833068, 127.178419),
@@ -34,11 +41,12 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     return Scaffold(
         body: SafeArea(
           bottom: false,
-          child: Column(
+          child: Stack(
             children: [
+              Column(
+                children: [
+                  Expanded(child:
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 2.184 / 3,
-                    width: MediaQuery.of(context).size.width,
                     child: GoogleMap(
                       gestureRecognizers: {
                         Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())
@@ -50,10 +58,20 @@ class _BoardLocationPage extends State<BoardLocationPage> {
                         _controller.complete(controller);
                       },
                       onCameraMove: ((_position) => _updatePosition(_position)),
+                      onCameraIdle: (() => _getPlaceAddress()),
                     ),
                   )
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 50,
+                child: Center(
+                  child: Text("${nowPosition ?? "불러오는 중"}"),
+                ),
+              )
             ],
-          ),
+          )
         ));
   }
 
@@ -72,7 +90,18 @@ class _BoardLocationPage extends State<BoardLocationPage> {
         draggable: true,
       ),
     );
+    lat = _position.target.latitude;
+    lng = _position.target.longitude;
     setState(() {});
+  }
+
+  Future<void> _getPlaceAddress() async {
+    final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko';
+    final res = await http.get(Uri.parse(url));
+    var value = jsonDecode(res.body)['results'][0]['address_components'];
+    setState(() {
+      nowPosition = "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
+    });
   }
 
 

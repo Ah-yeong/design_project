@@ -74,7 +74,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                       height: mediaSize!.height / 22,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
-                          color: styleColor),
+                          color: colorSuccess),
                       child: const Center(
                         child: Text("신청하기",
                             style: TextStyle(color: Colors.white, fontSize: 15)),

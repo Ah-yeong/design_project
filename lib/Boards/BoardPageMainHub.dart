@@ -1,5 +1,5 @@
 import 'package:design_project/Boards/BoardHomePage.dart';
-import 'package:design_project/Boards/BoardWritingPage.dart';
+import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:design_project/Chat/ChatScreen.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 import 'package:flutter/material.dart';
