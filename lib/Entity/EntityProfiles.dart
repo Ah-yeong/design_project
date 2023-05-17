@@ -6,6 +6,13 @@ class EntityProfiles {
   late String profileImagePath;
   var mannerGroup; // 소모임 매너지수
   var mannerTaxi; // 택시 온도
+
+  var nickname;
+  List<String>? hobby;
+  var mbti;
+  var commute;
+  var birth;
+
   bool _isLoaded = false;
 
   EntityProfiles(var this.profileId) {
@@ -14,7 +21,7 @@ class EntityProfiles {
   }
 
   loadProfile() {
-
+    // profileID 로 프로필 불러오기
   }
 
   makeTestingProfile() {
@@ -24,6 +31,12 @@ class EntityProfiles {
     profileImagePath = "assets/images/userImage.png";
     mannerGroup = 80;
     mannerTaxi = 64;
+
+    nickname = "테스트";
+    hobby = ["술", "영화"];
+    birth = "1999-10-19";
+    commute = "통학";
+
     _isLoaded = true;
   }
 }

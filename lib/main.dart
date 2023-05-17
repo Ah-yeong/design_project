@@ -1,6 +1,6 @@
 import 'package:design_project/Boards/BoardLocationPage.dart';
 import 'package:design_project/Boards/BoardPageMainHub.dart';
-import 'package:design_project/Boards/BoardWritingPage.dart';
+import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -146,11 +146,11 @@ class _MyHomePage extends State<MyHomePage> {
 
   _login() async {
     if (controllerId!.text.isEmpty) {
-      showAlert("이메일을 입력해주세요!", context);
+      showAlert("이메일을 입력해주세요!", context, colorWarning);
       return;
     }
     if (controllerPw!.text.isEmpty) {
-      showAlert("비밀번호를 입력해주세요!", context);
+      showAlert("비밀번호를 입력해주세요!", context, colorWarning);
       return;
     }
     if (_formKey.currentState!.validate()) {
@@ -163,7 +163,7 @@ class _MyHomePage extends State<MyHomePage> {
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
         } else {
-          showPopup("이메일 인증을 확인해주세요.", 1250);
+          showAlert("이메일로 인증 주소를 보냈습니다!\n인증 주소를 클릭해주세요.", context, colorSuccess);
           return;
         }
       } on FirebaseAuthException catch (e) {
@@ -176,20 +176,9 @@ class _MyHomePage extends State<MyHomePage> {
         } else {
           message = e.code;
         }
-        showPopup(message, 1250);
+        showAlert(message, context, colorError);
       }
     }
-  }
-
-  void showPopup(String message, int duration) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      duration: Duration(milliseconds: duration),
-    );
-
-    // Find the ScaffoldMessenger in the widget tree
-    // and use it to show a SnackBar.
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   _logout() async {
