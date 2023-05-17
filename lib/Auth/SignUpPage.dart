@@ -291,6 +291,8 @@ class _SignUpPage extends State<SignUpPage> {
           message = '닉네임이 이미 사용중입니다.';
         } else if (e.code == 'classid-already-in-use') {
           message = '학번이 이미 사용중입니다.';
+        } else if (e.code == 'weak-password'){
+          message = '비밀번호가 너무 취약합니다.';
         } else {
           message = e.code;
         }
