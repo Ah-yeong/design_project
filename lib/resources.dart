@@ -8,6 +8,7 @@ void showAlert(String message, BuildContext cont) {
   final snackBar = SnackBar(
     content: Text(message),
     duration: Duration(milliseconds: 1250),
+    backgroundColor: Color(0xFFFF5555),
   );
 
   // Find the ScaffoldMessenger in the widget tree
