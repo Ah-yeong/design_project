@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:design_project/Entity/EntityLatLng.dart';
 import 'package:design_project/resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -93,7 +94,7 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 30),
                   child: InkWell(
                       onTap: () =>
-                          Navigator.pop(context, nowPosition ?? "알 수 없음"),
+                          Navigator.pop(context, LLName(LatLng(lat, lng), nowPosition ?? "알 수 없음")),
                       child: SizedBox(
                         height: 50,
                         width: MediaQuery.of(context).size.width - 40,
