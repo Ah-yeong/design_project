@@ -74,29 +74,6 @@ class EntityPostGroup {
     } else {
       return "방금 전";
     }
-
-    // List<String> ymdCurrent = cTime.split(" ")[0].split("-");
-    // List<String> ymdBefore = _upTime.split(" ")[0].split("-");
-    // List<String> hmsCurrent = cTime.split(" ")[1].split(":");
-    // List<String> hmsBefore = _upTime.split(" ")[2].split(":");
-
-    int diff = 0;
-    // 년도의 차이가 있을 경우
-    // for(int i = 0; i < 3; i++) {
-    //   if (ymdCurrent[i] != ymdBefore[i]) {
-    //     diff = int.parse(timeCurrent[i]) - int.parse(timeBefore[i]);
-    //     return "$diff${i == 0 ? "년" :
-    //         i == 1 ? "개월" :
-    //         i == 2 ? "일" :
-    //         i == 3 ? "시간" :
-    //             i == 4 ? "분" :
-    //         ""} 전" ;
-    //   }
-    // }
-    // return "방금 전";
   }
 }
 
-class EntityPostTaxi {
-
-}

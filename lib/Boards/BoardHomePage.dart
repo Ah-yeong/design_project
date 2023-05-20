@@ -14,7 +14,7 @@ class BoardHomePage extends StatefulWidget {
 }
 
 class _BoardHomePage extends State<BoardHomePage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   int _page = 1;
   TabController? controller;
   ScrollController? scrollController;
@@ -93,7 +93,7 @@ class _BoardHomePage extends State<BoardHomePage>
                         width: 50,
                         child: FittedBox(
                           child: FloatingActionButton.small(
-                            heroTag: "fab1",
+                            heroTag: "fab2",
                             backgroundColor: const Color(0xCCFFFFFF),
                             onPressed: () {
                               scrollController!.animateTo(
@@ -137,6 +137,9 @@ class _BoardHomePage extends State<BoardHomePage>
       });
     });
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class TabBarDelegate extends SliverPersistentHeaderDelegate {

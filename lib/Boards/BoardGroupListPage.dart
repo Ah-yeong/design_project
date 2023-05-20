@@ -10,7 +10,8 @@ class BoardGroupListPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
 
-class _BoardGroupListPage extends State<BoardGroupListPage> {
+class _BoardGroupListPage extends State<BoardGroupListPage>
+with AutomaticKeepAliveClientMixin{
   var count = 10;
 
   @override
@@ -176,4 +177,7 @@ class _BoardGroupListPage extends State<BoardGroupListPage> {
       ],
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
