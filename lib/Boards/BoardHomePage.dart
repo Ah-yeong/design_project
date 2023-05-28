@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../Settings/PageSettings.dart';
-import 'BoardGroupListPage.dart';
+import 'BoardPostListPage.dart';
 import 'BoardLocationPage.dart';
 import 'BoardSearchPage.dart';
 
