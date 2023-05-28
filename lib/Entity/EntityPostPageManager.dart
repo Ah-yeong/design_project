@@ -5,7 +5,7 @@ import 'EntityPost.dart';
 class PostPageManager {
   bool isLoaded = false;
   int _loadedCount = 0;
-  int _maxCount = 25;
+  int _maxCount = 100;
   int _lastLoaded = 0;
   int _scrollCount = 0;
   List<EntityPost> list = List.empty(growable: true);
@@ -14,12 +14,12 @@ class PostPageManager {
 
   void reloadPage() {
     isLoaded = true;
-    _maxCount += 25;
+    _maxCount += 100;
     loadPages().then((value) => isLoaded = false);
   }
 
   Future<void> loadPages() async {
-    int post_count;
+    int post_count = 0;
     DocumentReference<Map<String, dynamic>> ref =
         await FirebaseFirestore.instance.collection("Post").doc("postData");
     await ref.get().then((DocumentSnapshot ds) {
@@ -27,8 +27,12 @@ class PostPageManager {
     });
     var qs = await FirebaseFirestore.instance.collection("Post").get();
     for(DocumentSnapshot ds in qs.docs) {
-      if(_maxCount <= _loadedCount || ds.id == "postData") continue;
-    if(int.parse(ds.id) <= _lastLoaded) continue;
+      if(post_count <= _loadedCount || _maxCount <= _loadedCount) {
+        isLoaded = true;
+        return;
+      }
+      if (ds.id == "postData") continue;
+      if(int.parse(ds.id) <= _lastLoaded) continue;
       EntityPost pg = EntityPost(int.parse(ds.id));
       await pg.loadPost();
       list.add(pg);

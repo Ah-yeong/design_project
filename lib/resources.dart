@@ -6,6 +6,20 @@ const Color colorGrey = const Color(0xFF777777);
 const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
 
+Color getColorForScore(int score) {
+  if (score < 20) {
+    return Colors.red;
+  } else if (score < 40) {
+    return Colors.orange;
+  } else if (score < 60) {
+    return Colors.lime;
+  } else if (score < 80) {
+    return Colors.green;
+  } else {
+    return Colors.blue;
+  }
+}
+
 void showAlert(String message, BuildContext cont, Color color) {
   final snackBar = SnackBar(
     elevation: 2,
