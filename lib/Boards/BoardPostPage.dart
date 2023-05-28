@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources.dart';
 
 class BoardPostPage extends StatefulWidget {
-  final String postId;
+  final int postId;
 
   const BoardPostPage({super.key, required this.postId});
 
@@ -27,7 +27,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   );
 
   var postId;
-  EntityPostGroup? postEntity;
+  EntityPost? postEntity;
   EntityProfiles? profileEntity;
   bool isLoaded = false;
   bool postTimeIsLoaded = false;
@@ -37,55 +37,64 @@ class _BoardPostPage extends State<BoardPostPage> {
   @override
   Widget build(BuildContext context) {
     mediaSize = MediaQuery.of(context).size;
-    return Scaffold(
-      bottomNavigationBar: BottomAppBar(
+    return !isLoaded
+        ? const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              color: Colors.black,
+              backgroundColor: Colors.white,
+            ),
+          )
+        : Scaffold(
+            bottomNavigationBar: BottomAppBar(
         color: const Color(0xFFF6F6F6),
         elevation: 1,
         notchMargin: 4,
         child: SizedBox(
-          height: mediaSize!.height / 18,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Padding(padding: EdgeInsets.only(left: 40)),
-                  SizedBox(
-                      width: mediaSize!.width / 3 - 20,
-                      height: mediaSize!.height / 22,
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Text("현재 인원 ${postEntity!.getPostCurrentPerson()}/${postEntity!.getPostMaxPerson()} 명",
-                                style: const TextStyle(color: Colors.black54, fontSize: 14)),
-                            const Text("마감 하루 남음",
-                                style: TextStyle(color: Colors.black54, fontSize: 14)),
-                          ],
+            height: 55,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Padding(padding: EdgeInsets.only(left: 40)),
+                    SizedBox(
+                        width: mediaSize!.width / 3 - 20,
+                        child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("현재 인원 ${postEntity!.getPostCurrentPerson()}/${postEntity!.getPostMaxPerson()} 명",
+                                    style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                const Text("마감 하루 남음",
+                                    style: TextStyle(color: Colors.black54, fontSize: 14)),
+                              ],
+                            )
                         )
-                      )
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                      width: mediaSize!.width / 2 - 20,
-                      height: mediaSize!.height / 22,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: colorSuccess),
-                      child: const Center(
-                        child: Text("신청하기",
-                            style: TextStyle(color: Colors.white, fontSize: 15)),
-                      )
-                  ),
-                  const Padding(padding: EdgeInsets.only(left: 20)),
-                ],
-              )
-            ],
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                        width: mediaSize!.width / 2 - 20,
+                        height: mediaSize!.height / 22,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: colorSuccess),
+                        child: const Center(
+                          child: Text("신청하기",
+                              style: TextStyle(color: Colors.white, fontSize: 15)),
+                        )
+                    ),
+                    const Padding(padding: EdgeInsets.only(left: 20)),
+                  ],
+                )
+              ],
+            ),
           ),
-        ),
       ),
       appBar: AppBar(
         title: const Text(
@@ -108,16 +117,9 @@ class _BoardPostPage extends State<BoardPostPage> {
         elevation: 1,
       ),
       backgroundColor: Colors.white,
-      body: SafeArea(
-          child: !isLoaded
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 5,
-                    color: Colors.black,
-                    backgroundColor: Colors.white,
-                  ),
-                )
-              : Padding(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +130,10 @@ class _BoardPostPage extends State<BoardPostPage> {
                           child: GoogleMap(
                             markers: Set.from(_markers),
                             mapType: MapType.normal,
-                            initialCameraPosition: _kSeoul,
+                            initialCameraPosition: CameraPosition(
+                              target: postEntity!.getLLName().latLng,
+                              zoom: 17.4746,
+                            ),
                             onMapCreated: (GoogleMapController controller) {
                               _controller.complete(controller);
                             },
@@ -241,6 +246,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                         // Text("Gender Limit : ${postEntity!.getPostGender()}"),
                       ]),
                 )),
+      ),
     );
   }
 
@@ -261,16 +267,18 @@ class _BoardPostPage extends State<BoardPostPage> {
   void initState() {
     super.initState();
     postId = widget.postId;
-    postEntity = EntityPostGroup(postId);
-    postEntity!.makeTestingPost();
-    profileEntity = EntityProfiles(postEntity!.getWriterId());
-    profileEntity!.makeTestingProfile();
-    _markers.add(Marker(
-        markerId: const MarkerId('1'),
-        draggable: true,
-        onTap: () => print("marker tap"),
-        position: const LatLng(36.833068, 127.178419)));
-    loadPostTime();
+    postEntity = EntityPost(postId);
+    postEntity!.loadPost().then((value) {
+      profileEntity = EntityProfiles(postEntity!.getWriterId());
+      profileEntity!.makeTestingProfile();
+      _markers.add(Marker(
+          markerId: const MarkerId('1'),
+          draggable: true,
+          onTap: () => print("marker tap"),
+          position: postEntity!.getLLName().latLng));
+      loadPostTime();
+    });
+    //postEntity!.makeTestingPost();
   }
 
   Color _getColorForScore(int score) {
@@ -288,13 +296,11 @@ class _BoardPostPage extends State<BoardPostPage> {
   }
 
   loadPostTime() {
-    Future<String> ptime = postEntity!.getTimeBefore();
-    ptime.then((value) {
-      postTime = value;
-      setState(() {
-        postTimeIsLoaded = true;
-        isLoaded = true;
-      });
+    String ptime = getTimeBefore(postEntity!.getUpTime());
+    postTime = ptime;
+    setState(() {
+      postTimeIsLoaded = true;
+      isLoaded = true;
     });
   }
 

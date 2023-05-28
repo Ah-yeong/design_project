@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
 import 'package:design_project/Boards/Writing/BoardSelectPositionPage.dart';
+import 'package:design_project/Entity/EntityPost.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -121,10 +122,10 @@ class _BoardWritingPage extends State<BoardWritingPage> {
   bool _isUploading = false;
   bool _isIgnoreAge = false;
 
+  final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+
   @override
   Widget build(BuildContext context) {
-    final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
-
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
@@ -457,12 +458,27 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                 child: AnimatedOpacity(
                   opacity: _btnVisible ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
-                  child: Align(
+                  child: !_btnVisible ? SizedBox() : Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 18),
                       child: InkWell(
-                          onTap: () => _tryUploadPost(),
+                          onTap: () {
+                            if(!_btnVisible) return;
+                            // 게시물 양식 확인
+                            var errMsg = _checkIsInputEmpty();
+                            if (errMsg != "Success") {
+                              showAlert(errMsg, context, colorError);
+                              return;
+                            }
+                            bool success = false;
+                            _tryUploadPost().then((value) {
+                              success = value;
+                              setState(() => _isUploading = false);
+                              showAlert(success ? "글 작성이 완료되었습니다!" : "글 작성에 실패했습니다!", context, success ? colorSuccess : colorError);
+                              if(success) Navigator.pop(context);
+                            });
+                          },
                           child: SizedBox(
                             height: 50,
                             width: MediaQuery.of(context).size.width - 40,
@@ -706,21 +722,15 @@ class _BoardWritingPage extends State<BoardWritingPage> {
 
   // 게시물 업로드 시도
   Future<bool> _tryUploadPost() async {
-    var errMsg = _checkIsInputEmpty();
-    if (errMsg != "Success") {
-      showAlert(errMsg, context, colorError);
-      return false;
-    }
-    int new_post_id = -1;
+    bool successUpload = false;
+
+    // 게시물 양식 조건이 모두 맞으면 업로드 시도
     setState(() => _isUploading = true); // 업로드 시작
-    DocumentReference<Map<String, dynamic>> ref =
-        await FirebaseFirestore.instance.collection("Post").doc("postData");
-    ref.get().then((DocumentSnapshot ds) {
-      new_post_id = ds.get("last_id") + 1;
-      if (new_post_id == -1) return false;
-      setState(() => _isUploading = false); // 업로드 완료
-    });
-    return true;
+    DateTime dt = DateTime.now();
+    successUpload = await addPost(_head!.text, _body!.text, _selectedGender!, _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
+        "${dateFormatter.format(_selectedDate)} ${_selectedTime.to24hours()}:00",
+        _llName!, "${dateFormatter.format(DateTime.now())} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}", _minAge, _maxAge, "Example");
+    return successUpload;
   }
 
   String _checkIsInputEmpty() {
@@ -746,6 +756,15 @@ class _BoardWritingPage extends State<BoardWritingPage> {
       msg = "모임 시간은 최소 30분 이후입니다!";
     }
     return msg;
+  }
+
+}
+
+extension TimeOfDayConverter on TimeOfDay {
+  String to24hours() {
+    final hour = this.hour.toString().padLeft(2, "0");
+    final min = this.minute.toString().padLeft(2, "0");
+    return "$hour:$min";
   }
 }
 

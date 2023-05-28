@@ -1,3 +1,4 @@
+/*
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -148,3 +149,5 @@ class _BoardTaxiListPage extends State<BoardTaxiListPage> {
     );
   }
 }
+
+*/

@@ -1,79 +1,139 @@
-import 'package:ntp/ntp.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/Entity/EntityLatLng.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class EntityPostGroup {
-  var _postId;
+class EntityPost {
+  int _postId;
   var _writerId;
+  var _writerNick;
   var _head;
   var _body;
   var _gender;
   var _maxPerson;
   var _currentPerson;
+  var _minAge;
+  var _maxAge;
   var _time;
-  var _locationX;
-  var _locationY;
+  var _llName;
   late String _upTime;
   var viewCount;
   bool _isLoaded = false;
 
-  EntityPostGroup(var this._postId) {
-    loadPost();
-  }
+  EntityPost(int this._postId) {}
 
-  loadPost() {
+  Future<void> loadPost() async {
     // 포스팅 로드
-    Future<String> temp = getTimeBefore();
     _isLoaded = true;
+    await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((ds) {
+      _writerId = ds.get("writer_id");
+      _head = ds.get("head");
+      _body = ds.get("body");
+      _gender = ds.get("gender");
+      _maxPerson = ds.get("maxPerson");
+      _currentPerson = ds.get("currentPerson");
+      _writerNick = ds.get("writer_nick");
+      _minAge = ds.get("minAge");
+      _maxAge = ds.get("maxAge");
+      _time = ds.get("time");
+      _upTime = ds.get("upTime");
+      viewCount = ds.get("viewCount");
+      _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
+    });
   }
 
   makeTestingPost() {
-    _postId = "00000001";
+    _postId = 1;
     _writerId = "jongwon1019";
     _head = "제목 테스트 - 영화 볼 사람?!";
+    _minAge = -1;
+    _maxAge = 25;
     _body = "내용입니다. \n다른 이유는 없습니다.";
-    _gender = "man";
-    _maxPerson = "5";
-    _currentPerson = "2";
+    _gender = 2;
+    _maxPerson = 5;
+    _currentPerson = 2;
     _time = "2023-04-22 11:10:05";
-    _locationX = "36.833068";
-    _locationY = "127.178419";
+    _llName = LLName(LatLng(36.833068, 127.178419), "천안시 동남구 안서동 300");
     _upTime = "2023-04-16 13:27:00";
     viewCount = "1342";
     _isLoaded = true;
   }
 
   // Getter, (ReadOnly)
-  String getPostId() => _postId;
+  int getPostId() => _postId;
   String getWriterId() => _writerId;
   String getPostHead() => _head;
   String getPostBody() => _body;
-  String getPostGender() => _gender;
-  String getPostMaxPerson() => _maxPerson;
-  String getPostCurrentPerson() => _currentPerson;
+  int getPostGender() => _gender;
+  int getPostMaxPerson() => _maxPerson;
+  int getPostCurrentPerson() => _currentPerson;
+  String getWriterNick() => _writerNick;
   String getTime() => _time;
   String getUpTime() => _upTime;
-  List<String> getLocation() => List.of([_locationX, _locationY]);
-
+  LLName getLLName() => _llName;
+  int getMinAge() => _minAge;
+  int getMaxAge() => _maxAge;
   bool isLoad() => _isLoaded;
 
-  Future<String> getTimeBefore() async {
-    DateTime currentTime = await NTP.now();
-    currentTime = currentTime.toUtc(); // 한국 시간
-    DateTime beforeTime = DateTime.parse(_upTime);
-    Duration timeGap = currentTime.difference(beforeTime);
+  String getDateString(bool hour, bool minute) {
+    if (_upTime.isEmpty) return "";
+    DateTime upTime = DateTime.parse(_upTime);
+    return "${upTime.month}월 ${upTime.day}일${hour ? " ${upTime.hour}시" : ""} ${minute ? " ${upTime.minute}분" : ""}";
+  }
+}
+String getTimeBefore(String upTime) {
+  DateTime currentTime = DateTime.now();
+  currentTime = currentTime.toUtc(); // 한국 시간
+  DateTime beforeTime = DateTime.parse(upTime);
+  Duration timeGap = currentTime.difference(beforeTime);
 
-    if(timeGap.inDays > 365) {
-      return "${timeGap.inDays ~/ 365}년 전";
-    } else if (timeGap.inDays >= 30) {
-      return "${timeGap.inDays ~/ 30}개월 전";
-    } else if (timeGap.inDays >= 1) {
-      return timeGap.inDays == 1 ? "하루 전" : ("${timeGap.inDays}일 전");
-    } else if (timeGap.inHours >= 1) {
-      return "${timeGap.inHours}시간 전";
-    } else if (timeGap.inMinutes >= 1) {
-      return "${timeGap.inMinutes}분 전";
-    } else {
-      return "방금 전";
-    }
+  if(timeGap.inDays > 365) {
+    return "${timeGap.inDays ~/ 365}년 전";
+  } else if (timeGap.inDays >= 30) {
+    return "${timeGap.inDays ~/ 30}개월 전";
+  } else if (timeGap.inDays >= 1) {
+    return timeGap.inDays == 1 ? "하루 전" : ("${timeGap.inDays}일 전");
+  } else if (timeGap.inHours >= 1) {
+    return "${timeGap.inHours}시간 전";
+  } else if (timeGap.inMinutes >= 1) {
+    return "${timeGap.inMinutes}분 전";
+  } else {
+    return "방금 전";
   }
 }
 
+Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime, int minAge, int maxAge, String writerNick) async {
+  try {
+    int? new_post_id, post_count;
+    DocumentReference<Map<String, dynamic>> ref =
+    await FirebaseFirestore.instance.collection("Post").doc("postData");
+    await ref.get().then((DocumentSnapshot ds) {
+      new_post_id = ds.get("last_id") + 1;
+      post_count = ds.get("post_count");
+      if (new_post_id == -1) return false; // 업로드 실패
+    });
+    await ref.update({"last_id" : new_post_id, "post_count" : post_count! + 1});
+    String uuid = await FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
+      "post_id" : new_post_id,
+      "writer_id" : uuid,
+      "head" : head,
+      "body" : body,
+      "gender" : gender,
+      "maxPerson" : maxPerson,
+      "time" : time,
+      "lat" : llName.latLng.latitude,
+      "lng" : llName.latLng.longitude,
+      "name" : llName.AddressName,
+      "currentPerson" : 1,
+      "minAge" : minAge,
+      "writer_nick" : writerNick,
+      "maxAge" : maxAge,
+      "upTime" : upTime,
+      "viewCount" : 1
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
