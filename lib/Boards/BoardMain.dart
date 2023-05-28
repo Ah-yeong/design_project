@@ -6,6 +6,7 @@ import 'package:design_project/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../Entity/EntityPostPageManager.dart';
 import '../PageAlert.dart';
 
 class BoardPageMainHub extends StatefulWidget {
@@ -15,8 +16,12 @@ class BoardPageMainHub extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardPageMainHub();
 }
 
+final PostPageManager postManager = PostPageManager();
+
 class _BoardPageMainHub extends State<BoardPageMainHub> {
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatScreen(), PageAlert(), PageProfile()];
+
+
   int _selectedIdx = 0;
 
   @override

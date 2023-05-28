@@ -149,7 +149,7 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
         "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
       });
     } catch (e) {
-      e.toString();
+      nowPosition = "알 수 없음";
     }
   }
 

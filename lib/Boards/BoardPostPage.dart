@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:design_project/Boards/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
@@ -145,122 +146,13 @@ class _BoardPostPage extends State<BoardPostPage> {
                         ),
 
                         // 제목 및 카테고리
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(postEntity!.getPostHead(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18)),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: const Color(0xFFBFBFBF)),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(
-                                        right: 5, left: 5, top: 3, bottom: 3),
-                                    child: Text("20~24세",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10)),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 1, right: 1),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: const Color(0xFFBFBFBF)),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(
-                                        right: 5, left: 5, top: 3, bottom: 3),
-                                    child: Text("남자만",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10)),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 1, right: 1),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: const Color(0xFFBFBFBF)),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(
-                                        right: 5, left: 5, top: 3, bottom: 3),
-                                    child: Text("영화",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 10)),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 1, right: 1),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
-                          child: Divider(
-                            thickness: 1,
-                          ),
-                        ),
-                        drawProfile(),
-                        // 프로필
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
-                          child: Divider(
-                            thickness: 1,
-                          ),
-                        ),
-                        Text(postEntity!.getPostBody(),
-                            style: const TextStyle(fontSize: 15)),
-                        // 내용
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                        ),
-                        Text("조회수 ${postEntity!.viewCount}, $postTime",
-                            style: const TextStyle(
-                                fontSize: 12.5, color: Color(0xFF888888))),
-                        // 조회수 및 게시글 시간
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 12, 0, 12),
-                          child: Divider(
-                            thickness: 1,
-                          ),
-                        ),
-                        // const Text("모임 장소 및 시간",
-                        //     style: TextStyle(
-                        //         fontWeight: FontWeight.bold, fontSize: 16)),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
-                        ),
-                        Text("시간 : ${postEntity!.getTime()}"),
-                        const Text("장소 : 예시 텍스트"),
-
+                        buildPostContext(postEntity!, profileEntity!),
                         // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
                         // Text("Gender Limit : ${postEntity!.getPostGender()}"),
                       ]),
                 )),
       ),
     );
-  }
-
-  void _updatePosition(CameraPosition _position) {
-    var m = _markers.firstWhere((p) => p.markerId == const MarkerId('1'));
-    _markers.remove(m);
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('1'),
-        position: LatLng(_position.target.latitude, _position.target.longitude),
-        draggable: true,
-      ),
-    );
-    setState(() {});
   }
 
   @override
@@ -281,20 +173,6 @@ class _BoardPostPage extends State<BoardPostPage> {
     //postEntity!.makeTestingPost();
   }
 
-  Color _getColorForScore(int score) {
-    if (score < 20) {
-      return Colors.red;
-    } else if (score < 40) {
-      return Colors.orange;
-    } else if (score < 60) {
-      return Colors.lime;
-    } else if (score < 80) {
-      return Colors.green;
-    } else {
-      return Colors.blue;
-    }
-  }
-
   loadPostTime() {
     String ptime = getTimeBefore(postEntity!.getUpTime());
     postTime = ptime;
@@ -303,70 +181,172 @@ class _BoardPostPage extends State<BoardPostPage> {
       isLoaded = true;
     });
   }
+}
 
-  Widget drawProfile() {
-    final color = _getColorForScore(profileEntity!.mannerGroup);
-    return GestureDetector(
-      onTap: () {
-        // 프로필 터치 이벤트
-        print(profileEntity!.profileId);
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+Column buildPostContext(EntityPost post, EntityProfiles profiles) {
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          Text(post.getPostHead(),
+              style:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           Row(
             children: [
-              Image.asset(
-                profileEntity!.profileImagePath,
-                width: 45,
-                height: 45,
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xFFBFBFBF)),
+                child: const Padding(
+                  padding:
+                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                  child: Text("20~24세",
+                      style: TextStyle(color: Colors.white, fontSize: 10)),
+                ),
               ),
-              const Padding(padding: EdgeInsets.only(left: 10)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${profileEntity!.name}",
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
-                  ),
-                  const Padding(padding: EdgeInsets.only(top: 4)),
-                  Text(
-                    "${profileEntity!.major}, ${profileEntity!.age}세",
-                    style:
-                        const TextStyle(color: Color(0xFF777777), fontSize: 13),
-                  )
-                ],
+              const Padding(
+                padding: EdgeInsets.only(left: 1, right: 1),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xFFBFBFBF)),
+                child: const Padding(
+                  padding:
+                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                  child: Text("남자만",
+                      style: TextStyle(color: Colors.white, fontSize: 10)),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 1, right: 1),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xFFBFBFBF)),
+                child: const Padding(
+                  padding:
+                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                  child: Text("영화",
+                      style: TextStyle(color: Colors.white, fontSize: 10)),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 1, right: 1),
               ),
             ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 7, top: 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
+          )
+        ],
+      ),
+
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawProfile(profiles),
+      // 프로필
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      Text(post.getPostBody(), style: const TextStyle(fontSize: 15)),
+      // 내용
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+      ),
+      Text("조회수 ${post.viewCount}, ${getTimeBefore(post.getUpTime())}",
+          style: const TextStyle(fontSize: 12.5, color: Color(0xFF888888))),
+      // 조회수 및 게시글 시간
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      // const Text("모임 장소 및 시간",
+      //     style: TextStyle(
+      //         fontWeight: FontWeight.bold, fontSize: 16)),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 0, 0, 12),
+      ),
+      Text("시간 : ${getMeetTimeText(post)}"),
+      Text("장소 : ${post.getLLName().AddressName}"),
+    ],
+  );
+}
+
+Widget drawProfile(EntityProfiles profileEntity) {
+  final color = getColorForScore(profileEntity.mannerGroup);
+  return GestureDetector(
+    onTap: () {
+      // 프로필 터치 이벤트
+      print(profileEntity.profileId);
+    },
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Image.asset(
+              profileEntity.profileImagePath,
+              width: 45,
+              height: 45,
+            ),
+            const Padding(padding: EdgeInsets.only(left: 10)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("매너 지수 ${profileEntity!.mannerGroup}점", style: const TextStyle(color: Color(0xFF777777), fontSize: 12),),
-                const Padding(padding: EdgeInsets.only(top:2),),
-                SizedBox(
+                Text(
+                  "${profileEntity.name}",
+                  style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                const Padding(padding: EdgeInsets.only(top: 4)),
+                Text(
+                  "${profileEntity.major}, ${profileEntity.age}세",
+                  style:
+                  const TextStyle(color: Color(0xFF777777), fontSize: 13),
+                )
+              ],
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 7, top: 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text("매너 지수 ${profileEntity.mannerGroup}점", style: const TextStyle(color: Color(0xFF777777), fontSize: 12),),
+              const Padding(padding: EdgeInsets.only(top:2),),
+              SizedBox(
                   height: 6,
                   width: 105,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: profileEntity!.mannerGroup / 100,
+                      value: profileEntity.mannerGroup / 100,
                       valueColor: AlwaysStoppedAnimation<Color>(color),
                       backgroundColor: color.withOpacity(0.3),
                     ),
                   )
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
+              )
+            ],
+          ),
+        )
+      ],
+    ),
+  );
 }
+

@@ -1,6 +1,6 @@
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:design_project/Entity/EntityPost.dart';
-import 'package:design_project/Entity/EntityPostPageManager.dart';
+import 'BoardMain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../resources.dart';
@@ -15,11 +15,10 @@ class BoardGroupListPage extends StatefulWidget {
 class _BoardGroupListPage extends State<BoardGroupListPage>
 with AutomaticKeepAliveClientMixin{
   var count = 10;
-  PostPageManager? _manager;
 
   @override
   Widget build(BuildContext context) {
-    return !_manager!.isLoaded ? Center(
+    return !postManager.isLoaded ? Center(
       child: SizedBox(
         height: 65,
         width: 65,
@@ -44,9 +43,9 @@ with AutomaticKeepAliveClientMixin{
                   child: Card(
                       child: Padding(
                           padding: const EdgeInsets.all(7),
-                          child: _buildFriendRow(_manager!.list[index]))),
+                          child: _buildFriendRow(postManager.list[index]))),
                 ),
-                childCount: _manager!.loadedCount))
+                childCount: postManager.loadedCount))
       ],
     );
   }
@@ -54,12 +53,11 @@ with AutomaticKeepAliveClientMixin{
   @override
   void initState() {
     super.initState();
-    _manager = PostPageManager();
-    _manager!.loadPages().then((value) => setState(() {}));
+    postManager.loadPages().then((value) => setState(() {}));
   }
 
   naviToPost(int index) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: _manager!.list[index].getPostId())));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[index].getPostId())));
   }
 
   // 바로 모임 카드
@@ -244,38 +242,38 @@ with AutomaticKeepAliveClientMixin{
   }
 
   String getAgeText(EntityPost post) {
-    if(post.getMinAge() == -1 && post.getMaxAge() == -1) {
+    if (post.getMinAge() == -1 && post.getMaxAge() == -1) {
       return "나이 무관";
     } else if (post.getMinAge() == -1) {
       return "${post.getMaxAge()}세 이하";
-    } else if (post.getMaxAge() == -1){
+    } else if (post.getMaxAge() == -1) {
       return "${post.getMinAge()}세 이상";
-    } else{
+    } else {
       return "${post.getMinAge()} ~ ${post.getMaxAge()}세";
     }
   }
 
-  String getMeetTimeText(EntityPost post) {
-    Duration timeGap = DateTime.now().difference(DateTime.parse(post.getTime()));
-    bool isNegative = timeGap.isNegative;
-    timeGap = timeGap.abs();
-    String val;
-    if(timeGap.inDays > 365) {
-      val = "${timeGap.inDays ~/ 365}년";
-    } else if (timeGap.inDays >= 30) {
-      val = "${timeGap.inDays ~/ 30}개월";
-    } else if (timeGap.inDays >= 1) {
-      val = "${timeGap.inDays}일";
-    } else if (timeGap.inHours >= 1) {
-      val = "${timeGap.inHours}시간";
-    } else if (timeGap.inMinutes >= 1) {
-      val = "${timeGap.inMinutes}분";
-    } else {
-      val = "잠시";
-    }
-    return " $val ${isNegative ? "후" : "전"}";
-  }
-
   @override
   bool get wantKeepAlive => true;
+}
+
+String getMeetTimeText(EntityPost post) {
+  Duration timeGap = DateTime.now().difference(DateTime.parse(post.getTime()));
+  bool isNegative = timeGap.isNegative;
+  timeGap = timeGap.abs();
+  String val;
+  if(timeGap.inDays > 365) {
+    val = "${timeGap.inDays ~/ 365}년";
+  } else if (timeGap.inDays >= 30) {
+    val = "${timeGap.inDays ~/ 30}개월";
+  } else if (timeGap.inDays >= 1) {
+    val = "${timeGap.inDays}일";
+  } else if (timeGap.inHours >= 1) {
+    val = "${timeGap.inHours}시간";
+  } else if (timeGap.inMinutes >= 1) {
+    val = "${timeGap.inMinutes}분";
+  } else {
+    val = "잠시";
+  }
+  return " $val ${isNegative ? "후" : "전"}";
 }
