@@ -20,8 +20,6 @@ final PostPageManager postManager = PostPageManager();
 
 class _BoardPageMainHub extends State<BoardPageMainHub> {
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatScreen(), PageAlert(), PageProfile()];
-
-
   int _selectedIdx = 0;
 
   @override

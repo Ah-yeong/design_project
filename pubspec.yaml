@@ -47,6 +47,7 @@ dependencies:
   cloud_firestore: ^4.7.1
   get: ^4.6.5
   http: ^0.13.6
+  geolocator: ^9.0.2
 
 dev_dependencies:
   flutter_test:

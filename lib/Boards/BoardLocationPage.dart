@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
@@ -36,24 +37,21 @@ class _BoardLocationPage extends State<BoardLocationPage> {
 
   double lat = 36.833068;
   double lng = 127.178419;
+  CameraPosition temp = CameraPosition(target: LatLng(36.833068, 127.178419), zoom: 16.3);
 
   bool isMarkerSeleced = false;
-
-  static const CameraPosition _Univ = CameraPosition(
-    target: LatLng(36.833068, 127.178419),
-    zoom: 16.5,
-  );
-
-  static const CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(33.450701, 126.578667),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
+        body: postManager.isLoading ? Center(
+            child: SizedBox(
+                height: 65,
+                width: 65,
+                child: CircularProgressIndicator(
+                  strokeWidth: 4,
+                  color: colorSuccess,
+                ))) : SafeArea(
             bottom: false,
             child: Stack(
               children: [
@@ -74,7 +72,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
                         },
                         markers: Set.from(_markers),
                         mapType: MapType.normal,
-                        initialCameraPosition: _Univ,
+                        initialCameraPosition: temp,
                         onMapCreated: (GoogleMapController controller) {
                           changeMapMode(controller);
                           _controller.complete(controller);
@@ -179,7 +177,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
             ),
           ),
           SizedBox(
-            height: 5,
+            height: 5
           ),
           Container(
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -217,14 +215,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
       );
       markerid++;
     }
-    _markers.add(
-      Marker(
-          markerId: MarkerId('1'),
-          position: LatLng(lat, lng),
-          onTap: () {},
-          draggable: true,
-          icon: _markerIcons[0]),
-    );
+    _initLocations();
   }
 
   Future<void> _getPlaceAddress() async {
@@ -242,9 +233,90 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     }
   }
 
+  _initLocations() async {
+    await determinePosition().then((pos) {
+      setState(() {
+        try {
+          LatLng newLatLng = LatLng(pos.latitude, pos.longitude);
+          _controller.future.then((value) =>
+              value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                target: newLatLng,
+                zoom: 16.3,
+              ))));
+          _getPlaceAddress();
+          _markers.add(
+            Marker(
+                markerId: MarkerId('1'),
+                position: newLatLng,
+                onTap: () {},
+                draggable: true,
+                icon: _markerIcons[0]),
+          );
+        } catch (e) {
+          print(e);
+          _markers.add(
+            Marker(
+                markerId: MarkerId('1'),
+                position: LatLng(lat, lng),
+                onTap: () {},
+                draggable: true,
+                icon: _markerIcons[0]),
+          );
+        }
+      });
+    });
+  }
+
+  Future<Position> determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+  }
+
+  _loading() async {
+    if (postManager.isLoading) {
+      print("111");
+      await Future.delayed(Duration(milliseconds: 1000)).then((value) => _loading());
+      return;
+    } else {
+      _addCustomIcons();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _addCustomIcons();
+    _loading();
   }
 }

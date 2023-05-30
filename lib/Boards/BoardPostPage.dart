@@ -280,6 +280,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
       ),
       Text("시간 : ${getMeetTimeText(post)}"),
       Text("장소 : ${post.getLLName().AddressName}"),
+      SizedBox(height: 20,),
     ],
   );
 }
