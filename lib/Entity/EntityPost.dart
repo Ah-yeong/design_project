@@ -20,10 +20,12 @@ class EntityPost {
   var viewCount;
   bool _isLoaded = false;
 
-  EntityPost(int this._postId) {}
+  EntityPost(int this._postId) {
+    print("포스트 연결");
+  }
 
   Future<void> loadPost() async {
-    // 포스팅 로드
+    print("포스트 로드");
     _isLoaded = true;
     await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((ds) {
       _writerId = ds.get("writer_id");
