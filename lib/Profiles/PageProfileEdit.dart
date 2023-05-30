@@ -21,6 +21,8 @@ final List<String> mbti = [
 
 final List<String> hobby = [
   '영화', '노래', '술', '책',
+  '취미1,','취미2','취미3','취미4',
+  '취미5', '취미6', '취미6', '취미7'
 ];
 
 final List<String> commute = [
@@ -32,12 +34,18 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   File? _image;
   EntityProfiles? myProfile;
 
+  int _mbtiIndex = -1;
+  bool _mbtiIsExpanded = false;
+  Color _selectedColor = Color(0xFF6ACA9A);
+  Color _unSelectedColor = Colors.grey;
+
   Future<void> _getImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+        print(_image);
       });
     }
   }
@@ -50,8 +58,14 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   Color ButtonColor2 = Colors.grey;
   Color ButtonColor3 = Colors.grey;
 
-  Color _selectedColor = Color(0xFF6ACA9A);
-  Color _unSelectedColor = Colors.grey;
+  bool _hobbyIsExpanded = false;
+  List<bool> _hobbyIndex = List.generate(16, (index) => false);
+
+  void _onPressed(int index) {
+    setState(() {
+      _hobbyIndex[index] = !_hobbyIndex[index];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,15 +105,13 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                         actions: [
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.pop(
-                                                  context, ImageSource.camera);
+                                              Navigator.pop(context, ImageSource.camera);
                                             },
                                             child: Text('카메라로 직접 촬영'),
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.pop(
-                                                  context, ImageSource.gallery);
+                                              Navigator.pop(context, ImageSource.gallery);
                                             },
                                             child: Text('앨범에서 가져오기'),
                                           ),
@@ -107,17 +119,15 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                       );
                                     },
                                   );
-                                  if (source != null) {
+
+                                  if (source != null && source == ImageSource.gallery) {
                                     await _getImage(source);
                                   }
                                 },
                                 child: CircleAvatar(
                                   radius: 70,
-                                  backgroundImage: _image != null
-                                      ? FileImage(_image!)
-                                      : null,
-                                  child: _image == null
-                                      ? Icon(Icons.person, size: 80,) : null,
+                                  backgroundImage: _image != null ? FileImage(_image!) : null,
+                                  child: _image == null ? Icon(Icons.person, size: 80) : null,
                                 ),
                               ),
                               SizedBox(
@@ -180,7 +190,66 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                             width: 1.0, // 테두리 두께를 지정할 수 있습니다.
                           ),
                         ),
-                        child: MbtiWidget(),
+                        child: ExpansionPanelList(
+                          expansionCallback: (int index, bool isExpanded) {
+                            setState(() {
+                              _mbtiIsExpanded = !isExpanded;
+                            });
+                          },
+                          children: [
+                            ExpansionPanel(
+                              headerBuilder: (BuildContext context, bool isExpanded) {
+                                return ListTile(
+                                  title: Row(
+                                    children: [
+                                      Icon(Icons.mood),
+                                      SizedBox(width: 12),
+                                      Text(mbti[_mbtiIndex], style: TextStyle(fontSize: 14)),
+                                    ],
+                                  ),
+                                );
+                              },
+                              body:
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Container(
+                                  height: _mbtiIsExpanded ? 180 : 0,
+                                  child: GridView.count(
+                                    crossAxisCount: 4,
+                                    crossAxisSpacing: 5,
+                                    mainAxisSpacing: 5,
+                                    childAspectRatio: 2.0,
+                                    children: List.generate(
+                                      16,
+                                          (index) =>
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor: _mbtiIndex == index
+                                                  ? MaterialStateProperty.all(_selectedColor)
+                                                  : MaterialStateProperty.all(Colors.grey),
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                if (_mbtiIndex == index) {
+                                                  _mbtiIndex = -1;
+                                                } else {
+                                                  _mbtiIndex = index;
+                                                }
+                                              });
+                                            },
+                                            child: Text(
+                                              mbti[index],
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              isExpanded: _mbtiIsExpanded,
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 15),
                       Text(
@@ -197,7 +266,57 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                             width: 1.0, // 테두리 두께를 지정할 수 있습니다.
                           ),
                         ),
-                        child: HobbyWidget(),
+                        child: ExpansionPanelList(
+                          expansionCallback: (int index, bool isExpanded) {
+                            setState(() {
+                              _hobbyIsExpanded = !isExpanded;
+                            });
+                          },
+                          children: [
+                            ExpansionPanel(
+                              headerBuilder: (BuildContext context, bool isExpanded) {
+                                return ListTile(
+                                  title: Row(
+                                    children: [
+                                      Icon(Icons.mood),
+                                      SizedBox(width: 12),
+                                      Text('취미', style: TextStyle(fontSize: 14)),
+                                    ],
+                                  ),
+                                );
+                              },
+                              body: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Container(
+                                  height: _hobbyIsExpanded ? 180 : 0,
+                                  child: GridView.count(
+                                    crossAxisCount: 4, // 4열
+                                    crossAxisSpacing: 5, // 열 사이의 간격 5
+                                    mainAxisSpacing: 5, // 행 사이의 간격 5
+                                    childAspectRatio: 2.0,
+                                    children: List.generate(
+                                      4, // 4행 4열 = 총 16개의 버튼
+                                          (index) => ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor: MaterialStateProperty.all(
+                                            _hobbyIndex[index] ? _selectedColor : Colors.grey,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          _onPressed(index);
+                                        },
+                                        child: Text(hobby[index],
+                                          style: TextStyle(fontSize: 14),
+                                        ), // 취미 텍스트 설정
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              isExpanded: _hobbyIsExpanded,
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 15),
                       Text(
@@ -329,6 +448,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
         _commuteIndex = myProfile!.commuteIndex;
         ButtonColor3 = _selectedColor;
       }
+      _mbtiIndex = myProfile!.mbtiIndex;
+      // _hobbyIndex = myProfile!.hobbyIndex;
       setState(() {});
     });
   }
@@ -341,8 +462,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
           .update({
         'nickName' : _nicknameController!.value.text,
         'textInfo' : _textInfoController!.value.text,
-        // 'mbtiIndex': _selectedMBTIIndex,
-        // 'mbti': mbti[_selectedMBTIIndex],
+        'mbtiIndex': _mbtiIndex,
+        'mbti': mbti[_mbtiIndex],
         // 'hobbyIndex' hobbyIndex,
         // 'hobby': selectedHobby,
         'commuteIndex' : _commuteIndex,
@@ -352,167 +473,5 @@ class _PageProfileEditState extends State<PageProfileEdit> {
     } catch (e) {
       print('Error updating profile data: $e');
     }
-  }
-}
-
-class MbtiWidget extends StatefulWidget {
-  @override
-  _MbtiWidgetState createState() => _MbtiWidgetState();
-}
-
-class _MbtiWidgetState extends State<MbtiWidget> {
-  int _selectedIndex = -1;
-  bool _isExpanded = false;
-  Color _selectedColor = Color(0xFF6ACA9A);
-
-  final List<String> mbti = [
-    'ENFP', 'ENFJ', 'ENTP', 'ENTJ',
-    'ESFP', 'ESFJ', 'ESTP', 'ESTJ',
-    'INFP', 'INFJ', 'INTP', 'INTJ',
-    'ISFP', 'ISFJ', 'ISTP', 'ISTJ',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-
-    String selectedMBTI = _selectedIndex == -1 ? '' : mbti[_selectedIndex];
-
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _isExpanded = !isExpanded;
-        });
-      },
-      children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.mood),
-                  SizedBox(width: 12),
-                  Text(selectedMBTI, style: TextStyle(fontSize: 14)),
-                ],
-              ),
-            );
-          },
-          body:
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
-              height: _isExpanded ? 180 : 0,
-              child: GridView.count(
-                crossAxisCount: 4,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
-                childAspectRatio: 2.0,
-                children: List.generate(
-                  16,
-                      (index) =>
-                      ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: _selectedIndex == index
-                              ? MaterialStateProperty.all(_selectedColor)
-                              : MaterialStateProperty.all(Colors.grey),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            if (_selectedIndex == index) {
-                              _selectedIndex = -1;
-                            } else {
-                              _selectedIndex = index;
-                            }
-                          });
-                        },
-                        child: Text(
-                          mbti[index],
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ),
-                ),
-              ),
-            ),
-          ),
-          isExpanded: _isExpanded,
-        ),
-      ],
-    );
-  }
-}
-
-class HobbyWidget extends StatefulWidget {
-  @override
-  _HobbyWidgetState createState() => _HobbyWidgetState();
-}
-
-// 취미 (mbti 복붙해옴 수정 필요)
-class _HobbyWidgetState extends State<HobbyWidget> {
-  bool _isExpanded = false;
-  Color _selectedColor = Color(0xFF6ACA9A);
-
-  final List<String> hobby = [
-    '영화', '노래', '술', '책',
-  ];
-  List<bool> _selectedHobby = List.generate(16, (index) => false);
-
-  void _onPressed(int index) {
-    setState(() {
-      _selectedHobby[index] = !_selectedHobby[index];
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _isExpanded = !isExpanded;
-        });
-      },
-      children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return ListTile(
-              title: Row(
-                children: [
-                  Icon(Icons.mood),
-                  SizedBox(width: 12),
-                  Text('취미', style: TextStyle(fontSize: 14)),
-                ],
-              ),
-            );
-          },
-          body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
-              height: _isExpanded ? 180 : 0,
-              child: GridView.count(
-                crossAxisCount: 4, // 4열
-                crossAxisSpacing: 5, // 열 사이의 간격 5
-                mainAxisSpacing: 5, // 행 사이의 간격 5
-                childAspectRatio: 2.0,
-                children: List.generate(
-                  4, // 4행 4열 = 총 16개의 버튼
-                      (index) => ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        _selectedHobby[index] ? _selectedColor : Colors.grey,
-                      ),
-                    ),
-                    onPressed: () {
-                      _onPressed(index);
-                    },
-                    child: Text(hobby[index],
-                      style: TextStyle(fontSize: 14),
-                    ), // 취미 텍스트 설정
-                  ),
-                ),
-              ),
-            ),
-          ),
-          isExpanded: _isExpanded,
-        ),
-      ],
-    );
   }
 }

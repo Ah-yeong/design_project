@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Auth/SignUpPage.dart';
 import 'resources.dart';
 import 'package:get/get.dart';
+import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -139,7 +140,7 @@ class _MyHomePage extends State<MyHomePage> {
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        Get.off(() => const BoardPageMainHub());
+        Get.off(() => NameSignUpScreen());
       }
     });
   }

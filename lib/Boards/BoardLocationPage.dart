@@ -51,7 +51,8 @@ class _BoardLocationPage extends State<BoardLocationPage> {
                 child: CircularProgressIndicator(
                   strokeWidth: 4,
                   color: colorSuccess,
-                ))) : SafeArea(
+                ))) :
+        SafeArea(
             bottom: false,
             child: Stack(
               children: [

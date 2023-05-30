@@ -25,13 +25,21 @@ class _PageProfileState extends State<PageProfile> {
         title: Text(
           '프로필',
           style: TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               color: Colors.black
           ),
         ),
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: myProfile!.isLoading ? Center(
+          child: SizedBox(
+              height: 65,
+              width: 65,
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+                color: colorSuccess,
+              ))) :
+      SingleChildScrollView(
         child:Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,6 +122,19 @@ class _PageProfileState extends State<PageProfile> {
                           )
                       ),
                       SizedBox(height: 10),
+                      // Row(
+                      //   children: [
+                      //     Card(
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.all(7),
+                      //         child: _buildFriendRow(myPost!),
+                      //       ),
+                      //     ),
+                      //     Container(
+                      //
+                      //     )
+                      //   ],
+                      // )
                       Card(
                         child: Padding(
                           padding: const EdgeInsets.all(7),
@@ -149,75 +170,77 @@ class _PageProfileState extends State<PageProfile> {
                           child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                          '취미',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          'MBTI',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '통학여부',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '거주지',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      )
-                                    ]
+                          Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                '취미',
+                                style: TextStyle(
+                                  fontSize: 14,
                                 ),
-                                SizedBox(width:20),
-                                Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Row(
-                                        children: [
-                                          Text(
-                                              '단대호수 산책',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          "${myProfile!.mbti}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          "${myProfile!.commute}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '경기도 오산시',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      )
-                                    ]
+
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                'MBTI',
+                                style: TextStyle(
+                                  fontSize: 14,
                                 ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                '통학여부',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                '거주지',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  '${myProfile!.hobby?.join(', ')}',
+                                  // '단대호수 산책',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
+                                  overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "${myProfile!.mbti}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "${myProfile!.commute}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  '경기도 오산시',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                               ]
                           )
                       )
