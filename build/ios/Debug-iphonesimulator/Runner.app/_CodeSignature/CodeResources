@@ -46,7 +46,7 @@
 		</data>
 		<key>Frameworks/App.framework/App</key>
 		<data>
-		Rpe6e08azdpGuSeXfJdnGeoSE48=
+		MpTLCh6jhv+aIw3ExVJtlALdHrA=
 		</data>
 		<key>Frameworks/App.framework/Info.plist</key>
 		<data>
@@ -54,7 +54,7 @@
 		</data>
 		<key>Frameworks/App.framework/_CodeSignature/CodeResources</key>
 		<data>
-		8lcbvTq+DlynMIaiUlH+jyt2BZU=
+		9A/otmzJa/dFkMMndRhRQPHNlbc=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
 		<data>
@@ -66,7 +66,7 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/NOTICES.Z</key>
 		<data>
-		R/ANdILqQL3KhZBp78/pJoOpOlw=
+		/Ap/9hd661Xn1tfkRiwvgIOvii0=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/drinkMarker.png</key>
 		<data>
@@ -102,7 +102,7 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/kernel_blob.bin</key>
 		<data>
-		uyav0+UQi8CbYAar9xgvYUAeceA=
+		08tpOGsjoDnXRMXsxyYTA+4r2CQ=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -284,6 +284,18 @@
 		<data>
 		XvPr/NpnWMBjKfe9aY9kT60PgGw=
 		</data>
+		<key>Frameworks/geolocator_apple.framework/Info.plist</key>
+		<data>
+		GKZubAFzkF6D/4guLysgTGEzPY0=
+		</data>
+		<key>Frameworks/geolocator_apple.framework/_CodeSignature/CodeResources</key>
+		<data>
+		FjHM7NZUYjQqTZbMccLKLODovhw=
+		</data>
+		<key>Frameworks/geolocator_apple.framework/geolocator_apple</key>
+		<data>
+		WwTQoeq0+sM/FZ41N8Fzy5Bq3II=
+		</data>
 		<key>Frameworks/image_picker_ios.framework/Info.plist</key>
 		<data>
 		Qz8B6ZQLz5VICLIgM57ly8KRB0c=
@@ -295,6 +307,18 @@
 		<key>Frameworks/image_picker_ios.framework/image_picker_ios</key>
 		<data>
 		NwhthgQ2pG7dwI3R02pSG0OshVA=
+		</data>
+		<key>Frameworks/location.framework/Info.plist</key>
+		<data>
+		Y8yL8E4R6ovpeHP9P4rAg4cFymg=
+		</data>
+		<key>Frameworks/location.framework/_CodeSignature/CodeResources</key>
+		<data>
+		YQHj4IulKa7azCMtdQ4r+3kMYic=
+		</data>
+		<key>Frameworks/location.framework/location</key>
+		<data>
+		JyinQvMS/QrrAz3R03jiR8jV2hM=
 		</data>
 		<key>Frameworks/nanopb.framework/Info.plist</key>
 		<data>
@@ -1103,7 +1127,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		RjhhkhvfjExrUEQLd9wrOntRHHY=
+		GMg32A6/yez+4AzMUFLPNkZq1RQ=
 		</data>
 		<key>PkgInfo</key>
 		<data>
@@ -1194,7 +1218,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Wblzwir+9Xhmw+XKiskwWlSrlVA8P3UhUVa/XqfdNEo=
+			azYhg+qcuBs+gYqhtIgimFWdot/VoVWVMgoc+Z4rmds=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/Info.plist</key>
@@ -1208,7 +1232,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			PZKi2gj3hDLV3vUXemNuVscuXuurSRxCnOuwU/s9rds=
+			oIHGZHHfcg3iBU80MydGuh3mJvq/c0L0ITz3umKASAI=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.json</key>
@@ -1229,7 +1253,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			4+DgJU8JvBGJLGncCN+PAhmopAHbdQpYDprRMmp2ivk=
+			G40a6EUbgzhCLYqf9FGyu8jmVj0uDb5Q1Ej+OXTkGdA=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/images/drinkMarker.png</key>
@@ -1292,7 +1316,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			spRypW3kxO+ZUBtBbvDIvdSuaZMnlaIws/qClBGrW70=
+			2XTVvxpPKRNYzRsOkthhQsM3urNOY6e1BVgynU1h97g=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
@@ -1610,6 +1634,27 @@
 			Mekd+mN9En9zSdEoOZi/ALS44XnO+XTw6ssLTN9tzHs=
 			</data>
 		</dict>
+		<key>Frameworks/geolocator_apple.framework/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			UTvsuGLFz2tPtuu3xp+mA+sh4sObKPxDZ8NmxKlnziU=
+			</data>
+		</dict>
+		<key>Frameworks/geolocator_apple.framework/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0oqHq32ByXe9b7C8imkNFZ0g/KJYQ+RDsT2qx0vO2V0=
+			</data>
+		</dict>
+		<key>Frameworks/geolocator_apple.framework/geolocator_apple</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			vQzDGlnaUBo5wgasyxfBYAa34ykC94UJ1yhAZ42NeFo=
+			</data>
+		</dict>
 		<key>Frameworks/image_picker_ios.framework/Info.plist</key>
 		<dict>
 			<key>hash2</key>
@@ -1629,6 +1674,27 @@
 			<key>hash2</key>
 			<data>
 			ODr7TLRlYXU+fpfqw1GeRZCFLjg9PXMW95J+QfVhI4k=
+			</data>
+		</dict>
+		<key>Frameworks/location.framework/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			FmZGmRt70isABwKUWXz9DuVLt9KRE5wgQ2YMh24h9ac=
+			</data>
+		</dict>
+		<key>Frameworks/location.framework/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/jY0zli8RMtU59svlAB75GHQYi0C+Hn6meV/nPSSiWc=
+			</data>
+		</dict>
+		<key>Frameworks/location.framework/location</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			PdS4XwTI8+a2ehMOkUyifPMlzL3Nj1UIhwHGA21U1RM=
 			</data>
 		</dict>
 		<key>Frameworks/nanopb.framework/Info.plist</key>

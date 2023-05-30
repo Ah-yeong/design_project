@@ -16,9 +16,11 @@ class _BoardGroupListPage extends State<BoardGroupListPage>
 with AutomaticKeepAliveClientMixin{
   var count = 10;
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-    return !postManager.isLoaded ? Center(
+    return postManager.isLoading ? Center(
       child: SizedBox(
         height: 65,
         width: 65,
@@ -27,6 +29,7 @@ with AutomaticKeepAliveClientMixin{
           color: colorSuccess,
         )))
       : CustomScrollView(
+      controller: _scrollController,
       slivers: [
         /*SliverToBoxAdapter(
           child: Container(
@@ -54,6 +57,15 @@ with AutomaticKeepAliveClientMixin{
   void initState() {
     super.initState();
     postManager.loadPages().then((value) => setState(() {}));
+    _scrollController.addListener(() {
+      setState(() {
+        if (_scrollController.offset <
+            _scrollController.position.minScrollExtent &&
+            _scrollController.position.outOfRange && !postManager.isLoading ) {
+          postManager.reloadPages().then((value) => setState(() {}));
+        }
+      });
+    });
   }
 
   naviToPost(int index) {

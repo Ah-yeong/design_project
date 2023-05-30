@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 
 import 'EntityPost.dart';
 
 class PostPageManager {
-  bool isLoaded = false;
+  bool isLoading = true;
   int _loadedCount = 0;
   int _maxCount = 100;
   int _lastLoaded = 0;
@@ -12,10 +13,20 @@ class PostPageManager {
 
   PostPageManager() {}
 
-  void reloadPage() {
-    isLoaded = true;
+  void continuePage() {
+    isLoading = true;
     _maxCount += 100;
-    loadPages().then((value) => isLoaded = false);
+    loadPages().then((value) => isLoading = false);
+  }
+
+  Future<void> reloadPages() async {
+    isLoading = true;
+    _loadedCount = 0;
+    _lastLoaded = 0;
+    _scrollCount = 0;
+    _maxCount = 100;
+    list.clear();
+    await loadPages().then((value) => isLoading = false);
   }
 
   Future<void> loadPages() async {
@@ -28,7 +39,7 @@ class PostPageManager {
     var qs = await FirebaseFirestore.instance.collection("Post").get();
     for(DocumentSnapshot ds in qs.docs) {
       if(post_count <= _loadedCount || _maxCount <= _loadedCount) {
-        isLoaded = true;
+        isLoading = false;
         return;
       }
       if (ds.id == "postData") continue;
@@ -39,7 +50,7 @@ class PostPageManager {
       _loadedCount++;
       _lastLoaded = int.parse(ds.id);
     }
-    isLoaded = true;
+    isLoading = false;
     return;
     // forEach((doc) async {
     //   if(doc.id != "postData" && _maxCount > _loadedCount && int.parse(doc.id) > _lastLoaded) {
