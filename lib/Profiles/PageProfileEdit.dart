@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../Entity/EntityProfile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'PageProfile.dart';
 
 class PageProfileEdit extends StatefulWidget {
@@ -15,9 +19,18 @@ final List<String> mbti = [
   'ISFP', 'ISFJ', 'ISTP', 'ISTJ',
 ];
 
+final List<String> hobby = [
+  '영화', '노래', '술', '책',
+];
+
+final List<String> commute = [
+  '통학', '자취', '기숙사'
+];
+
 class _PageProfileEditState extends State<PageProfileEdit> {
   final _picker = ImagePicker();
   File? _image;
+  EntityProfiles? myProfile;
 
   Future<void> _getImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -29,9 +42,9 @@ class _PageProfileEditState extends State<PageProfileEdit> {
     }
   }
 
-  final _nicknameController = TextEditingController();
-
-  int _selectedIndex = -1;
+  TextEditingController? _nicknameController;
+  TextEditingController? _textInfoController;
+  int _commuteIndex = -1;
 
   Color ButtonColor1 = Colors.grey;
   Color ButtonColor2 = Colors.grey;
@@ -138,6 +151,22 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                       ),
                       SizedBox(height: 15),
                       Text(
+                          ' 한줄소개',
+                          style: TextStyle(
+                            fontSize: 14,
+                          )
+                      ),
+                      SizedBox(height: 5),
+                      TextFormField(
+                        controller: _textInfoController,
+                        decoration: InputDecoration(
+                          labelStyle: TextStyle(fontSize: 14),
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.only(left:10 ,top: 10, bottom: 10),
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
                           ' MBTI',
                           style: TextStyle(
                             fontSize: 14,
@@ -192,7 +221,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _selectedColor;
                                   ButtonColor2 = _unSelectedColor;
                                   ButtonColor3 = _unSelectedColor;
-                                  _selectedIndex = 1;
+                                  _commuteIndex = 0;
                                 });
                               },
                               child: Text(
@@ -216,7 +245,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _unSelectedColor;
                                   ButtonColor2 = _selectedColor;
                                   ButtonColor3 = _unSelectedColor;
-                                  _selectedIndex = 2;
+                                  _commuteIndex = 1;
                                 });
                               },
                               child: Text(
@@ -240,7 +269,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _unSelectedColor;
                                   ButtonColor2 = _unSelectedColor;
                                   ButtonColor3 = _selectedColor;
-                                  _selectedIndex = 3;
+                                  _commuteIndex = 2;
                                 });
                               },
                               child: Text(
@@ -268,6 +297,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                         onPressed: () {
                           Navigator.pop(context);
+                          _updateProfile();
+                          // Get.off(() => PageProfile());
                         },
                       ),
                     )
@@ -277,6 +308,50 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
         )
     );
+  }
+
+  void initState() {
+    super.initState();
+    myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
+    myProfile!.loadProfile().then((n) {
+      _nicknameController = TextEditingController(text: '${myProfile!.name}');
+      _textInfoController = TextEditingController(text: '${myProfile!.textInfo}');
+
+      if(myProfile!.commuteIndex == 0){
+        _commuteIndex = myProfile!.commuteIndex;
+        ButtonColor1 = _selectedColor;
+      }
+      if(myProfile!.commuteIndex == 1){
+        _commuteIndex = myProfile!.commuteIndex;
+        ButtonColor2 = _selectedColor;
+      }
+      if(myProfile!.commuteIndex == 2){
+        _commuteIndex = myProfile!.commuteIndex;
+        ButtonColor3 = _selectedColor;
+      }
+      setState(() {});
+    });
+  }
+
+  _updateProfile() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('UserProfile')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        'nickName' : _nicknameController!.value.text,
+        'textInfo' : _textInfoController!.value.text,
+        // 'mbtiIndex': _selectedMBTIIndex,
+        // 'mbti': mbti[_selectedMBTIIndex],
+        // 'hobbyIndex' hobbyIndex,
+        // 'hobby': selectedHobby,
+        'commuteIndex' : _commuteIndex,
+        'commute' : commute[_commuteIndex],
+      });
+      print('Profile data updated successfully.');
+    } catch (e) {
+      print('Error updating profile data: $e');
+    }
   }
 }
 
@@ -299,6 +374,7 @@ class _MbtiWidgetState extends State<MbtiWidget> {
 
   @override
   Widget build(BuildContext context) {
+
     String selectedMBTI = _selectedIndex == -1 ? '' : mbti[_selectedIndex];
 
     return ExpansionPanelList(

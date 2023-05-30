@@ -237,36 +237,35 @@ with AutomaticKeepAliveClientMixin{
       ],
     );
   }
-  
-  String getMaxPersonText(EntityPost post) {
-    if(post.getPostMaxPerson() == -1) return " ${post.getPostCurrentPerson()}";
-    return " ${post.getPostCurrentPerson()}/${post.getPostMaxPerson()}";
-  }
-
-  String getGenderText(EntityPost post) {
-    if(post.getPostGender() == 0) {
-      return "성별 무관";
-    } else if (post.getPostGender() == 1) {
-      return "남자만";
-    } else {
-      return "여자만";
-    }
-  }
-
-  String getAgeText(EntityPost post) {
-    if (post.getMinAge() == -1 && post.getMaxAge() == -1) {
-      return "나이 무관";
-    } else if (post.getMinAge() == -1) {
-      return "${post.getMaxAge()}세 이하";
-    } else if (post.getMaxAge() == -1) {
-      return "${post.getMinAge()}세 이상";
-    } else {
-      return "${post.getMinAge()} ~ ${post.getMaxAge()}세";
-    }
-  }
 
   @override
   bool get wantKeepAlive => true;
+}
+String getMaxPersonText(EntityPost post) {
+  if(post.getPostMaxPerson() == -1) return " ${post.getPostCurrentPerson()}";
+  return " ${post.getPostCurrentPerson()}/${post.getPostMaxPerson()}";
+}
+
+String getGenderText(EntityPost post) {
+  if(post.getPostGender() == 0) {
+    return "성별 무관";
+  } else if (post.getPostGender() == 1) {
+    return "남자만";
+  } else {
+    return "여자만";
+  }
+}
+
+String getAgeText(EntityPost post) {
+  if (post.getMinAge() == -1 && post.getMaxAge() == -1) {
+    return "나이 무관";
+  } else if (post.getMinAge() == -1) {
+    return "${post.getMaxAge()}세 이하";
+  } else if (post.getMaxAge() == -1) {
+    return "${post.getMinAge()}세 이상";
+  } else {
+    return "${post.getMinAge()} ~ ${post.getMaxAge()}세";
+  }
 }
 
 String getMeetTimeText(EntityPost post) {
