@@ -240,7 +240,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
           LatLng newLatLng = LatLng(pos.latitude, pos.longitude);
           _controller.future.then((value) =>
               value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-                target: newLatLng,
+                target: LatLng(lat, lng),
                 zoom: 16.3,
               ))));
           _getPlaceAddress();
@@ -306,7 +306,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
 
   _loading() async {
     if (postManager.isLoading) {
-      print("111");
       await Future.delayed(Duration(milliseconds: 1000)).then((value) => _loading());
       return;
     } else {

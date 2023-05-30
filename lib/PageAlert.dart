@@ -8,9 +8,7 @@ class PageAlert extends StatelessWidget {
           elevation: 1,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () {}
           ),
           title: Text('알림 목록')
       ),
@@ -21,9 +19,7 @@ class PageAlert extends StatelessWidget {
               child: ListTile(
                   leading: IconButton(
                     icon: Icon(Icons.alarm),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: () {},
                   ),
                   title: Text('알림 제목 $index'),
                   subtitle: Text('알림 내용 $index'),

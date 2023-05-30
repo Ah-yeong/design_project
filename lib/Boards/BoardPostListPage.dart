@@ -59,7 +59,7 @@ with AutomaticKeepAliveClientMixin{
     postManager.loadPages().then((value) => setState(() {}));
     _scrollController.addListener(() {
       setState(() {
-        if (_scrollController.offset <
+        if (_scrollController.offset + 100<
             _scrollController.position.minScrollExtent &&
             _scrollController.position.outOfRange && !postManager.isLoading ) {
           postManager.reloadPages().then((value) => setState(() {}));

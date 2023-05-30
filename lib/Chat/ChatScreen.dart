@@ -23,9 +23,7 @@ class ChatScreenState extends State<ChatScreen> {
         title: Text('같이타자 채팅'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () {},
         ),
       ),
       body: Column(
