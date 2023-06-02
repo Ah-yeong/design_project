@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:design_project/Boards/BoardPostListPage.dart';
+import 'package:design_project/Boards/List/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';

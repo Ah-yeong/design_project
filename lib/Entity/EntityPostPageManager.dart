@@ -11,23 +11,23 @@ class PostPageManager {
 
   PostPageManager() {}
 
-  void continuePage() {
+  Future<void> continuePage() async {
     isLoading = true;
     _maxCount += 100;
-    loadPages().then((value) => isLoading = false);
+    await loadPages("").then((value) => isLoading = false);
   }
 
-  Future<void> reloadPages() async {
+  Future<void> reloadPages(String search_value) async {
     isLoading = true;
     _loadedCount = 0;
     _lastLoaded = 0;
     _scrollCount = 0;
     _maxCount = 100;
     list.clear();
-    await loadPages().then((value) => isLoading = false);
+    await loadPages(search_value).then((value) => isLoading = false);
   }
 
-  Future<void> loadPages() async {
+  Future<void> loadPages(String search_value) async {
     var qs = await FirebaseFirestore.instance.collection("Post").get();
     // FirebaseFirestore.instance.collection("Post").orderBy("post_id", descending: false).get(); => 정렬로 가져오기
     // descending : false 시 post_id에 대하여 내림차순 정렬 로드
@@ -41,6 +41,12 @@ class PostPageManager {
 
       // postData값 건너 뜀
       if (ds.id == "postData") continue;
+
+      // FirebaseQuery에서 where문 wildcard를 지원하지 않기 때문에 모든 게시물을 불러와서 직접 걸러줘야 함.
+      if (search_value != "") {
+        bool isContainValue = ds.get("head").toString().contains(search_value) || ds.get("body").toString().contains(search_value);
+        if (!isContainValue) continue;
+      }
 
       EntityPost post = EntityPost(int.parse(ds.id));
       await post.loadPost();
