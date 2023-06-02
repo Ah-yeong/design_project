@@ -1,6 +1,8 @@
+import 'package:design_project/resources.dart';
 import 'package:get/get.dart';
 import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final formKey = GlobalKey<FormState>();
 
@@ -16,12 +18,29 @@ class _BoardSearchPage extends State<BoardSearchPage> {
   TextEditingController? textEditingController;
   var itemCnt;
   List<String>? tempCategory;
+  List<String>? _searchHistory;
+  bool _searchHistoryEnabled = true;
+
+  SharedPreferences? _storage;
 
   @override
   void initState() {
+    _searchHistory = List.empty(growable: true);
     tempCategory =
         List.of(["술", "밥", "영화", "산책", "공부", "취미", "운동", "기타", "음악", "게임"]);
     itemCnt = tempCategory!.length;
+    loadStorage().then((value) => {
+      setState(() {
+      _searchHistory = _storage!.getStringList("search_history") ?? _searchHistory;
+      _searchHistoryEnabled = _storage!.getBool("search_history_enabled") ?? _searchHistoryEnabled;
+      })
+    });
+
+  }
+
+  Future<void> loadStorage() async {
+    _storage = await SharedPreferences.getInstance();
+    return;
   }
 
   @override
@@ -47,7 +66,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                         disabledBorder: _buildOutlineInputBorder(),
                         focusedBorder: _buildOutlineInputBorder()),
                     onFieldSubmitted: (search_value) {
-                      Get.off(() => BoardSearchListPage(search_value: search_value));
+                      _searchPost(search_value);
                     },
                   ),
                 )),
@@ -104,19 +123,38 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("최근 검색어",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("최근 검색어",
+                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                const Text("검색어는 최대 20개까지 저장됩니다", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
+                              ],
+                            ),
                             Row(
                               children: [
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    setState(() {
+                                      _searchHistory!.clear();
+                                      _storage!.setStringList("search_history", _searchHistory!);
+                                    });
+                                  },
                                   child: const Text("모두 지우기", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
                                 ),
                                 const VerticalDivider(),
                                 GestureDetector(
-                                  onTap: () {},
-                                  child: const Text("저장 기능 끄기", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
+                                  onTap: () {
+                                    setState(() {
+                                      _searchHistoryEnabled = !_searchHistoryEnabled;
+                                      _storage!.setStringList("search_history", List.empty());
+                                      _searchHistory!.clear();
+                                      _storage!.setBool("search_history_enabled", _searchHistoryEnabled);
+                                    });
+                                  },
+                                  child: Text("저장 기능 ${_searchHistoryEnabled ? "끄기" : "켜기"}", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
                                 ),
                               ],
                             )
@@ -124,61 +162,93 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                         )
                     ),
                   ), // 최근 검색어
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 4,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10),
-                        itemBuilder: (context, index) {
-                          return Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                              child: SizedBox(
-                                  height: 70,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              print("tapped $index");
-                                            },
-                                            child: Row(
-                                              children: [
-                                                const Icon(Icons.search_sharp),
-                                                Padding(padding: EdgeInsets.only(left:10), child: Text("예시 $index"),),
-                                              ],
-                                            ),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              print("closed $index");
-                                            },
-                                            child: const Icon(Icons.close),
-                                          )
-                                        ],
-                                      ),
-                                      const Divider(
-                                        thickness: 1.5,
-                                      ),
-                                    ],
-                                  )));
-                        },
-                        itemCount: 20,
-                      ),
-                    ),
-                  ),
+                  _buildHistory(),
                 ],
               ))),
       onTap: () {FocusManager.instance.primaryFocus?.unfocus();},
     );
+  }
 
+  Widget _buildHistory() {
+    return _searchHistoryEnabled ?
+
+      _searchHistory!.length == 0 ?
+      SizedBox(
+          height: 100,
+          width: double.infinity,
+          child: Center(child: Text("저장된 검색어가 없습니다", style: TextStyle(color: colorGrey, fontSize: 15),)),) :
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 4,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10),
+            itemBuilder: (context, index) {
+              return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: SizedBox(
+                      height: 70,
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () => _searchPost(_searchHistory![_searchHistory!.length - index - 1]),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.search_sharp),
+                                    Padding(padding: EdgeInsets.only(left:10), child: Text("${_searchHistory![_searchHistory!.length - index - 1]}"),),
+                                  ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _searchHistory!.removeAt(_searchHistory!.length - index - 1);
+                                    _storage!.setStringList("search_history", _searchHistory!);
+                                  });
+                                },
+                                child: const Icon(Icons.close),
+                              )
+                            ],
+                          ),
+                          const Divider(
+                            thickness: 1.5,
+                          ),
+                        ],
+                      )));
+            },
+            itemCount: _searchHistory!.length,
+          ),
+        ),
+      )
+
+    : SizedBox(
+      height: 100,
+      width: double.infinity,
+      child: Center(child: Text("검색어 자동 저장 기능이 꺼져있습니다", style: TextStyle(color: colorGrey, fontSize: 15),)),
+    );
+  }
+
+  _searchPost(String search_value) {
+    if(_searchHistoryEnabled) {
+      if(_searchHistory!.length == 20) {
+        // 최대 20개 까지 저장할 수 있음
+        _searchHistory!.removeAt(0);
+      }
+      if(_searchHistory!.contains(search_value)) {
+        _searchHistory!.remove(search_value);
+      }
+      _searchHistory!.add(search_value);
+      _storage!.setStringList("search_history", _searchHistory!);
+    }
+    Get.off(() => BoardSearchListPage(search_value: search_value));
   }
 
   BoxDecoration _buildBoxDecoration() {
