@@ -1,5 +1,6 @@
 import 'package:design_project/Entity/EntityPostPageManager.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../resources.dart';
 import '../List/BoardPostListPage.dart';
@@ -24,6 +25,10 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   TextEditingController textEditingController = TextEditingController();
   PostPageManager _pageManager = PostPageManager();
 
+  List<String>? _searchHistory;
+  bool _searchHistoryEnabled = true;
+  SharedPreferences? _storage;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +52,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                       focusedBorder: _buildOutlineInputBorder()),
                   onFieldSubmitted: (search_value) {
                     _search_value = search_value;
+                    _searchPost(search_value);
                     setState(() {});
                     _pageManager.reloadPages(search_value).then((value) {setState(() {});});
                   },
@@ -94,6 +100,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   @override
   void initState() {
     super.initState();
+    _searchHistory = List.empty(growable: true);
     _search_value = widget.search_value;
     _pageManager.loadPages(_search_value!).then((value) => setState(() {}));
     _scrollController.addListener(() {
@@ -105,7 +112,33 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         }
       });
     });
+
     textEditingController.text = _search_value!;
+    loadStorage().then((value) => {
+      setState(() {
+        _searchHistory = _storage!.getStringList("search_history") ?? _searchHistory;
+        _searchHistoryEnabled = _storage!.getBool("search_history_enabled") ?? _searchHistoryEnabled;
+      })
+    });
+  }
+
+  _searchPost(String search_value) {
+    if(_searchHistoryEnabled) {
+      if(_searchHistory!.length == 20) {
+        // 최대 20개 까지 저장할 수 있음
+        _searchHistory!.removeAt(0);
+      }
+      if(_searchHistory!.contains(search_value)) {
+        _searchHistory!.remove(search_value);
+      }
+      _searchHistory!.add(search_value);
+      _storage!.setStringList("search_history", _searchHistory!);
+    }
+  }
+
+  Future<void> loadStorage() async {
+    _storage = await SharedPreferences.getInstance();
+    return;
   }
 
   naviToPost(int index) {
