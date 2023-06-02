@@ -134,7 +134,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
   void _updatePosition(CameraPosition _position) {
     lat = _position.target.latitude;
     lng = _position.target.longitude;
-    setState(() {});
   }
 
   Widget _buildModalSheet(BuildContext context, int markerId) {
@@ -240,7 +239,8 @@ class _BoardLocationPage extends State<BoardLocationPage> {
           LatLng newLatLng = LatLng(pos.latitude, pos.longitude);
           _controller.future.then((value) =>
               value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-                target: LatLng(lat, lng),
+                // target: newLatLng
+                target: LatLng(lat, lng), // 애뮬레이터 테스트시 상명대학교 초기화
                 zoom: 16.3,
               ))));
           _getPlaceAddress();
@@ -271,12 +271,8 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
       return Future.error('Location services are disabled.');
     }
 
@@ -284,11 +280,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
         return Future.error('Location permissions are denied');
       }
     }
