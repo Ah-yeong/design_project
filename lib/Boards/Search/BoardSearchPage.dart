@@ -37,7 +37,6 @@ class _BoardSearchPage extends State<BoardSearchPage> {
     });
 
   }
-
   Future<void> loadStorage() async {
     _storage = await SharedPreferences.getInstance();
     return;
@@ -237,16 +236,22 @@ class _BoardSearchPage extends State<BoardSearchPage> {
   }
 
   _searchPost(String search_value) {
-    if(_searchHistoryEnabled) {
-      if(_searchHistory!.length == 20) {
-        // 최대 20개 까지 저장할 수 있음
-        _searchHistory!.removeAt(0);
+    if(search_value != "" && search_value.length < 2) {
+      showAlert("검색어를 두 글자 이상 입력해주세요", context, colorSuccess);
+      return;
+    }
+    if(search_value != "") {
+      if(_searchHistoryEnabled) {
+        if(_searchHistory!.length == 20) {
+          // 최대 20개 까지 저장할 수 있음
+          _searchHistory!.removeAt(0);
+        }
+        if(_searchHistory!.contains(search_value)) {
+          _searchHistory!.remove(search_value);
+        }
+        _searchHistory!.add(search_value);
+        _storage!.setStringList("search_history", _searchHistory!);
       }
-      if(_searchHistory!.contains(search_value)) {
-        _searchHistory!.remove(search_value);
-      }
-      _searchHistory!.add(search_value);
-      _storage!.setStringList("search_history", _searchHistory!);
     }
     Get.off(() => BoardSearchListPage(search_value: search_value));
   }
