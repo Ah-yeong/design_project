@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:design_project/Boards/BoardMain.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
 import 'package:flutter/foundation.dart';
@@ -15,8 +15,8 @@ import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 import 'dart:async';
 
-import '../Entity/EntityPost.dart';
-import '../resources.dart';
+import '../../Entity/EntityPost.dart';
+import '../../resources.dart';
 
 class BoardLocationPage extends StatefulWidget {
   const BoardLocationPage({super.key});

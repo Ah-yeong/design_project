@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
 import 'package:flutter/material.dart';
 
 final formKey = GlobalKey<FormState>();
@@ -44,6 +46,9 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                         enabledBorder: _buildOutlineInputBorder(),
                         disabledBorder: _buildOutlineInputBorder(),
                         focusedBorder: _buildOutlineInputBorder()),
+                    onFieldSubmitted: (search_value) {
+                      Get.off(() => BoardSearchListPage(search_value: search_value));
+                    },
                   ),
                 )),
             leading: const BackButton(

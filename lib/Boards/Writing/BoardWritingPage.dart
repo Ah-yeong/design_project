@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
-import 'package:design_project/Boards/BoardMain.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/Writing/BoardSelectPositionPage.dart';
 import 'package:design_project/Entity/EntityPost.dart';
 import 'package:flutter/cupertino.dart';
@@ -477,7 +477,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                               success = value;
                               setState(() => _isUploading = false);
                               showAlert(success ? "글 작성 완료!" : "글 작성에 실패했습니다!", context, success ? colorSuccess : colorError);
-                              postManager.reloadPages();
+                              postManager.reloadPages("");
                               if(success) Navigator.pop(context);
                             });
                           },
