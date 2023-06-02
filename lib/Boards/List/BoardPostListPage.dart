@@ -1,5 +1,6 @@
 import 'package:design_project/Boards/List/BoardHomePage.dart';
 import 'package:design_project/Boards/BoardPostPage.dart';
+import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
 import 'package:design_project/Entity/EntityPost.dart';
 import 'BoardMain.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,7 @@ with AutomaticKeepAliveClientMixin{
                   child: Card(
                       child: Padding(
                           padding: const EdgeInsets.all(7),
-                          child: buildFriendRow(postManager.list[index]))),
+                          child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
                 ),
                 childCount: postManager.loadedCount))
       ],
@@ -70,14 +71,14 @@ with AutomaticKeepAliveClientMixin{
   }
 
   naviToPost(int index) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[index].getPostId())));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())));
   }
   @override
   bool get wantKeepAlive => true;
 }
 
 // 바로 모임 카드
-Widget buildFriendRow(EntityPost entity) {
+Widget buildFriendRow(EntityPost entity, double distance) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -123,6 +124,16 @@ Widget buildFriendRow(EntityPost entity) {
             const Padding(
               padding: EdgeInsets.only(bottom: 18),
             ),
+            distance != 0.0 ? Row(
+              children: [
+                const Icon(Icons.gps_fixed_sharp, color: colorSuccess, size: 13,),
+                Text(
+                  " ${getDistanceString(entity.distance)}",
+                  style: TextStyle(fontSize: 11, color: colorSuccess, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ) : SizedBox(),
+            SizedBox(height: distance == "" ? 0 : 1,),
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),

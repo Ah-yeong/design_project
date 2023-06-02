@@ -16,6 +16,13 @@ class EntityPost {
   var _maxAge;
   var _time;
   var _llName;
+  double _distance = 0.0;
+
+  double get distance => _distance;
+  set distance(double value) => _distance = value;
+
+  set llName(value) => _llName = value;
+
   late String _upTime;
   var viewCount;
   bool _isLoaded = false;
