@@ -39,7 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   custom_radio_grouped_button: ^2.2.0
   ntp: ^2.0.0
-  google_maps_flutter: ^2.2.6
+  google_maps_flutter: ^2.2.8
   image_picker: ^0.8.7+5
   firebase_auth: ^4.6.1
   firebase_core: ^2.13.0
@@ -49,6 +49,7 @@ dependencies:
   geolocator: ^9.0.2
   firebase_database: ^10.2.2
   shared_preferences: ^2.1.1
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:

@@ -10,7 +10,6 @@ class EntityProfiles {
   var major; // 학과
   var profileImagePath;
   var mannerGroup; // 소모임 매너지수
-
   var nickname;
   var hobby;
   var mbti;
@@ -34,6 +33,8 @@ class EntityProfiles {
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
       birth = ds.get("birth");
+      age = 23;
+      profileImagePath = "assets/images/userImage.png";
       commute = ds.get("commute");
       commuteIndex = ds.get("commuteIndex");
       // gender = ds.get("gender");

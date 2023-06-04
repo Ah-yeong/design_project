@@ -1,11 +1,12 @@
 import 'dart:async';
-
+import 'package:get/get.dart';
 import 'package:design_project/Boards/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources.dart';
+import '../Boards/BoardProfilePage.dart';
 
 class BoardPostPage extends StatefulWidget {
   final int postId;
@@ -162,13 +163,14 @@ class _BoardPostPage extends State<BoardPostPage> {
     postEntity = EntityPost(postId);
     postEntity!.loadPost().then((value) {
       profileEntity = EntityProfiles(postEntity!.getWriterId());
-      profileEntity!.makeTestingProfile();
-      _markers.add(Marker(
-          markerId: const MarkerId('1'),
-          draggable: true,
-          onTap: () => print("marker tap"),
-          position: postEntity!.getLLName().latLng));
-      loadPostTime();
+      profileEntity!.loadProfile().then((value){
+        _markers.add(Marker(
+            markerId: const MarkerId('1'),
+            draggable: true,
+            onTap: () => print("marker tap"),
+            position: postEntity!.getLLName().latLng));
+        loadPostTime();
+      });
     });
     //postEntity!.makeTestingPost();
   }
@@ -289,7 +291,7 @@ Widget drawProfile(EntityProfiles profileEntity) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     onTap: () {
-      // 프로필 터치 이벤트
+      Get.off(() => BoardProfilePage(profileId: profileEntity.profileId));
       print(profileEntity.profileId);
     },
     child: Row(
