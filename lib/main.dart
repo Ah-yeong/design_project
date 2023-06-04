@@ -140,7 +140,7 @@ class _MyHomePage extends State<MyHomePage> {
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        Get.off(() => NameSignUpScreen());
+        Get.off(() => BoardPageMainHub());
       }
     });
   }
