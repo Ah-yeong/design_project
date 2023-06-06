@@ -1,5 +1,5 @@
-import 'package:design_project/Boards/BoardLocationPage.dart';
-import 'package:design_project/Boards/BoardMain.dart';
+import 'package:design_project/Boards/List/BoardLocationPage.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Auth/SignUpPage.dart';
 import 'resources.dart';
 import 'package:get/get.dart';
+import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -146,7 +147,7 @@ class _MyHomePage extends State<MyHomePage> {
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        Get.off(() => const BoardPageMainHub());
+        Get.off(() => BoardPageMainHub());
       }
     });
   }

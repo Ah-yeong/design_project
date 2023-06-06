@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:design_project/Boards/BoardMain.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
 import 'package:flutter/foundation.dart';
@@ -15,8 +15,8 @@ import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 import 'dart:async';
 
-import '../Entity/EntityPost.dart';
-import '../resources.dart';
+import '../../Entity/EntityPost.dart';
+import '../../resources.dart';
 
 class BoardLocationPage extends StatefulWidget {
   const BoardLocationPage({super.key});
@@ -51,7 +51,8 @@ class _BoardLocationPage extends State<BoardLocationPage> {
                 child: CircularProgressIndicator(
                   strokeWidth: 4,
                   color: colorSuccess,
-                ))) : SafeArea(
+                ))) :
+        SafeArea(
             bottom: false,
             child: Stack(
               children: [
@@ -134,7 +135,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
   void _updatePosition(CameraPosition _position) {
     lat = _position.target.latitude;
     lng = _position.target.longitude;
-    setState(() {});
   }
 
   Widget _buildModalSheet(BuildContext context, int markerId) {
@@ -187,7 +187,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
               ),
               child: Padding(
                   padding: EdgeInsets.all(13),
-                  child: buildPostContext(postEntity, profileEntity!))),
+                  child: buildPostContext(postEntity, profileEntity!, context))),
         ],
       ),
     );
@@ -240,7 +240,8 @@ class _BoardLocationPage extends State<BoardLocationPage> {
           LatLng newLatLng = LatLng(pos.latitude, pos.longitude);
           _controller.future.then((value) =>
               value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-                target: LatLng(lat, lng),
+                // target: newLatLng
+                target: LatLng(lat, lng), // 애뮬레이터 테스트시 상명대학교 초기화
                 zoom: 16.3,
               ))));
           _getPlaceAddress();
@@ -267,43 +268,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     });
   }
 
-  Future<Position> determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
-  }
-
   _loading() async {
     if (postManager.isLoading) {
       await Future.delayed(Duration(milliseconds: 1000)).then((value) => _loading());
@@ -318,4 +282,32 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     super.initState();
     _loading();
   }
+}
+
+Future<Position> determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
 }

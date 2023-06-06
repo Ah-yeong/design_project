@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../Boards/BoardPostPage.dart';
 import '../Entity/EntityProfile.dart';
 import '../Entity/EntityPost.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:design_project/resources.dart';
 import 'PageProfileEdit.dart';
-import 'package:design_project/Boards/BoardPostListPage.dart';
+import 'package:design_project/Boards/List/BoardPostListPage.dart';
 
 class PageProfile extends StatefulWidget {
   @override
@@ -25,13 +26,21 @@ class _PageProfileState extends State<PageProfile> {
         title: Text(
           '프로필',
           style: TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               color: Colors.black
           ),
         ),
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: myProfile!.isLoading ? Center(
+          child: SizedBox(
+              height: 65,
+              width: 65,
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+                color: colorSuccess,
+              ))) :
+      SingleChildScrollView(
         child:Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +70,7 @@ class _PageProfileState extends State<PageProfile> {
                           ),
                           SizedBox(height: 6),
                           Text(
-                            "${myProfile!.major}",
+                            "${myProfile!.major}, ${myProfile!.age}세",
                             style: TextStyle(
                               fontSize: 14,
                             ),
@@ -107,18 +116,36 @@ class _PageProfileState extends State<PageProfile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                          '내가 속한 모임',
+                          ' 내가 속한 모임',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            //fontWeight: FontWeight.bold,
                           )
                       ),
                       SizedBox(height: 10),
+                      // Row(
+                      //   children: [
+                      //     Card(
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.all(7),
+                      //         child: _buildFriendRow(myPost!),
+                      //       ),
+                      //     ),
+                      //     Container(
+                      //
+                      //     )
+                      //   ],
+                      // )
                       Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: _buildFriendRow(myPost!),
-                        ),
+                        child: GestureDetector(
+                            onTap: (){
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: myPost!.getPostId())));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(7),
+                              child: _buildFriendRow(myPost!),
+                            )
+                        )
                       ),
                     ]
                 ),
@@ -129,97 +156,186 @@ class _PageProfileState extends State<PageProfile> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                          '내 정보',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          )
-                      ),
-                      SizedBox(height: 10),
+                      // Text(
+                      //     '내 정보',
+                      //     style: TextStyle(
+                      //       fontSize: 16,
+                      //       fontWeight: FontWeight.bold,
+                      //     )
+                      // ),
+                      // SizedBox(height: 10),
                       Container(
-                          padding:  EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              width: 2,
-                              color: Color(0xFF6ACA89),
+                        child: Column(
+                          children: [
+                            Row(
+                                children: [
+                                  Text(
+                                    '취미',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      //fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '${myProfile!.hobby?.join(', ')}',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
+                                      overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
+                                    ),
+                                  )
+                                ]
                             ),
-                          ),
-                          child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                          '취미',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          'MBTI',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '통학여부',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '거주지',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Divider(thickness: 1, height: 1),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Row(
+                                children: [
+                                  Text(
+                                    'MBTI',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      //fontWeight:FontWeight.bold
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        "${myProfile!.mbti}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                        ),
                                       )
-                                    ]
-                                ),
-                                SizedBox(width:20),
-                                Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Row(
-                                        children: [
-                                          Text(
-                                              '단대호수 산책',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          "${myProfile!.mbti}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          "${myProfile!.commute}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                          '경기도 오산시',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          )
+                                  )
+                                ]
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Divider(thickness: 1, height: 1),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Row(
+                                children: [
+                                  Text(
+                                    '통학여부',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      // fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        "${myProfile!.commute}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                        ),
                                       )
-                                    ]
-                                ),
-                              ]
-                          )
+                                  )
+                                ]
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Divider(thickness: 1, height: 1),
+                            SizedBox(
+                              height: 7,
+                            ),
+                          ],
+                        ),
+                      //     padding:  EdgeInsets.all(15),
+                      //     decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.circular(10),
+                      //       border: Border.all(
+                      //         width: 2,
+                      //         color: Color(0xFF6ACA89),
+                      //       ),
+                      //     ),
+                      //     child: Row(
+                      //         crossAxisAlignment: CrossAxisAlignment.center,
+                      //         children: <Widget>[
+                      //     Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: <Widget>[
+                      //         Text(
+                      //           '취미',
+                      //           style: TextStyle(
+                      //             fontSize: 14,
+                      //           ),
+                      //
+                      //         ),
+                      //         SizedBox(height: 6),
+                      //         Text(
+                      //           'MBTI',
+                      //           style: TextStyle(
+                      //             fontSize: 14,
+                      //           ),
+                      //         ),
+                      //         SizedBox(height: 6),
+                      //         Text(
+                      //           '통학여부',
+                      //           style: TextStyle(
+                      //             fontSize: 14,
+                      //           ),
+                      //         ),
+                      //         SizedBox(height: 6),
+                      //         Text(
+                      //           '거주지',
+                      //           style: TextStyle(
+                      //             fontSize: 14,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     SizedBox(width: 20),
+                      //     Expanded(
+                      //       child: Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: <Widget>[
+                      //           Text(
+                      //             '${myProfile!.hobby?.join(', ')}',
+                      //             // '단대호수 산책',
+                      //             style: TextStyle(
+                      //               fontSize: 14,
+                      //             ),
+                      //             maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
+                      //             overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
+                      //           ),
+                      //           SizedBox(height: 6),
+                      //           Text(
+                      //             "${myProfile!.mbti}",
+                      //             style: TextStyle(
+                      //               fontSize: 14,
+                      //             ),
+                      //           ),
+                      //           SizedBox(height: 6),
+                      //           Text(
+                      //             "${myProfile!.commute}",
+                      //             style: TextStyle(
+                      //               fontSize: 14,
+                      //             ),
+                      //           ),
+                      //           SizedBox(height: 6),
+                      //           Text(
+                      //             '경기도 오산시',
+                      //             style: TextStyle(
+                      //               fontSize: 14,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //         ]
+                      //     )
                       )
                     ]
                 ),
@@ -234,6 +350,7 @@ class _PageProfileState extends State<PageProfile> {
 
   @override
   void initState() {
+    //setState(() {});
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfile!.loadProfile().then((n) {
@@ -453,7 +570,7 @@ class MannerTemperatureWidget extends StatelessWidget {
               child: Text(
                 '매너지수',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  //fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -461,7 +578,7 @@ class MannerTemperatureWidget extends StatelessWidget {
               child: Text(
                 '${mannerScore}점',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  //fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.right,
               ),

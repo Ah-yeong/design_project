@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'package:design_project/Boards/BoardPostListPage.dart';
+import 'package:design_project/Boards/List/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources.dart';
-import 'package:design_project/Chat/ChatScreen.dart';
+import '../Boards/BoardProfilePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-
 
 class BoardPostPage extends StatefulWidget {
   final int postId;
@@ -24,6 +23,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   User? loggedUser; // loggedUser 변수 선언
 
   final List<Marker> _markers = [];
+  bool isSameId = false;
 
   static const CameraPosition _kSeoul = CameraPosition(
     target: LatLng(36.833068, 127.178419),
@@ -50,99 +50,31 @@ class _BoardPostPage extends State<BoardPostPage> {
             ),
           )
         : Scaffold(
-            bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFFF6F6F6),
-        elevation: 1,
-        notchMargin: 4,
-        child: SizedBox(
-            height: 55,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Padding(padding: EdgeInsets.only(left: 40)),
-                    SizedBox(
-                        width: mediaSize!.width / 3 - 20,
-                        child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("현재 인원 ${postEntity!.getPostCurrentPerson()}/${postEntity!.getPostMaxPerson()} 명",
-                                    style: const TextStyle(color: Colors.black54, fontSize: 14)),
-                                const Text("마감 하루 남음",
-                                    style: TextStyle(color: Colors.black54, fontSize: 14)),
-                              ],
-                            )
-                        )
-                    ),
-                  ],
+            appBar: AppBar(
+              title: const Text(
+                "게시글",
+                style: TextStyle(color: Colors.black, fontSize: 16),
+              ),
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: const SizedBox(
+                  height: 55,
+                  width: 55,
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: Colors.black,
+                  ),
                 ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        //print(postId);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(postId: postId),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: colorSuccess,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Container(
-                        width: mediaSize!.width / 2 - 20,
-                        height: mediaSize!.height / 22,
-                        child: Center(
-                          child: Text(
-                            "신청하기",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.only(left: 20)),
-                  ],
-                )
-              ],
+              ),
+              backgroundColor: Colors.white,
+              toolbarHeight: 40,
+              elevation: 1,
             ),
-          ),
-      ),
-      appBar: AppBar(
-        title: const Text(
-          "게시글",
-          style: TextStyle(color: Colors.black, fontSize: 16),
-        ),
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: const SizedBox(
-            height: 55,
-            width: 55,
-            child: Icon(
-              Icons.close_rounded,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        toolbarHeight: 40,
-        elevation: 1,
-      ),
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
+            backgroundColor: Colors.white,
+            body: Stack(children: [
+              SingleChildScrollView(
+                  child: SafeArea(
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,13 +100,55 @@ class _BoardPostPage extends State<BoardPostPage> {
                         ),
 
                         // 제목 및 카테고리
-                        buildPostContext(postEntity!, profileEntity!),
+                        buildPostContext(postEntity!, profileEntity!, context),
                         // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
                         // Text("Gender Limit : ${postEntity!.getPostGender()}"),
                       ]),
-                )),
-      ),
-    );
+                ),
+              )),
+              Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 18),
+                    child: InkWell(
+                        onTap: () {},
+                        child: SizedBox(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width - 40,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                                color: colorSuccess,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey,
+                                      offset: Offset(1, 1),
+                                      blurRadius: 4.5)
+                                ]),
+                            child: Center(
+                                child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.emoji_people,
+                                  color: Colors.white,
+                                ),
+                                Text(
+                                  "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
+                                      "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+
+                              ],
+                            )),
+                          ),
+                        )),
+                  ),
+                ),
+              ),
+            ]));
   }
 
   @override
@@ -184,13 +158,15 @@ class _BoardPostPage extends State<BoardPostPage> {
     postEntity = EntityPost(postId);
     postEntity!.loadPost().then((value) {
       profileEntity = EntityProfiles(postEntity!.getWriterId());
-      profileEntity!.makeTestingProfile();
-      _markers.add(Marker(
-          markerId: const MarkerId('1'),
-          draggable: true,
-          onTap: () => print("marker tap"),
-          position: postEntity!.getLLName().latLng));
-      loadPostTime();
+      profileEntity!.loadProfile().then((value){
+        _markers.add(Marker(
+            markerId: const MarkerId('1'),
+            draggable: true,
+            onTap: () => print("marker tap"),
+            position: postEntity!.getLLName().latLng));
+        loadPostTime();
+        checkWriterId(postEntity!.getWriterId());
+      });
     });
     //postEntity!.makeTestingPost();
   }
@@ -204,10 +180,16 @@ class _BoardPostPage extends State<BoardPostPage> {
       isLoaded = true;
     });
   }
+
+  checkWriterId(writerId) {
+    if(writerId != Null) {
+      if (FirebaseAuth.instance.currentUser!.uid == writerId)
+        isSameId = true;
+    }
+  }
 }
 
-Column buildPostContext(EntityPost post, EntityProfiles profiles) {
-
+Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext context) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -217,7 +199,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
         children: [
           Text(post.getPostHead(),
               style:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           Row(
             children: [
               Container(
@@ -226,7 +208,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
                     color: const Color(0xFFBFBFBF)),
                 child: const Padding(
                   padding:
-                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                      EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
                   child: Text("20~24세",
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
@@ -240,7 +222,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
                     color: const Color(0xFFBFBFBF)),
                 child: const Padding(
                   padding:
-                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                      EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
                   child: Text("남자만",
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
@@ -254,7 +236,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
                     color: const Color(0xFFBFBFBF)),
                 child: const Padding(
                   padding:
-                  EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
+                      EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
                   child: Text("영화",
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
@@ -273,7 +255,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
           thickness: 1,
         ),
       ),
-      drawProfile(profiles),
+      drawProfile(profiles, context),
       // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
@@ -303,16 +285,18 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
       ),
       Text("시간 : ${getMeetTimeText(post)}"),
       Text("장소 : ${post.getLLName().AddressName}"),
-      SizedBox(height: 20,),
+      SizedBox(
+        height: 20,
+      ),
     ],
   );
 }
 
-Widget drawProfile(EntityProfiles profileEntity) {
+Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     onTap: () {
-      // 프로필 터치 이벤트
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
       print(profileEntity.profileId);
     },
     child: Row(
@@ -340,7 +324,7 @@ Widget drawProfile(EntityProfiles profileEntity) {
                 Text(
                   "${profileEntity.major}, ${profileEntity.age}세",
                   style:
-                  const TextStyle(color: Color(0xFF777777), fontSize: 13),
+                      const TextStyle(color: Color(0xFF777777), fontSize: 13),
                 )
               ],
             ),
@@ -352,8 +336,13 @@ Widget drawProfile(EntityProfiles profileEntity) {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text("매너 지수 ${profileEntity.mannerGroup}점", style: const TextStyle(color: Color(0xFF777777), fontSize: 12),),
-              const Padding(padding: EdgeInsets.only(top:2),),
+              Text(
+                "매너 지수 ${profileEntity.mannerGroup}점",
+                style: const TextStyle(color: Color(0xFF777777), fontSize: 12),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+              ),
               SizedBox(
                   height: 6,
                   width: 105,
@@ -364,8 +353,7 @@ Widget drawProfile(EntityProfiles profileEntity) {
                       valueColor: AlwaysStoppedAnimation<Color>(color),
                       backgroundColor: color.withOpacity(0.3),
                     ),
-                  )
-              )
+                  ))
             ],
           ),
         )
@@ -373,4 +361,3 @@ Widget drawProfile(EntityProfiles profileEntity) {
     ),
   );
 }
-
