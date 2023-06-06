@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'package:design_project/Boards/BoardPostListPage.dart';
+import 'package:design_project/Boards/List/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
-import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:design_project/resources.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 
 class BoardProfilePage extends StatefulWidget {
