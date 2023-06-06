@@ -113,42 +113,35 @@ class _PageProfileState extends State<PageProfile> {
               Container(
                 padding: EdgeInsets.all(15),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                          ' 내가 속한 모임',
-                          style: TextStyle(
-                            fontSize: 16,
-                            //fontWeight: FontWeight.bold,
-                          )
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '내가 작성한 글',
+                      style: TextStyle(
+                        fontSize: 16,
+                        //fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(height: 10),
-                      // Row(
-                      //   children: [
-                      //     Card(
-                      //       child: Padding(
-                      //         padding: const EdgeInsets.all(7),
-                      //         child: _buildFriendRow(myPost!),
-                      //       ),
-                      //     ),
-                      //     Container(
-                      //
-                      //     )
-                      //   ],
-                      // )
-                      Card(
-                        child: GestureDetector(
-                            onTap: (){
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: myPost!.getPostId())));
+                    ),
+                    SizedBox(height: 10),
+                    Column(
+                      children: myPostList.map((post) {
+                        return Card(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => BoardPostPage(postId: post.getPostId()),
+                              ));
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(7),
-                              child: _buildFriendRow(myPost!),
-                            )
-                        )
-                      ),
-                    ]
-                ),
+                              child: _buildFriendRow(post),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                )
               ),
               Divider(thickness: 1, height: 1),
               Container(
@@ -278,40 +271,7 @@ class _PageProfileState extends State<PageProfile> {
                 ),
               ),
               // 추가적인 프로필 정보를 이곳에 추가할 수 있습니다.
-              Divider(thickness: 1, height: 1),
-              Container(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      '내가 작성한 글',
-                      style: TextStyle(
-                        fontSize: 16,
-                        //fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Column(
-                      children: myPostList.map((post) {
-                        return Card(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => BoardPostPage(postId: post.getPostId()),
-                              ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(7),
-                              child: _buildFriendRow(post),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                )
-              ),
+              Divider(thickness: 1, height: 1)
             ],
           ),
         ),
