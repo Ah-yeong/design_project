@@ -256,8 +256,6 @@ class _SignUpPage extends State<SignUpPage> {
             .doc('nickNames').get();
         var classIdList = await FirebaseFirestore.instance.collection('NickClassData')
             .doc('classIds').get();
-        print(nickList.data().toString());
-        print(classIdList.data().toString());
         showAlert("이메일로 인증 주소가 발급되었습니다!", context, colorSuccess);
         if (credential.user != null) {
             await FirebaseFirestore.instance
