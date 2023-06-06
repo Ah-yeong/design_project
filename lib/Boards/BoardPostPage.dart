@@ -120,6 +120,8 @@ class _BoardPostPage extends State<BoardPostPage> {
                                   builder: (BuildContext context) =>
                                       _buildModalSheet(context, postEntity!.getPostId()),
                                   backgroundColor: Colors.transparent);
+                            } else {
+                              postEntity!.applyToPost(userID);
                             }
                           },
                           child: SizedBox(
@@ -156,51 +158,6 @@ class _BoardPostPage extends State<BoardPostPage> {
                     ),
                   ),
                 ),
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 18),
-                    child: InkWell(
-                        onTap: () {
-                          postEntity!.applyToPost(userID);
-                          print("클릭");
-                        },
-                        child: SizedBox(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width - 40,
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: colorSuccess,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      offset: Offset(1, 1),
-                                      blurRadius: 4.5)
-                                ]),
-                            child: Center(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.emoji_people,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
-                                      "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-
-                              ],
-                            )),
-                          ),
-                        )),
-                  ),
-                ),
-              ),
             ]));
   }
 

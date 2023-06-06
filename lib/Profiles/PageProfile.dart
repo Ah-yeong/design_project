@@ -1,3 +1,4 @@
+import 'package:design_project/Profiles/pageMyGroup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../Boards/BoardPostPage.dart';
@@ -168,6 +169,40 @@ class _PageProfileState extends State<PageProfile> {
                       ],
                     ),
                   ],
+                ),
+              ),
+              Divider(thickness: 1, height: 1),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => PageMyGroup(),
+                  ));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '내가 속한 모임',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: colorGrey,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 17,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Divider(thickness: 1, height: 1),

@@ -20,6 +20,7 @@ class EntityProfiles {
   var gender;
   var textInfo;
   var post;
+  var group;
   int postCount = 0;
   bool isLoading = true;
   // bool isLoaded = false;
@@ -48,6 +49,7 @@ class EntityProfiles {
       textInfo = ds.get("textInfo");
       mannerGroup = ds.get("mannerGroup");
       post = ds.get("post");
+      group = ds.get("group");
       print(post);
     });
     isLoading = false;
@@ -70,6 +72,27 @@ class EntityProfiles {
   }
 
   Future<bool> addPostId() async {
+    try {
+      int? new_post_id;
+      DocumentReference<Map<String, dynamic>> ref =
+      await FirebaseFirestore.instance.collection("Post").doc("postData");
+      await ref.get().then((DocumentSnapshot ds) {
+        new_post_id = ds.get("last_id");
+        if (new_post_id == -1) return false; // 업로드 실패
+      });
+      await FirebaseFirestore.instance.collection("UserProfile").doc(profileId.toString())
+          .update({
+        "post": FieldValue.arrayUnion([new_post_id]),
+        //"post" : new_post_id,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 수락된 게시물 아이디 추가 (내가 속한 그룹)
+  Future<bool> addGroupId() async {
     try {
       int? new_post_id;
       DocumentReference<Map<String, dynamic>> ref =
