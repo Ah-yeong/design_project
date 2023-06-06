@@ -108,27 +108,24 @@ class _BoardPostPage extends State<BoardPostPage> {
               )),
                 Padding(
                   padding: EdgeInsets.all(20.0),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 18),
-                      child: InkWell(
-                          onTap: () {
-                            if (isSameId){
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    height: 350, // 원하는 높이로 설정
-                                    child: _buildModalSheet(context),
-                                  );
-                                },
-                                backgroundColor: Colors.transparent,
-                              );
-                            } else {
-                              postEntity!.applyToPost(userID);
-                            }
-                          },
+                  child:
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 18),
+                        child: InkWell(
+                            onTap: () {
+                              if(isSameId){
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        _buildModalSheet(context, postEntity!.getPostId()),
+                                    backgroundColor: Colors.transparent);
+                              } else{
+                                postEntity!.applyToPost(userID);
+                                showAlert("신청이 완료되었습니다!", context, Colors.grey);
+                              }
+                            },
                           child: SizedBox(
                             height: 50,
                             width: MediaQuery.of(context).size.width - 40,
@@ -203,7 +200,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     }
   }
 
-  Widget _buildModalSheet(BuildContext context) {
+  Widget _buildModalSheet(BuildContext context, int postId) {
     return SingleChildScrollView(
       child: Container(
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -213,41 +210,16 @@ class _BoardPostPage extends State<BoardPostPage> {
               ),
               child: Padding(
                   padding: EdgeInsets.all(13),
-                  child: buildPostMember(profileEntity!, postEntity!, context))),
+                  child: buildPostMember(profileEntity!, context))),
     );
   }
 }
 
-Column buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
-  // List<dynamic> userData= post.getUser();
+Column buildPostMember(EntityProfiles profiles, BuildContext context) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // ListView.builder(
-      //   shrinkWrap: true,
-      //   physics: NeverScrollableScrollPhysics(),
-      //   itemCount: userData!.length,
-      //   itemBuilder: (context, index) {
-      //     return Column(
-      //       children: [
-      //         Card(
-      //           child: GestureDetector(
-      //             onTap: () {
-      //               Navigator.of(context).push(MaterialPageRoute(
-      //                 builder: (context) => BoardPostPage(postId: userData[index]['id']!),
-      //               ));
-      //             },
-      //             child: Padding(
-      //               padding: const EdgeInsets.all(7),
-      //               child: drawApplyProfile(EntityProfiles(userData[index]['id'])!, context),
-      //             ),
-      //           ),
-      //         ),
-      //       ]
-      //     );
-      //   }
-      // )
-      drawApplyProfile(profiles, context), // 프로필
+      drawProfile(profiles, context), // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
         child: Divider(
