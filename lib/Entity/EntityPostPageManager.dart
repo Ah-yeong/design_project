@@ -43,6 +43,7 @@ class PostPageManager {
       if (ds.id == "postData") continue;
 
       // FirebaseQuery에서 where문 wildcard를 지원하지 않기 때문에 모든 게시물을 불러와서 직접 걸러줘야 함.
+      // 검색어에 대한 제목 + 내용 검색.
       if (search_value != "") {
         bool isContainValue = ds.get("head").toString().contains(search_value) || ds.get("body").toString().contains(search_value);
         if (!isContainValue) continue;

@@ -40,14 +40,19 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   double _lat = 36.833068;
   double _lng = 127.178419;
 
-  List<String> _sortingBy = List.of(["최신순", "거리 가까운 순", "모임 시간 빠른 순"]);
+  List<String> _sortingOptionList = List.of(["최신순", "거리 가까운 순", "모임 시간 빠른 순"]);
+  List<String> _timeOptionList = List.of(["제한 없음", "1시간 이내", "6시간 이내", "1일 이내", "7일 이내", "직접 입력"]);
+
   int _selectedSortingBy = 0;
   int _selectedSortingByTemp = 0;
-  bool _isSelectedSortTime = false;
-  bool _isSelectedSortPeople = false;
-  bool _isSelectedSortDistance = false;
-  bool _isSelectedCategory = false;
-  bool _isSelectedGender = false;
+  int _selectedTime = 0;
+  int _selectedTimeTemp = 0;
+
+  bool _filteringTime = false;
+  bool _filteringPeople = false;
+  bool _filteringDistance = false;
+  bool _filteringCategory = false;
+  bool _filteringGender = false;
 
   Future<void> loadPos() async {
     // 애뮬레이터 비활성화시 아래 주석 제거
@@ -112,20 +117,26 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                             child: Row(
                               children: [
                                 buildSortingButton(
-                                    "정렬 기준 : ${_sortingBy[_selectedSortingBy]}", () {
+                                    "정렬 기준 : ${_sortingOptionList[_selectedSortingBy]}", () {
                                   showModalBottomSheet(
                                       context: context,
                                       builder: (BuildContext context) =>
-                                          _buildModalSheet(context),
+                                          _buildModalSheet(context, 0),
                                       backgroundColor: Colors.transparent);
                                 }, true),
                                 buildSortingButton(
-                                    "모임 시간", () => print("asdf"), _isSelectedSortTime),
+                                    "모임 시간${_filteringTime ? " : ${_timeOptionList[_selectedTime]}" : ""}", () {
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          _buildModalSheet(context, 1),
+                                      backgroundColor: Colors.transparent);
+                                }, _filteringTime),
                                 buildSortingButton(
-                                    "모임 인원", () => print("asdf"), _isSelectedSortPeople),
-                                buildSortingButton("거리", () => print("asdf"), _isSelectedSortDistance),
-                                buildSortingButton("카테고리", () => print("asdf"), _isSelectedCategory),
-                                buildSortingButton("성별", () => print("asdf"), _isSelectedGender),
+                                    "모임 인원", () => print("asdf"), _filteringPeople),
+                                buildSortingButton("거리", () => print("asdf"), _filteringDistance),
+                                buildSortingButton("카테고리", () => print("asdf"), _filteringCategory),
+                                buildSortingButton("성별", () => print("asdf"), _filteringGender),
                               ],
                             ),
                           ))),
@@ -249,8 +260,18 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
     );
   }
 
-  Widget _buildModalSheet(BuildContext context) {
+  Widget _buildModalSheet(BuildContext context, int pageIdx) {
     return StatefulBuilder(builder: (BuildContext context, StateSetter myState) {
+      Widget modalChildWidget = _buildSortingSheet(myState);
+      switch (pageIdx) {
+        // 0. 정렬 기준
+        case 1: modalChildWidget = _buildTimeSheet(myState); break; // 1. 모임 시간
+        case 2: modalChildWidget = _buildSortingSheet(myState); break; // 2. 모임 인원
+        case 3: modalChildWidget = _buildSortingSheet(myState); break; // 3. 거리
+        case 4: modalChildWidget = _buildSortingSheet(myState); break; // 4. 카테고리
+        case 5: modalChildWidget = _buildSortingSheet(myState); break; // 5. 성별
+        default: break;
+      }
       return SingleChildScrollView(
           child: Container(
             margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -258,7 +279,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Padding(padding: EdgeInsets.all(13), child: _buildSortingSheet(myState)),
+            child: Padding(padding: EdgeInsets.all(13), child: modalChildWidget),
           ));
     });
   }
@@ -292,13 +313,13 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                   height: 40,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text(_sortingBy[index],
+                    children: [Text(_sortingOptionList[index],
                       style: _selectedSortingByTemp == index ? TextStyle(color: colorSuccess, fontWeight: FontWeight.bold, fontSize: 16)
                       : TextStyle(color: Colors.black, fontSize: 15),
                     ), _selectedSortingByTemp == index ? Icon(Icons.check_rounded, color: colorSuccess, size: 22,) : SizedBox()],
                   ),
                 ),
-              ), itemCount: 3, scrollDirection: Axis.vertical,),
+              ), itemCount: 3, scrollDirection: Axis.vertical, physics: NeverScrollableScrollPhysics(),),
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(0, 15, 0, 10),
@@ -343,6 +364,87 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         ),
                       )),
                 ),
+            ),
+          ],
+        ));
+  }
+
+  Widget _buildTimeSheet(StateSetter stateSetter) {
+    return Padding(
+        padding: EdgeInsets.all(7),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("모임 시간",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+                textAlign: TextAlign.left),
+            SizedBox(height: 20,),
+            SizedBox(
+              height: 250,
+              width: double.infinity,
+              child: ListView.builder(itemBuilder: (context, index) => GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  stateSetter(() {
+                    setState(() {
+                      _selectedTimeTemp = index;
+                    });
+                  });
+                },
+                child: SizedBox(
+                  height: 40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text(_timeOptionList[index],
+                      style: _selectedTimeTemp == index ? TextStyle(color: colorSuccess, fontWeight: FontWeight.bold, fontSize: 16)
+                          : TextStyle(color: Colors.black, fontSize: 15),
+                    ), _selectedTimeTemp == index ? Icon(Icons.check_rounded, color: colorSuccess, size: 22,) : SizedBox()],
+                  ),
+                ),
+              ), itemCount: 6, scrollDirection: Axis.vertical, physics: NeverScrollableScrollPhysics(),),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 15, 0, 10),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 18),
+                child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedTime = _selectedTimeTemp;
+                        _filteringTime = _selectedTime == 0 ? false : true;
+                        // filtering of Time
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: colorSuccess,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey,
+                                  offset: Offset(1, 1),
+                                  blurRadius: 4.5)
+                            ]),
+                        child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "적용하기",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                                ),
+                              ],
+                            )),
+                      ),
+                    )),
+              ),
             ),
           ],
         ));
