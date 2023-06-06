@@ -1,46 +1,10 @@
-// import 'package:flutter/material.dart';
-//
-// const String _name = "Name";
-//
-// class ChatMessage extends StatelessWidget {
-//   ChatMessage({this.text, this.icon});
-//   final String? text;
-//   final Icon? icon;
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       margin: const EdgeInsets.symmetric(vertical: 10.0),
-//       child: Row(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: <Widget>[
-//           Container(
-//             margin: const EdgeInsets.only(right: 16.0),
-//             child: CircleAvatar(child: Text(_name[0])),
-//           ),
-//           Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: <Widget>[
-//               if (icon!=null) icon!,
-//               Text(_name, style: Theme.of(context).textTheme.bodyText1),
-//               Container(
-//                 margin: const EdgeInsets.only(top: 5.0),
-//                 child: Text(text!),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-
-import 'ChatBubble.dart';
 import 'package:flutter/material.dart';
+import 'ChatBubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 class Messages extends StatefulWidget {
   const Messages({Key? key}) : super(key: key);
@@ -52,15 +16,14 @@ class Messages extends StatefulWidget {
 class _MessagesState extends State<Messages> {
   late SharedPreferences _preferences;
   final _chatController = TextEditingController();
-
   late DatabaseReference _chatRef;
-  //final _chatController = TextEditingController();
+  late CollectionReference _chatCollection;
 
   @override
   void initState() {
     super.initState();
-    //_userEnterMessage = ''; // 초기화 코드를 initState에서 수행
     _chatRef = FirebaseDatabase.instance.reference().child('chat');
+    _chatCollection = FirebaseFirestore.instance.collection('chat');
     _initSharedPreferences();
   }
 
@@ -70,16 +33,24 @@ class _MessagesState extends State<Messages> {
     super.dispose();
   }
 
-  void _sendMessage() {
-    final user = FirebaseAuth.instance.currentUser;
+  void _sendMessage() async {
+    final user = FirebaseAuth.instance.currentUser!.uid;
     final chatData = _chatController.text.trim();
-    FirebaseFirestore.instance.collection('chat').add({
-      'text' : chatData,
-      'time' : Timestamp.now(),
-      'userID' : user!.uid,
-    });
-    _chatController.clear();
+    final timestamp = Timestamp.now();
+    var userName;
+    await FirebaseFirestore.instance.collection('UserData').doc(user)
+        .get()
+        .then((DocumentSnapshot ds) => userName = ds.get('nickName'));
 
+    _chatCollection.add({
+      'text': chatData,
+      'time': timestamp,
+      'userID': user,
+      'nickname': userName,
+
+    });
+
+    _chatController.clear();
   }
 
   Future<void> _initSharedPreferences() async {
@@ -87,17 +58,11 @@ class _MessagesState extends State<Messages> {
     setState(() {}); // _preferences를 초기화한 후에 다시 build 되도록 setState 호출
   }
 
-  Future<void> _saveChatData(String chatData) async {
-    final savedChatData = _preferences.getStringList('chat_data') ?? [];
-    savedChatData.add(chatData);
-    await _preferences.setStringList('chat_data', savedChatData);
-  }
 
   List<String> _getSavedChatData() {
     return _preferences.getStringList('chat_data') ?? [];
   }
 
-  DatabaseReference chatRef = FirebaseDatabase.instance.reference().child('chat');
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +81,7 @@ class _MessagesState extends State<Messages> {
       }
     });
 
-
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>?>(
       stream: FirebaseFirestore.instance
           .collection('chat')
           .orderBy('time', descending: true)
@@ -129,43 +93,114 @@ class _MessagesState extends State<Messages> {
           );
         }
         final chatDocs = snapshot.data!.docs;
+
         void handleData(QuerySnapshot<Map<String, dynamic>> snapshot) {
           final chatDocs = snapshot.docs;
           // 변경된 데이터 가져오기
           final newData = chatDocs.map((doc) => doc.data()).toList();
           print('New Data: $newData');
         }
+
         // 초기 데이터 처리
         handleData(snapshot.data!);
 
+        List<Widget> chatWidgets = [];
+        DateTime? currentDate;
+
+        for (int i = (chatDocs.length - 1); i >= 0; i--) {
+          final chat = chatDocs[i].data() as Map<String, dynamic>;
+          final isMe = chat['userID'] == user!.uid;
+          final timestamp = chat['time'] as Timestamp;
+          final dateTime = timestamp.toDate();
+          final year = dateTime.year;
+          final month = dateTime.month;
+          final day = dateTime.day;
+          //final weekday = dateTime.weekday;
+
+          // 날짜가 바뀌면 날짜를 표시
+          if (currentDate == null || currentDate.year != year ||
+              currentDate.month != month || currentDate.day != day) {
+            currentDate = DateTime(year, month, day);
+            final formattedDate = DateFormat('yyyy-MM-dd E').format(
+                currentDate);
+            chatWidgets.add(
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(
+                      formattedDate,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+          final formattedTime = DateFormat.jm().format(dateTime);
+          final userID = chat['userID'];
+          final userName = chat['nickname'];
+
+          chatWidgets.add(
+            Row(
+              mainAxisAlignment: isMe
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
+              children: [
+                if (isMe)
+                  Text(
+                    formattedTime,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ChatBubble(chat['text'], isMe, userName ?? 'Unknown'),
+                if (!isMe)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        formattedTime,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          );
+        }
         return Column(
           children: [
             Expanded(
-              child: ListView.builder(
+              child: ListView(
                 reverse: true,
-                itemCount: chatDocs.length,
-                itemBuilder: (context, index) {
-                  final chat = chatDocs[index].data() as Map<String, dynamic>;
-                  final isMe = chat['userID'] == user!.uid;
-                  //final userName = chatDocs[index]['userName'];
-                  return ChatBubble(
-                    chat['text'],
-                    isMe,
-                    //userName,
-                  );
-                },
+                children: chatWidgets.reversed.toList(),
               ),
             ),
             Container(
               width: 382,
               height: 40,
+              margin: EdgeInsets.only(bottom: 16.0), // 상단 여백 조정
               child: TextField(
                 controller: _chatController,
                 onSubmitted: (value) {
                   _sendMessage();
                 },
                 decoration: InputDecoration(
-                  hintText: 'Enter your message',
+                  hintText: ' Enter your message',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(9.0),
                   ),
