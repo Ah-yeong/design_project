@@ -1,9 +1,11 @@
 import 'package:design_project/Boards/List/BoardHomePage.dart';
 import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:design_project/Chat/ChatScreen.dart';
-import 'package:design_project/Chat/ChatRoom.dart';
+import 'package:design_project/Chat/ChatList.dart';
+import 'package:design_project/Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 import 'package:design_project/resources.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -18,6 +20,7 @@ class BoardPageMainHub extends StatefulWidget {
 }
 
 final PostPageManager postManager = PostPageManager();
+final EntityProfiles myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
 
 class _BoardPageMainHub extends State<BoardPageMainHub> {
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
@@ -110,6 +113,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
   @override
   void initState() {
     super.initState();
+    myProfileEntity.loadProfile();
     _pageController = PageController();
   }
 }
