@@ -1,4 +1,4 @@
-import 'package:design_project/Boards/BoardHomePage.dart';
+import 'package:design_project/Boards/List/BoardHomePage.dart';
 import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:design_project/Chat/ChatScreen.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
@@ -6,8 +6,8 @@ import 'package:design_project/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../Entity/EntityPostPageManager.dart';
-import '../PageAlert.dart';
+import '../../Entity/EntityPostPageManager.dart';
+import '../../PageAlert.dart';
 
 class BoardPageMainHub extends StatefulWidget {
   const BoardPageMainHub({super.key});

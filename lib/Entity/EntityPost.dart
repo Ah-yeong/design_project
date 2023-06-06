@@ -16,16 +16,20 @@ class EntityPost {
   var _maxAge;
   var _time;
   var _llName;
+  double _distance = 0.0;
+
+  double get distance => _distance;
+  set distance(double value) => _distance = value;
+
+  set llName(value) => _llName = value;
+
   late String _upTime;
   var viewCount;
   bool _isLoaded = false;
 
-  EntityPost(int this._postId) {
-    print("포스트 연결");
-  }
+  EntityPost(int this._postId) {}
 
   Future<void> loadPost() async {
-    print("포스트 로드");
     _isLoaded = true;
     await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((ds) {
       _writerId = ds.get("writer_id");
@@ -106,15 +110,14 @@ String getTimeBefore(String upTime) {
 
 Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime, int minAge, int maxAge, String writerNick) async {
   try {
-    int? new_post_id, post_count;
+    int? new_post_id;
     DocumentReference<Map<String, dynamic>> ref =
     await FirebaseFirestore.instance.collection("Post").doc("postData");
     await ref.get().then((DocumentSnapshot ds) {
       new_post_id = ds.get("last_id") + 1;
-      post_count = ds.get("post_count");
       if (new_post_id == -1) return false; // 업로드 실패
     });
-    await ref.update({"last_id" : new_post_id, "post_count" : post_count! + 1});
+    await ref.update({"last_id" : new_post_id});
     String uuid = await FirebaseAuth.instance.currentUser!.uid;
     await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
       "post_id" : new_post_id,
