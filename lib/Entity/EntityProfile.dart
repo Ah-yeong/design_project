@@ -49,7 +49,7 @@ class EntityProfiles {
       textInfo = ds.get("textInfo");
       mannerGroup = ds.get("mannerGroup");
       post = ds.get("post");
-      group = ds.get("group");
+      // group = ds.get("group");
       print(post);
     });
     isLoading = false;

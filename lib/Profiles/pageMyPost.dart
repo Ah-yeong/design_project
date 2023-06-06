@@ -9,21 +9,21 @@ import 'package:design_project/Profiles/PageProfile.dart';
 
 import '../resources.dart';
 
-class PageMyGroup extends StatefulWidget {
+class PageMyPost extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _PageMyGroup();
+  State<StatefulWidget> createState() => _PageMyPost();
 }
 
-class _PageMyGroup extends State<PageMyGroup> {
+class _PageMyPost extends State<PageMyPost> {
   EntityProfiles? myProfile;
-  List<EntityPost> myGroupList = List.empty(growable: true);
+  List<EntityPost> myPostList = List.empty(growable: true);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "내가 속한 모임",
+          "내가 작성한 글",
           style: TextStyle(color: Colors.black, fontSize: 16),
         ),
         leading: GestureDetector(
@@ -43,34 +43,56 @@ class _PageMyGroup extends State<PageMyGroup> {
       ),
       backgroundColor: Colors.white,
       body:
-      // body: profileEntity!.isLoading ? Center(
-      //     child: SizedBox(
-      //         height: 65,
-      //         width: 65,
-      //         child: CircularProgressIndicator(
-      //           strokeWidth: 4,
-      //           color: colorSuccess,
-      //         ))) :
       SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
-          children: myGroupList.map((group) {
-            return Card(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => BoardPostPage(postId: group.getPostId()),
-                  ));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(7),
-                  child: _buildFriendRow(group),
-                ),
-              ),
-            );
-          }).toList(),
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: myPostList.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    Card(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => BoardPostPage(postId: myPostList[index].getPostId()),
+                          ));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: _buildFriendRow(myPostList[index]),
+                        ),
+                      ),
+                    ),
+                    // 신청자 리스트 출력
+                    // Column(
+                    //   children: myPostList[index]!.User.map((group) {
+                    //     return Card(
+                    //       child: GestureDetector(
+                    //         onTap: () {
+                    //           Navigator.of(context).push(MaterialPageRoute(
+                    //             builder: (context) => BoardPostPage(postId: group.getPostId()),
+                    //           ));
+                    //         },
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(7),
+                    //           child: _buildModalSheet(group),
+                    //         ),
+                    //       ),
+                    //     );
+                    //   }).toList(),
+                    // ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
+
     );
   }
 
@@ -79,10 +101,10 @@ class _PageMyGroup extends State<PageMyGroup> {
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfile!.loadProfile().then((n) {
-      for (var groupId in myProfile!.group) {
-        EntityPost myGroup = EntityPost(groupId);
-        myGroup.loadPost().then((value) {
-          myGroupList.add(myGroup);
+      for (var postId in myProfile!.post) {
+        EntityPost myPost = EntityPost(postId);
+        myPost.loadPost().then((value) {
+          myPostList.add(myPost);
           setState(() {});
         });
       }
@@ -171,4 +193,18 @@ class _PageMyGroup extends State<PageMyGroup> {
       ],
     );
   }
+
+  // Widget _buildModalSheet(BuildContext context, int postId) {
+  //   return SingleChildScrollView(
+  //     child: Container(
+  //         margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+  //         decoration: BoxDecoration(
+  //           color: Colors.white,
+  //           borderRadius: BorderRadius.circular(6),
+  //         ),
+  //         child: Padding(
+  //             padding: EdgeInsets.all(13),
+  //             child: buildPostMember(profileEntity!, context))),
+  //   );
+  // }
 }
