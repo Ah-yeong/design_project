@@ -73,7 +73,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                   child: FloatingActionButton.small(
                     heroTag: "fab1",
                     backgroundColor: const Color(0xDD00CC88),
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardWritingPage()));
                     },
                     shape: RoundedRectangleBorder(
