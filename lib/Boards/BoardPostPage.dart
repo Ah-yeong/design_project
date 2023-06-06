@@ -107,48 +107,59 @@ class _BoardPostPage extends State<BoardPostPage> {
                       ]),
                 ),
               )),
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 18),
-                    child: InkWell(
-                        onTap: () {},
-                        child: SizedBox(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width - 40,
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: colorSuccess,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      offset: Offset(1, 1),
-                                      blurRadius: 4.5)
-                                ]),
-                            child: Center(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.emoji_people,
-                                  color: Colors.white,
+                Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 18),
+                      child: InkWell(
+                          onTap: () {},
+                          child: SizedBox(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width - 40,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (isSameId){
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          _buildModalSheet(context, postEntity!.getPostId()),
+                                      backgroundColor: Colors.transparent);
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: colorSuccess,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.grey,
+                                          offset: Offset(1, 1),
+                                          blurRadius: 4.5)
+                                    ]),
+                                child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.emoji_people,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          isSameId ? "신청 현황 보기" : "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
+                                          "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    )
                                 ),
-                                Text(
-                                  "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
-                                      "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-
-                              ],
-                            )),
-                          ),
-                        )),
+                              ),
+                            )
+                          )),
+                    ),
                   ),
                 ),
-              ),
             ]));
   }
 
@@ -187,6 +198,43 @@ class _BoardPostPage extends State<BoardPostPage> {
         isSameId = true;
     }
   }
+
+  Widget _buildModalSheet(BuildContext context, int postId) {
+    return SingleChildScrollView(
+      child: Container(
+              margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Padding(
+                  padding: EdgeInsets.all(13),
+                  child: buildPostMember(profileEntity!, context))),
+    );
+  }
+}
+
+Column buildPostMember(EntityProfiles profiles, BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      drawProfile(profiles, context), // 프로필
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawProfile(profiles, context),
+    ],
+  );
 }
 
 Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext context) {
