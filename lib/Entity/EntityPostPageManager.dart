@@ -55,6 +55,8 @@ class PostPageManager {
       _loadedCount++;
       _lastLoaded = int.parse(ds.id);
     }
+    Comparator<EntityPost> entityComparator = (a, b) => a.getPostId().compareTo(b.getPostId());
+    list.sort(entityComparator);
     isLoading = false;
     return;
   }

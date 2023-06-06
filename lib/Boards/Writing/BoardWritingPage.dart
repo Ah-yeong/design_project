@@ -478,10 +478,13 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                             bool success = false;
                             _tryUploadPost().then((value) {
                               success = value;
-                              setState(() => _isUploading = false);
-                              showAlert(success ? "글 작성 완료!" : "글 작성에 실패했습니다!", context, success ? colorSuccess : colorError);
-                              postManager.reloadPages("");
-                              if(success) Navigator.pop(context);
+                              if(success) {
+                                postManager.reloadPages("").then((value) {
+                                  setState(() => _isUploading = false);
+                                  showAlert(success ? "글 작성 완료!" : "글 작성에 실패했습니다!", context, success ? colorSuccess : colorError);
+                                  Navigator.pop(context);
+                                });
+                              }
                             });
                           },
                           child: SizedBox(
