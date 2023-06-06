@@ -1,4 +1,5 @@
 import 'package:design_project/Profiles/pageMyGroup.dart';
+import 'package:design_project/Profiles/pageMyPost.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../Boards/BoardPostPage.dart';
@@ -111,64 +112,36 @@ class _PageProfileState extends State<PageProfile> {
                   child: mannerWidget
               ),
               Divider(thickness: 1, height: 1),
-              Container(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      '내가 작성한 글',
-                      style: TextStyle(
-                        fontSize: 16,
-                        //fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => PageMyPost(),
+                  ));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '내가 작성한 글',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 17,
+                          ),
+                        ],
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Column(
-                      children: myPostList.map((post) {
-                        return Card(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => BoardPostPage(postId: post.getPostId()),
-                              ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(7),
-                              child: _buildFriendRow(post),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                )
-              ),
-              Divider(thickness: 1, height: 1),
-              Container(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '내가 작성한 게시글',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: colorGrey,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 17,
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Divider(thickness: 1, height: 1),
@@ -191,7 +164,6 @@ class _PageProfileState extends State<PageProfile> {
                               '내가 속한 모임',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: colorGrey,
                               ),
                             ),
                           ),
@@ -211,14 +183,6 @@ class _PageProfileState extends State<PageProfile> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      // Text(
-                      //     '내 정보',
-                      //     style: TextStyle(
-                      //       fontSize: 16,
-                      //       fontWeight: FontWeight.bold,
-                      //     )
-                      // ),
-                      // SizedBox(height: 10),
                       Container(
                         child: Column(
                           children: [
