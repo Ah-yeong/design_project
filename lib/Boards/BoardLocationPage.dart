@@ -188,7 +188,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
               ),
               child: Padding(
                   padding: EdgeInsets.all(13),
-                  child: buildPostContext(postEntity, profileEntity!))),
+                  child: buildPostContext(postEntity, profileEntity!, context))),
         ],
       ),
     );

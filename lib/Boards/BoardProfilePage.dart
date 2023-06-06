@@ -126,7 +126,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
               ),
               // Divider(thickness: 1, height: 1),
               Container(
-                padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 5),
                 // padding: EdgeInsets.all(20),
                 child: Container(
                           // padding:  EdgeInsets.all(15),
@@ -145,7 +145,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                     '취미',
                                     style: TextStyle(
                                       fontSize: 14,
-                                        //fontWeight: FontWeight.bold
+                                        fontWeight: FontWeight.bold
                                     ),
                                   ),
                                   Expanded(
@@ -162,19 +162,19 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                 ]
                               ),
                               SizedBox(
-                                height: 7,
+                                height: 14,
                               ),
-                              Divider(thickness: 1, height: 1),
-                              SizedBox(
-                                height: 7,
-                              ),
+                              // Divider(thickness: 1, height: 1),
+                              // SizedBox(
+                              //   height: 7,
+                              // ),
                               Row(
                                   children: [
                                     Text(
                                       'MBTI',
                                       style: TextStyle(
                                         fontSize: 14,
-                                          //fontWeight:FontWeight.bold
+                                          fontWeight:FontWeight.bold
                                       ),
                                     ),
                                     Expanded(
@@ -189,19 +189,19 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                   ]
                               ),
                               SizedBox(
-                                height: 7,
+                                height: 14,
                               ),
-                              Divider(thickness: 1, height: 1),
-                              SizedBox(
-                                height: 7,
-                              ),
+                              // Divider(thickness: 1, height: 1),
+                              // SizedBox(
+                              //   height: 7,
+                              // ),
                               Row(
                                   children: [
                                     Text(
                                       '통학여부',
                                       style: TextStyle(
                                           fontSize: 14,
-                                          // fontWeight: FontWeight.bold
+                                          fontWeight: FontWeight.bold
                                       ),
                                     ),
                                     Expanded(
@@ -216,12 +216,12 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                   ]
                               ),
                               SizedBox(
-                                height: 7,
+                                height: 14,
                               ),
-                              Divider(thickness: 1, height: 1),
-                              SizedBox(
-                                height: 7,
-                              ),
+                              // Divider(thickness: 1, height: 1),
+                              // SizedBox(
+                              //   height: 7,
+                              // ),
                             ],
                           ),
                           // child: Row(

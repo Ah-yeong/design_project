@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:design_project/resources.dart';
 import 'PageProfileEdit.dart';
 import 'package:design_project/Boards/BoardPostListPage.dart';
+import 'package:design_project/Boards/BoardPostPage.dart';
+
 
 class PageProfile extends StatefulWidget {
   @override
@@ -136,10 +138,15 @@ class _PageProfileState extends State<PageProfile> {
                       //   ],
                       // )
                       Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: _buildFriendRow(myPost!),
-                        ),
+                        child: GestureDetector(
+                            onTap: (){
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: myPost!.getPostId())));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(7),
+                              child: _buildFriendRow(myPost!),
+                            )
+                        )
                       ),
                     ]
                 ),
@@ -344,6 +351,7 @@ class _PageProfileState extends State<PageProfile> {
 
   @override
   void initState() {
+    //setState(() {});
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfile!.loadProfile().then((n) {
