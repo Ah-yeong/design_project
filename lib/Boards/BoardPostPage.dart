@@ -219,7 +219,7 @@ class _BoardPostPage extends State<BoardPostPage> {
 }
 
 Column buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
-  List<dynamic> userData= post.getUser();
+  // List<dynamic> userData= post.getUser();
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
