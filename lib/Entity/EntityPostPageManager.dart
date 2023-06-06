@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-
 import 'EntityPost.dart';
 
 class PostPageManager {
@@ -13,57 +11,52 @@ class PostPageManager {
 
   PostPageManager() {}
 
-  void continuePage() {
+  Future<void> continuePage() async {
     isLoading = true;
     _maxCount += 100;
-    loadPages().then((value) => isLoading = false);
+    await loadPages("").then((value) => isLoading = false);
   }
 
-  Future<void> reloadPages() async {
+  Future<void> reloadPages(String search_value) async {
     isLoading = true;
     _loadedCount = 0;
     _lastLoaded = 0;
     _scrollCount = 0;
     _maxCount = 100;
     list.clear();
-    await loadPages().then((value) => isLoading = false);
+    await loadPages(search_value).then((value) => isLoading = false);
   }
 
-  Future<void> loadPages() async {
-    int post_count = 0;
-    DocumentReference<Map<String, dynamic>> ref =
-        await FirebaseFirestore.instance.collection("Post").doc("postData");
-    await ref.get().then((DocumentSnapshot ds) {
-      post_count = ds.get("post_count");
-    });
+  Future<void> loadPages(String search_value) async {
     var qs = await FirebaseFirestore.instance.collection("Post").get();
+    // FirebaseFirestore.instance.collection("Post").orderBy("post_id", descending: false).get(); => 정렬로 가져오기
+    // descending : false 시 post_id에 대하여 내림차순 정렬 로드
+
     for(DocumentSnapshot ds in qs.docs) {
-      if(post_count <= _loadedCount || _maxCount <= _loadedCount) {
+      // 한 번에 로드될 게시물의 개수 넘어가면 로드 정지
+      if(_maxCount <= _loadedCount) {
         isLoading = false;
         return;
       }
+
+      // postData값 건너 뜀
       if (ds.id == "postData") continue;
-      if(int.parse(ds.id) <= _lastLoaded) continue;
-      EntityPost pg = EntityPost(int.parse(ds.id));
-      await pg.loadPost();
-      list.add(pg);
+
+      // FirebaseQuery에서 where문 wildcard를 지원하지 않기 때문에 모든 게시물을 불러와서 직접 걸러줘야 함.
+      // 검색어에 대한 제목 + 내용 검색.
+      if (search_value != "") {
+        bool isContainValue = ds.get("head").toString().contains(search_value) || ds.get("body").toString().contains(search_value);
+        if (!isContainValue) continue;
+      }
+
+      EntityPost post = EntityPost(int.parse(ds.id));
+      await post.loadPost();
+      list.add(post);
       _loadedCount++;
       _lastLoaded = int.parse(ds.id);
     }
     isLoading = false;
     return;
-    // forEach((doc) async {
-    //   if(doc.id != "postData" && _maxCount > _loadedCount && int.parse(doc.id) > _lastLoaded) {
-    //     if(int.parse(doc.id) > _lastLoaded) {
-    //       EntityPostGroup pg = EntityPostGroup(doc.id);
-    //       await pg.loadPost();
-    //       list.add(pg);
-    //       _loadedCount++;
-    //       _lastLoaded = int.parse(doc.id);
-    //       print("로드완료, $_loadedCount");
-    //     }
-    //   }
-    // });
   }
 
   int get maxCount => _maxCount;

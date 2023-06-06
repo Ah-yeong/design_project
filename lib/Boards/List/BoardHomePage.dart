@@ -1,10 +1,11 @@
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../Settings/PageSettings.dart';
+import '../../Settings/PageSettings.dart';
 import 'BoardPostListPage.dart';
 import 'BoardLocationPage.dart';
-import 'BoardSearchPage.dart';
+import '../Search/BoardSearchPage.dart';
 
 class BoardHomePage extends StatefulWidget {
   const BoardHomePage({super.key});
@@ -53,8 +54,8 @@ class _BoardHomePage extends State<BoardHomePage>
                                     width: 40,
                                     height: 50,
                                     child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardSearchPage()));
+                                        onTap: () async {
+                                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardSearchPage()));
                                         },
                                         child: const Icon(Icons.search_rounded)),
                                   ),

@@ -5,12 +5,15 @@ class PageAlert extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          elevation: 1,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {}
+        elevation: 1,
+        title: Text(
+          '알림목록',
+          style: TextStyle(
+              fontSize: 18,
+              color: Colors.black
           ),
-          title: Text('알림 목록')
+        ),
+        backgroundColor: Colors.white,
       ),
       body: ListView.builder(
         itemCount: 10, // 알림 개수

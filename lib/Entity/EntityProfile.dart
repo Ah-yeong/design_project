@@ -8,20 +8,20 @@ class EntityProfiles {
   var name;
   var age;
   var major; // 학과
-  late String profileImagePath;
+  var profileImagePath;
   var mannerGroup; // 소모임 매너지수
-
   var nickname;
-  List<String>? hobby;
+  var hobby;
   var mbti;
+  var mbtiIndex;
   var commute;
   var commuteIndex;
   var birth;
   var gender;
   var textInfo;
   var post;
-
-  bool isLoaded = false;
+  bool isLoading = true;
+  // bool isLoaded = false;
 
   EntityProfiles(var this.profileId) {
     print("프로필 연결됨");
@@ -33,13 +33,15 @@ class EntityProfiles {
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
       birth = ds.get("birth");
+      age = 23;
+      profileImagePath = "assets/images/userImage.png";
       commute = ds.get("commute");
       commuteIndex = ds.get("commuteIndex");
       // gender = ds.get("gender");
-      // hobby = ds.get("hobby");
+      hobby = ds.get("hobby");
       // _hobbyIndex = ds.get("hobbyIndex");
       mbti = ds.get("mbti");
-      //_mbtiIndex = ds.get("mbtiIndex");
+      mbtiIndex = ds.get("mbtiIndex");
       name = ds.get("nickName");
       major = "소프트웨어학과";
       textInfo = ds.get("textInfo");
@@ -47,7 +49,7 @@ class EntityProfiles {
       post = ds.get("post");
       print(post);
     });
-    isLoaded = true;
+    isLoading = false;
     print("프로필 정보 불러오기 성공");
   }
 
