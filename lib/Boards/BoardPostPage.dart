@@ -12,7 +12,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 class BoardPostPage extends StatefulWidget {
   final int postId;
   const BoardPostPage({super.key, required this.postId});
-
   @override
   State<StatefulWidget> createState() => _BoardPostPage();
 }
@@ -37,6 +36,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   bool postTimeIsLoaded = false;
   var postTime;
   Size? mediaSize;
+  String userID = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +113,10 @@ class _BoardPostPage extends State<BoardPostPage> {
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 18),
                     child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          postEntity!.applyToPost(userID);
+                          print("클릭");
+                        },
                         child: SizedBox(
                           height: 50,
                           width: MediaQuery.of(context).size.width - 40,
