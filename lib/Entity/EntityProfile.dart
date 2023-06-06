@@ -1,7 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/EntityLatLng.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EntityProfiles {
   var profileId;
@@ -61,8 +58,6 @@ class EntityProfiles {
     major = "소프트웨어학과";
     profileImagePath = "assets/images/userImage.png";
     mannerGroup = 80;
-
-    nickname = "테스트";
     hobby = ["술", "영화"];
     birth = "1999-10-19";
     commute = "통학";
