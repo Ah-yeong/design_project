@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:design_project/Boards/List/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -12,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class BoardPostPage extends StatefulWidget {
   final int postId;
-
   const BoardPostPage({super.key, required this.postId});
 
   @override
@@ -20,8 +18,9 @@ class BoardPostPage extends StatefulWidget {
 }
 
 class _BoardPostPage extends State<BoardPostPage> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+
+  User? loggedUser; // loggedUser 변수 선언
 
   final List<Marker> _markers = [];
   bool isSameId = false;
@@ -179,6 +178,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     });
     //postEntity!.makeTestingPost();
   }
+
 
   loadPostTime() {
     String ptime = getTimeBefore(postEntity!.getUpTime());

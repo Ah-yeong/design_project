@@ -86,6 +86,9 @@ class EntityPost {
     DateTime upTime = DateTime.parse(_upTime);
     return "${upTime.month}월 ${upTime.day}일${hour ? " ${upTime.hour}시" : ""} ${minute ? " ${upTime.minute}분" : ""}";
   }
+
+
+
 }
 String getTimeBefore(String upTime) {
   DateTime currentTime = DateTime.now();
