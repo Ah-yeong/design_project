@@ -1,5 +1,5 @@
-import 'package:design_project/Boards/BoardLocationPage.dart';
-import 'package:design_project/Boards/BoardMain.dart';
+import 'package:design_project/Boards/List/BoardLocationPage.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
