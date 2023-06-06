@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../Chat/ChatScreen.dart';
 
 class EntityPost {
   int _postId;
@@ -26,8 +28,19 @@ class EntityPost {
   late String _upTime;
   var viewCount;
   bool _isLoaded = false;
+  var user;
 
   EntityPost(int this._postId) {}
+
+  Future<void> applyToPost(String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
+        "User": FieldValue.arrayUnion([{"id": userId, "status": 0}])
+      });
+    } catch (e) {
+      print("신청 실패: $e");
+    }
+  }
 
   Future<void> loadPost() async {
     _isLoaded = true;
@@ -44,6 +57,7 @@ class EntityPost {
       _time = ds.get("time");
       _upTime = ds.get("upTime");
       viewCount = ds.get("viewCount");
+      //user = ds.get("User");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
   }
@@ -80,6 +94,7 @@ class EntityPost {
   int getMinAge() => _minAge;
   int getMaxAge() => _maxAge;
   bool isLoad() => _isLoaded;
+  List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
     if (_upTime.isEmpty) return "";
@@ -122,7 +137,8 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
     });
     await ref.update({"last_id" : new_post_id});
     String uuid = await FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
+    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString())
+        .set({
       "post_id" : new_post_id,
       "writer_id" : uuid,
       "head" : head,
@@ -140,6 +156,7 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "upTime" : upTime,
       "viewCount" : 1
     });
+    await addChatDataList(uuid, true, postId: new_post_id);
     return true;
   } catch (e) {
     return false;

@@ -22,8 +22,12 @@ class GoogleMapPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("현재 모임 상황"),
-        backgroundColor: Color(0xFF6ACA89),
+        elevation: 1,
+        title: Text('위치 공유', style: TextStyle(color: Colors.black, fontSize: 19),),
+        backgroundColor: Colors.white,
+        leading: BackButton(
+          color: Colors.black,
+        ),
       ),
       body: Column(
         children: [

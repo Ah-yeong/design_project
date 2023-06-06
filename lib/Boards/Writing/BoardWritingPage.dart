@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
-
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../Entity/EntityLatLng.dart';
+import '../../Entity/EntityProfile.dart';
 import '../../resources.dart';
 
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -122,6 +123,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
   LLName? _llName;
   bool _isUploading = false;
   bool _isIgnoreAge = false;
+
+  EntityProfiles? profileEntity;
 
   final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
 
@@ -735,6 +738,10 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     successUpload = await addPost(_head!.text, _body!.text, _selectedGender!, _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
         "${dateFormatter.format(_selectedDate)} ${_selectedTime.to24hours()}:00",
         _llName!, "${dateFormatter.format(DateTime.now())} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}", _minAge, _maxAge, "Example");
+    profileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
+    successUpload = await profileEntity!.addPostId();
+    print('게시물 업로드 완료 !!');
+
     return successUpload;
   }
 

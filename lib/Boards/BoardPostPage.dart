@@ -12,7 +12,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 class BoardPostPage extends StatefulWidget {
   final int postId;
   const BoardPostPage({super.key, required this.postId});
-
   @override
   State<StatefulWidget> createState() => _BoardPostPage();
 }
@@ -37,6 +36,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   bool postTimeIsLoaded = false;
   var postTime;
   Size? mediaSize;
+  String userID = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -106,48 +106,60 @@ class _BoardPostPage extends State<BoardPostPage> {
                       ]),
                 ),
               )),
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 18),
-                    child: InkWell(
-                        onTap: () {},
-                        child: SizedBox(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width - 40,
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: colorSuccess,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      offset: Offset(1, 1),
-                                      blurRadius: 4.5)
-                                ]),
-                            child: Center(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.emoji_people,
-                                  color: Colors.white,
+                Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child:
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 18),
+                        child: InkWell(
+                            onTap: () {
+                              if(isSameId){
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        _buildModalSheet(context, postEntity!.getPostId()),
+                                    backgroundColor: Colors.transparent);
+                              } else{
+                                postEntity!.applyToPost(userID);
+                                showAlert("신청이 완료되었습니다!", context, Colors.grey);
+                              }
+                            },
+                          child: SizedBox(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width - 40,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: colorSuccess,
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.grey,
+                                          offset: Offset(1, 1),
+                                          blurRadius: 4.5)
+                                    ]),
+                                child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.emoji_people,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          isSameId ? "신청 현황 보기" : "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
+                                          "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    )
                                 ),
-                                Text(
-                                  "  신청하기 - ${postEntity!.getPostMaxPerson() == -1 ? "현재 ${postEntity!.getPostCurrentPerson()}명" :
-                                      "(${postEntity!.getPostCurrentPerson()} / ${postEntity!.getPostMaxPerson()})"}",
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-
-                              ],
-                            )),
-                          ),
-                        )),
+                              ),
+                          )),
+                    ),
                   ),
                 ),
-              ),
             ]));
   }
 
@@ -187,6 +199,57 @@ class _BoardPostPage extends State<BoardPostPage> {
         isSameId = true;
     }
   }
+
+  Widget _buildModalSheet(BuildContext context, int postId) {
+    return SingleChildScrollView(
+      child: Container(
+              margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Padding(
+                  padding: EdgeInsets.all(13),
+                  child: buildPostMember(profileEntity!, context))),
+    );
+  }
+}
+
+Column buildPostMember(EntityProfiles profiles, BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      drawProfile(profiles, context), // 프로필
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
+    ],
+  );
 }
 
 Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext context) {
@@ -354,6 +417,75 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
                       backgroundColor: color.withOpacity(0.3),
                     ),
                   ))
+            ],
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
+  final color = getColorForScore(profileEntity!.mannerGroup);
+  return GestureDetector(
+    onTap: () {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity!.profileId)));
+      print(profileEntity!.profileId);
+    },
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Image.asset(
+              profileEntity!.profileImagePath,
+              width: 45,
+              height: 45,
+            ),
+            const Padding(padding: EdgeInsets.only(left: 10)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${profileEntity!.name}",
+                  style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                const Padding(padding: EdgeInsets.only(top: 4)),
+                Text(
+                  "${profileEntity!.major}, ${profileEntity!.age}세",
+                  style:
+                  const TextStyle(color: Color(0xFF777777), fontSize: 13),
+                )
+              ],
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF6ACA89),
+                  ),
+                  child: Text('수락')
+              ),
+              SizedBox(width: 4,),
+              ElevatedButton(
+                  onPressed: () {
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF6ACA89),
+                  ),
+                  child: Text('거절')
+              )
             ],
           ),
         )
