@@ -830,7 +830,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'commuteIndex' : _commuteIndex,
         'commute' : commute[_commuteIndex],
         'mannerGroup': 50,
-        'post':1,
+        // 'post':1,
         'profileImagePath': _image
       });
       print('Profile data updated successfully.');
