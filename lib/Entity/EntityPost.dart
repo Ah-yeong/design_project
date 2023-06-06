@@ -26,6 +26,7 @@ class EntityPost {
   late String _upTime;
   var viewCount;
   bool _isLoaded = false;
+  var user;
 
   EntityPost(int this._postId) {}
 
@@ -54,6 +55,7 @@ class EntityPost {
       _time = ds.get("time");
       _upTime = ds.get("upTime");
       viewCount = ds.get("viewCount");
+      user = ds.get("User");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
   }
@@ -90,6 +92,7 @@ class EntityPost {
   int getMinAge() => _minAge;
   int getMaxAge() => _maxAge;
   bool isLoad() => _isLoaded;
+  List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
     if (_upTime.isEmpty) return "";

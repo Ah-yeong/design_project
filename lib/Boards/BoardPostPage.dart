@@ -120,7 +120,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                 builder: (BuildContext context) {
                                   return Container(
                                     height: 350, // 원하는 높이로 설정
-                                    child: _buildModalSheet(context, postEntity!.getPostId()),
+                                    child: _buildModalSheet(context),
                                   );
                                 },
                                 backgroundColor: Colors.transparent,
@@ -203,7 +203,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     }
   }
 
-  Widget _buildModalSheet(BuildContext context, int postId) {
+  Widget _buildModalSheet(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
@@ -213,15 +213,40 @@ class _BoardPostPage extends State<BoardPostPage> {
               ),
               child: Padding(
                   padding: EdgeInsets.all(13),
-                  child: buildPostMember(profileEntity!, context))),
+                  child: buildPostMember(profileEntity!, postEntity!, context))),
     );
   }
 }
 
-Column buildPostMember(EntityProfiles profiles, BuildContext context) {
+Column buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
+  List<dynamic> userData= post.getUser();
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      // ListView.builder(
+      //   shrinkWrap: true,
+      //   physics: NeverScrollableScrollPhysics(),
+      //   itemCount: userData!.length,
+      //   itemBuilder: (context, index) {
+      //     return Column(
+      //       children: [
+      //         Card(
+      //           child: GestureDetector(
+      //             onTap: () {
+      //               Navigator.of(context).push(MaterialPageRoute(
+      //                 builder: (context) => BoardPostPage(postId: userData[index]['id']!),
+      //               ));
+      //             },
+      //             child: Padding(
+      //               padding: const EdgeInsets.all(7),
+      //               child: drawApplyProfile(EntityProfiles(userData[index]['id'])!, context),
+      //             ),
+      //           ),
+      //         ),
+      //       ]
+      //     );
+      //   }
+      // )
       drawApplyProfile(profiles, context), // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
@@ -429,11 +454,11 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
 }
 
 Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
-  final color = getColorForScore(profileEntity.mannerGroup);
+  final color = getColorForScore(profileEntity!.mannerGroup);
   return GestureDetector(
     onTap: () {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
-      print(profileEntity.profileId);
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity!.profileId)));
+      print(profileEntity!.profileId);
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -441,7 +466,7 @@ Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
         Row(
           children: [
             Image.asset(
-              profileEntity.profileImagePath,
+              profileEntity!.profileImagePath,
               width: 45,
               height: 45,
             ),
@@ -450,7 +475,7 @@ Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${profileEntity.name}",
+                  "${profileEntity!.name}",
                   style: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -458,7 +483,7 @@ Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
                 ),
                 const Padding(padding: EdgeInsets.only(top: 4)),
                 Text(
-                  "${profileEntity.major}, ${profileEntity.age}세",
+                  "${profileEntity!.major}, ${profileEntity!.age}세",
                   style:
                   const TextStyle(color: Color(0xFF777777), fontSize: 13),
                 )
