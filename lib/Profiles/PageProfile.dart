@@ -154,6 +154,33 @@ class _PageProfileState extends State<PageProfile> {
               Container(
                 padding: EdgeInsets.all(15),
                 child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '내가 작성한 게시글',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorGrey,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 17,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Divider(thickness: 1, height: 1),
+              Container(
+                padding: EdgeInsets.all(15),
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       // Text(
