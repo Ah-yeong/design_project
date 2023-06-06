@@ -114,20 +114,18 @@ class _BoardPostPage extends State<BoardPostPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 18),
                       child: InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            if (isSameId){
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      _buildModalSheet(context, postEntity!.getPostId()),
+                                  backgroundColor: Colors.transparent);
+                            }
+                          },
                           child: SizedBox(
                             height: 50,
                             width: MediaQuery.of(context).size.width - 40,
-                            child: GestureDetector(
-                              onTap: () {
-                                if (isSameId){
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          _buildModalSheet(context, postEntity!.getPostId()),
-                                      backgroundColor: Colors.transparent);
-                                }
-                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(4),
@@ -155,7 +153,6 @@ class _BoardPostPage extends State<BoardPostPage> {
                                     )
                                 ),
                               ),
-                            )
                           )),
                     ),
                   ),
