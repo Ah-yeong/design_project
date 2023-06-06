@@ -120,6 +120,13 @@ class _MyHomePage extends State<MyHomePage> {
                       onPressed: () => _login(),
                       child: const Text('로그인'),
                     ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: ElevatedButton(
+                      onPressed: () => _logout(),
+                      child: const Text('로그아웃'),
+                    ),
                   )
                 ],
               ),

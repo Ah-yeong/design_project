@@ -1,6 +1,7 @@
 import 'package:design_project/Boards/BoardHomePage.dart';
 import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
 import 'package:design_project/Chat/ChatScreen.dart';
+import 'package:design_project/Chat/ChatRoom.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 import 'package:design_project/resources.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class BoardPageMainHub extends StatefulWidget {
 final PostPageManager postManager = PostPageManager();
 
 class _BoardPageMainHub extends State<BoardPageMainHub> {
-  static List<Widget> _pages = <Widget>[BoardHomePage(), ChatScreen(), PageAlert(), PageProfile()];
+  static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
   int _selectedIdx = 0;
 
   @override

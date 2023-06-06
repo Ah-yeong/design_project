@@ -1,15 +1,17 @@
 import 'dart:async';
-
 import 'package:design_project/Boards/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources.dart';
+import 'package:design_project/Chat/ChatScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
 
 class BoardPostPage extends StatefulWidget {
   final int postId;
-
   const BoardPostPage({super.key, required this.postId});
 
   @override
@@ -17,8 +19,9 @@ class BoardPostPage extends StatefulWidget {
 }
 
 class _BoardPostPage extends State<BoardPostPage> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+
+  User? loggedUser; // loggedUser 변수 선언
 
   final List<Marker> _markers = [];
 
@@ -79,16 +82,35 @@ class _BoardPostPage extends State<BoardPostPage> {
                 ),
                 Row(
                   children: [
-                    Container(
+                    ElevatedButton(
+                      onPressed: () {
+                        //print(postId);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(postId: postId),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: colorSuccess,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Container(
                         width: mediaSize!.width / 2 - 20,
                         height: mediaSize!.height / 22,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: colorSuccess),
-                        child: const Center(
-                          child: Text("신청하기",
-                              style: TextStyle(color: Colors.white, fontSize: 15)),
-                        )
+                        child: Center(
+                          child: Text(
+                            "신청하기",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     const Padding(padding: EdgeInsets.only(left: 20)),
                   ],
@@ -172,6 +194,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     });
     //postEntity!.makeTestingPost();
   }
+
 
   loadPostTime() {
     String ptime = getTimeBefore(postEntity!.getUpTime());
