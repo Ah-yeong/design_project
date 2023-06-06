@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:get/get.dart';
 import 'package:design_project/Boards/BoardPostListPage.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityPost.dart';
@@ -7,6 +6,7 @@ import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources.dart';
 import '../Boards/BoardProfilePage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BoardPostPage extends StatefulWidget {
   final int postId;
@@ -22,6 +22,7 @@ class _BoardPostPage extends State<BoardPostPage> {
       Completer<GoogleMapController>();
 
   final List<Marker> _markers = [];
+  bool isSameId = false;
 
   static const CameraPosition _kSeoul = CameraPosition(
     target: LatLng(36.833068, 127.178419),
@@ -86,9 +87,11 @@ class _BoardPostPage extends State<BoardPostPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess),
-                        child: const Center(
-                          child: Text("신청하기",
-                              style: TextStyle(color: Colors.white, fontSize: 15)),
+                        child: Center(
+                          child: Text(
+                            isSameId! ? "신청 현황 보기" : "신청하기",
+                            style: TextStyle(color: Colors.white, fontSize: 15),
+                          ),
                         )
                     ),
                     const Padding(padding: EdgeInsets.only(left: 20)),
@@ -147,7 +150,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                         ),
 
                         // 제목 및 카테고리
-                        buildPostContext(postEntity!, profileEntity!),
+                        buildPostContext(postEntity!, profileEntity!, context),
                         // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
                         // Text("Gender Limit : ${postEntity!.getPostGender()}"),
                       ]),
@@ -170,6 +173,7 @@ class _BoardPostPage extends State<BoardPostPage> {
             onTap: () => print("marker tap"),
             position: postEntity!.getLLName().latLng));
         loadPostTime();
+        checkWriterId(postEntity!.getWriterId());
       });
     });
     //postEntity!.makeTestingPost();
@@ -183,10 +187,16 @@ class _BoardPostPage extends State<BoardPostPage> {
       isLoaded = true;
     });
   }
+
+  checkWriterId(writerId) {
+    if(writerId != Null) {
+      if (FirebaseAuth.instance.currentUser!.uid == writerId)
+        isSameId = true;
+    }
+  }
 }
 
-Column buildPostContext(EntityPost post, EntityProfiles profiles) {
-
+Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext context) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -252,7 +262,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
           thickness: 1,
         ),
       ),
-      drawProfile(profiles),
+      drawProfile(profiles, context),
       // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
@@ -287,11 +297,11 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles) {
   );
 }
 
-Widget drawProfile(EntityProfiles profileEntity) {
+Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     onTap: () {
-      Get.off(() => BoardProfilePage(profileId: profileEntity.profileId));
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
       print(profileEntity.profileId);
     },
     child: Row(
