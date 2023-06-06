@@ -115,6 +115,82 @@ class _PageProfileState extends State<PageProfile> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      Text(
+                          ' 내가 속한 모임',
+                          style: TextStyle(
+                            fontSize: 16,
+                            //fontWeight: FontWeight.bold,
+                          )
+                      ),
+                      SizedBox(height: 10),
+                      // Row(
+                      //   children: [
+                      //     Card(
+                      //       child: Padding(
+                      //         padding: const EdgeInsets.all(7),
+                      //         child: _buildFriendRow(myPost!),
+                      //       ),
+                      //     ),
+                      //     Container(
+                      //
+                      //     )
+                      //   ],
+                      // )
+                      Card(
+                        child: GestureDetector(
+                            onTap: (){
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: myPost!.getPostId())));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(7),
+                              child: _buildFriendRow(myPost!),
+                            )
+                        )
+                      ),
+                    ]
+                ),
+              ),
+              Divider(thickness: 1, height: 1),
+              Container(
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '내가 작성한 게시글',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorGrey,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 17,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Divider(thickness: 1, height: 1),
+              Container(
+                padding: EdgeInsets.all(15),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Text(
+                      //     '내 정보',
+                      //     style: TextStyle(
+                      //       fontSize: 16,
+                      //       fontWeight: FontWeight.bold,
+                      //     )
+                      // ),
+                      // SizedBox(height: 10),
                       Container(
                         child: Column(
                           children: [

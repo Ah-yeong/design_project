@@ -29,6 +29,19 @@ class EntityPost {
 
   EntityPost(int this._postId) {}
 
+  Future<void> applyToPost(String userId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Post")
+          .doc(_postId.toString())
+          .update({
+        "User": {"id": userId, "status": 0}
+      });
+    } catch (e) {
+      print("신청 실패: $e");
+    }
+  }
+
   Future<void> loadPost() async {
     _isLoaded = true;
     await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((ds) {
