@@ -1,3 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/Boards/List/BoardMain.dart';
+import 'package:design_project/Entity/EntityProfile.dart';
+import 'package:design_project/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,24 +9,41 @@ import 'ChatMessage.dart';
 import 'PageUserPosition.dart';
 
 class ChatScreen extends StatefulWidget {
-  final int postId;
-
-  const ChatScreen({Key? key, required this.postId}) : super(key: key);
+  final int? postId;
+  final String? recvUserId;
+  const ChatScreen({Key? key, this.postId, this.recvUserId}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState(postId);
+  _ChatScreenState createState() => _ChatScreenState(postId, recvUserId);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
   final _authentication = FirebaseAuth.instance;
   User? loggedUser;
-  final int postId;
-  _ChatScreenState(this.postId);
+  final int? postId;
+  final String? recvUserId;
+  _ChatScreenState(this.postId, this.recvUserId);
+
+  bool isLoaded = false;
+
+  late EntityProfiles recvUser;
+  late bool isGroupChat;
 
   @override
   void initState() {
     super.initState();
     getCurrentUser();
+    if (recvUserId != null) {
+      recvUser = EntityProfiles(recvUserId);
+      recvUser.loadProfile().then((value) {
+        setState(() {
+          isLoaded = true;
+        });
+      });
+    } else {
+      isLoaded = true;
+    }
+    isGroupChat = postId != null;
   }
 
   void getCurrentUser() {
@@ -30,35 +51,29 @@ class _ChatScreenState extends State<ChatScreen> {
       final user = _authentication.currentUser;
       if (user != null) {
         loggedUser = user;
-        print(loggedUser!.email);
       }
     } catch (e) {
       print(e);
     }
   }
+/*
 
-
-
+ */
+  // T
   @override
     Widget build(BuildContext context) {
-    print(postId);
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFF6ACA89),
-          title: Text('Chat Room $postId'),
-          actions: [
-            IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            )
-          ],
+          elevation: 1,
+          title: Text('${isGroupChat ? postManager.list[postId!].getPostHead() : isLoaded == true ? recvUser.name : "불러오는 중"} ', style: TextStyle(color: Colors.black, fontSize: 19),),
+          backgroundColor: Colors.white,
+          leading: BackButton(
+            color: Colors.black,
+          ),
         ),
-        body: Container(
+        body: isLoaded == false ? Center(
+          child: CircularProgressIndicator(),
+        ) : Container(
           child: Column(
             children: <Widget>[
               SizedBox(height: 10),
@@ -69,6 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: FloatingActionButton.extended(
+                        elevation: 0,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -77,14 +93,15 @@ class _ChatScreenState extends State<ChatScreen> {
                           );
                         },
                         label: Container(
-                          width: 60,
-                          child: Text('위치공유',
+                          width: 100,
+                          child: Text('위치 공유',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        backgroundColor: Color(0xFF6ACA89),
+                        backgroundColor: Color(0x996ACA89),
                         heroTag: null,
+
                       ),
                     ),
                   ),
@@ -92,6 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: FloatingActionButton.extended(
+                        elevation: 0,
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -129,13 +147,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           );
                         },
                         label: Container(
-                          width: 60,
-                          child: Text('모임일정',
+                          width: 100,
+                          child: Text('모임 일정',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        backgroundColor: Color(0xFF6ACA89),
+                        backgroundColor: Color(0x996ACA89),
                         heroTag: null,
                       ),
                     ),
@@ -143,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               Expanded(
-                child: Messages(),
+                child: Messages(postId: postId, recvUser: recvUserId,),
               ),
               //NewMessage(),
             ],
@@ -151,4 +169,37 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
     }
+}
+
+Future<void> addChatDataList(String uid, bool isGroupChat, {int? postId, String? recvUserId}) async {
+  String colName = "UserChatData";
+  final doc = await FirebaseFirestore.instance.collection(colName).doc(uid).get();
+  if ( !doc.exists ) {
+    if (isGroupChat) {
+      await FirebaseFirestore.instance.collection(colName).doc(uid).set({"chat" : []
+      , "group_chat" : postId!});
+    } else {
+      await FirebaseFirestore.instance.collection(colName).doc(uid).set({"chat" : [getNameChatRoom(uid, recvUserId!)]
+        , "group_chat" : []});
+    }
+  } else {
+    if (isGroupChat) {
+      late List<int> groupChatList;
+      await FirebaseFirestore.instance.collection(colName).doc(uid).get().then((ds) {
+        groupChatList = ds.get("group_chat");
+      });
+      if(groupChatList.contains(postId!)) return;
+      groupChatList.add(postId);
+      await FirebaseFirestore.instance.collection(colName).doc(uid).update({"group_chat" : groupChatList});
+    } else {
+      late List<dynamic> chatList;
+      await FirebaseFirestore.instance.collection(colName).doc(uid).get().then((ds) {
+        chatList = ds.get("chat");
+      });
+      if(chatList.contains(getNameChatRoom(uid, recvUserId!))) return;
+      chatList.add(getNameChatRoom(uid, recvUserId));
+      await FirebaseFirestore.instance.collection(colName).doc(uid).update({"chat" : chatList});
+    }
+  }
+  return;
 }

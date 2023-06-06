@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/List/BoardPostListPage.dart';
+import 'package:design_project/Chat/ChatScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
+
+import '../resources.dart';
 
 class BoardProfilePage extends StatefulWidget {
   final String profileId;
@@ -219,6 +224,48 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                               // SizedBox(
                               //   height: 7,
                               // ),
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: EdgeInsets.only(bottom: 18),
+                                  child: InkWell(
+                                      onTap: () {
+                                        if (profileEntity!.getProfileId() == myProfileEntity.getProfileId()) return;
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
+                                      },
+                                      child: SizedBox(
+                                        height: 50,
+                                        width: MediaQuery.of(context).size.width - 40,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(4),
+                                              color: colorSuccess,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.grey,
+                                                    offset: Offset(1, 1),
+                                                    blurRadius: 4.5)
+                                              ]),
+                                          child: Center(
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    Icons.chat_outlined,
+                                                    color: Colors.white,
+                                                    size: 17,
+                                                  ),
+                                                  Text(
+                                                    " ${profileEntity!.name} 님에게 연락하기",
+                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+
+                                                ],
+                                              )),
+                                        ),
+                                      )),
+                                ),
+                              )
                             ],
                           ),
                           // child: Row(

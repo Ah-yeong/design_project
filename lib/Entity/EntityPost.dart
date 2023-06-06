@@ -3,6 +3,8 @@ import 'package:design_project/Entity/EntityLatLng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../Chat/ChatScreen.dart';
+
 class EntityPost {
   int _postId;
   var _writerId;
@@ -154,6 +156,7 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "upTime" : upTime,
       "viewCount" : 1
     });
+    await addChatDataList(uuid, true, postId: new_post_id);
     return true;
   } catch (e) {
     return false;

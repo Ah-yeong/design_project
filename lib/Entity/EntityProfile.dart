@@ -10,7 +10,6 @@ class EntityProfiles {
   var major; // 학과
   var profileImagePath;
   var mannerGroup; // 소모임 매너지수
-  var nickname;
   var hobby;
   var mbti;
   var mbtiIndex;
@@ -52,7 +51,6 @@ class EntityProfiles {
       group = ds.get("group");
     });
     isLoading = false;
-    print("프로필 정보 불러오기 성공");
   }
 
   String getProfileId() => profileId;

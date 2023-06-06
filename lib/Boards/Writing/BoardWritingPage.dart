@@ -741,6 +741,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     profileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     successUpload = await profileEntity!.addPostId();
     print('게시물 업로드 완료 !!');
+
     return successUpload;
   }
 
