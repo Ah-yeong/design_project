@@ -55,7 +55,7 @@ class EntityPost {
       _time = ds.get("time");
       _upTime = ds.get("upTime");
       viewCount = ds.get("viewCount");
-      user = ds.get("User");
+      //user = ds.get("User");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
   }

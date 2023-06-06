@@ -49,8 +49,7 @@ class EntityProfiles {
       textInfo = ds.get("textInfo");
       mannerGroup = ds.get("mannerGroup");
       post = ds.get("post");
-      // group = ds.get("group");
-      print(post);
+      group = ds.get("group");
     });
     isLoading = false;
     print("프로필 정보 불러오기 성공");
