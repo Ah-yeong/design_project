@@ -116,10 +116,15 @@ class _BoardPostPage extends State<BoardPostPage> {
                           onTap: () {
                             if (isSameId){
                               showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      _buildModalSheet(context, postEntity!.getPostId()),
-                                  backgroundColor: Colors.transparent);
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    height: 350, // 원하는 높이로 설정
+                                    child: _buildModalSheet(context, postEntity!.getPostId()),
+                                  );
+                                },
+                                backgroundColor: Colors.transparent,
+                              );
                             } else {
                               postEntity!.applyToPost(userID);
                             }
@@ -217,21 +222,35 @@ Column buildPostMember(EntityProfiles profiles, BuildContext context) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      drawProfile(profiles, context), // 프로필
+      drawApplyProfile(profiles, context), // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
         child: Divider(
           thickness: 1,
         ),
       ),
-      drawProfile(profiles, context),
+      drawApplyProfile(profiles, context),
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
         child: Divider(
           thickness: 1,
         ),
       ),
-      drawProfile(profiles, context),
+      drawApplyProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
+        child: Divider(
+          thickness: 1,
+        ),
+      ),
+      drawApplyProfile(profiles, context),
     ],
   );
 }
@@ -401,6 +420,75 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
                       backgroundColor: color.withOpacity(0.3),
                     ),
                   ))
+            ],
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
+  final color = getColorForScore(profileEntity.mannerGroup);
+  return GestureDetector(
+    onTap: () {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
+      print(profileEntity.profileId);
+    },
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Image.asset(
+              profileEntity.profileImagePath,
+              width: 45,
+              height: 45,
+            ),
+            const Padding(padding: EdgeInsets.only(left: 10)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${profileEntity.name}",
+                  style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                const Padding(padding: EdgeInsets.only(top: 4)),
+                Text(
+                  "${profileEntity.major}, ${profileEntity.age}세",
+                  style:
+                  const TextStyle(color: Color(0xFF777777), fontSize: 13),
+                )
+              ],
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF6ACA89),
+                  ),
+                  child: Text('수락')
+              ),
+              SizedBox(width: 4,),
+              ElevatedButton(
+                  onPressed: () {
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF6ACA89),
+                  ),
+                  child: Text('거절')
+              )
             ],
           ),
         )
