@@ -18,6 +18,8 @@ class EntityPost {
   var _maxAge;
   var _time;
   var _llName;
+  var _category;
+
   double _distance = 0.0;
 
   double get distance => _distance;
@@ -56,6 +58,7 @@ class EntityPost {
       _maxAge = ds.get("maxAge");
       _time = ds.get("time");
       _upTime = ds.get("upTime");
+      _category = ds.get("category");
       viewCount = ds.get("viewCount");
       //user = ds.get("User");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
@@ -72,6 +75,7 @@ class EntityPost {
     _gender = 2;
     _maxPerson = 5;
     _currentPerson = 2;
+    _category = "기타";
     _time = "2023-04-22 11:10:05";
     _llName = LLName(LatLng(36.833068, 127.178419), "천안시 동남구 안서동 300");
     _upTime = "2023-04-16 13:27:00";
@@ -89,6 +93,7 @@ class EntityPost {
   int getPostCurrentPerson() => _currentPerson;
   String getWriterNick() => _writerNick;
   String getTime() => _time;
+  String getCategory() => _category;
   String getUpTime() => _upTime;
   LLName getLLName() => _llName;
   int getMinAge() => _minAge;
@@ -126,7 +131,7 @@ String getTimeBefore(String upTime) {
   }
 }
 
-Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime, int minAge, int maxAge, String writerNick) async {
+Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime, String category, int minAge, int maxAge, String writerNick) async {
   try {
     int? new_post_id;
     DocumentReference<Map<String, dynamic>> ref =
@@ -150,6 +155,7 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "lng" : llName.latLng.longitude,
       "name" : llName.AddressName,
       "currentPerson" : 1,
+      "category" : category,
       "minAge" : minAge,
       "writer_nick" : writerNick,
       "maxAge" : maxAge,

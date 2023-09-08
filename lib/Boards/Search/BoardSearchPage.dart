@@ -26,8 +26,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
   @override
   void initState() {
     _searchHistory = List.empty(growable: true);
-    tempCategory =
-        List.of(["술", "밥", "영화", "산책", "공부", "취미", "운동", "기타", "음악", "게임"]);
+    tempCategory = CategoryList;
     itemCnt = tempCategory!.length;
     loadStorage().then((value) => {
       setState(() {

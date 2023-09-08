@@ -168,10 +168,10 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                             borderRadius: BorderRadius.circular(4),
                             color: const Color(0xFFBFBFBF)),
                         child: Center(
-                          child: const Padding(
+                          child: Padding(
                             padding: EdgeInsets.only(
                                 right: 5, left: 5),
-                            child: Text("카테고리",
+                            child: Text(entity.getCategory(),
                                 style:
                                 TextStyle(color: Colors.white, fontSize: 10)),
                           ),
