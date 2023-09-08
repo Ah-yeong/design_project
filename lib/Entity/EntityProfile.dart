@@ -17,7 +17,6 @@ class EntityProfiles {
   var textInfo;
   var post;
   var group;
-  int postCount = 0;
   bool isLoading = true;
   // bool isLoaded = false;
 

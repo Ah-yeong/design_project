@@ -16,7 +16,7 @@ class BoardSelectPositionPage extends StatefulWidget {
 
 class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
   final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  Completer<GoogleMapController>();
 
   String? nowPosition;
   List<Marker> _markers = [];
@@ -39,7 +39,8 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("위치 지정", style: TextStyle(color: Colors.black, fontSize: 17),),
+          title: const Text(
+            "위치 지정", style: TextStyle(color: Colors.black, fontSize: 17),),
           backgroundColor: Colors.white,
           elevation: 1,
           toolbarHeight: 40,
@@ -52,7 +53,7 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
               child: GoogleMap(
                 gestureRecognizers: {
                   Factory<OneSequenceGestureRecognizer>(
-                      () => EagerGestureRecognizer())
+                          () => EagerGestureRecognizer())
                 },
                 markers: Set.from(_markers),
                 mapType: MapType.normal,
@@ -94,10 +95,14 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 30),
                   child: InkWell(
                       onTap: () =>
-                          Navigator.pop(context, LLName(LatLng(lat, lng), nowPosition ?? "알 수 없음")),
+                          Navigator.pop(context, LLName(
+                              LatLng(lat, lng), nowPosition ?? "알 수 없음")),
                       child: SizedBox(
                         height: 50,
-                        width: MediaQuery.of(context).size.width - 40,
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width - 40,
                         child: Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
@@ -123,6 +128,21 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
         ));
   }
 
+  Future<void> _getPlaceAddress() async {
+    try {
+      final url =
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko';
+      final res = await http.get(Uri.parse(url));
+      var value = jsonDecode(res.body)['results'][0]['address_components'];
+      setState(() {
+        nowPosition =
+        "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
+      });
+    } catch (e) {
+      nowPosition = "불러오는 중";
+    }
+  }
+
   void _updatePosition(CameraPosition _position) {
     var m = _markers.firstWhere((p) => p.markerId == MarkerId('1'));
     _markers.remove(m);
@@ -136,21 +156,6 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
     lat = _position.target.latitude;
     lng = _position.target.longitude;
     setState(() {});
-  }
-
-  Future<void> _getPlaceAddress() async {
-    final url =
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko';
-    final res = await http.get(Uri.parse(url));
-    try {
-      var value = jsonDecode(res.body)['results'][0]['address_components'];
-      setState(() {
-        nowPosition =
-        "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
-      });
-    } catch (e) {
-      nowPosition = "알 수 없음";
-    }
   }
 
   @override

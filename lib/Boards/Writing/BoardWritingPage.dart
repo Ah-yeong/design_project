@@ -102,19 +102,20 @@ class _BoardWritingPage extends State<BoardWritingPage> {
 
   Color maleButtonColor = Colors.grey;
   Color femaleButtonColor = Colors.grey;
-  String _selectedPerson = "선택";
   int _selectedPersonIndex = 0;
+  String _selectedPerson = "선택";
+  String _selectedCategory = "없음";
+  bool _tappedCategory = false;
+  List<String> _categories = CategoryList;
 
   ScrollController? _scrollController;
-  bool _btnVisible = false;
+  bool _btnVisible = true;
 
   final _formKey = GlobalKey<FormState>();
   int _minAge = -1, _minAgeIdx = 0;
   int _maxAge = -1, _maxAgeIdx = 0;
   List<String>? _minAgeItems;
   List<String>? _maxAgeItems;
-  bool _isDropDownAge = false;
-
   TextEditingController? _head;
   TextEditingController? _body;
 
@@ -122,7 +123,6 @@ class _BoardWritingPage extends State<BoardWritingPage> {
 
   LLName? _llName;
   bool _isUploading = false;
-  bool _isIgnoreAge = false;
 
   EntityProfiles? profileEntity;
 
@@ -166,11 +166,6 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('게시물 작성 자세하게 할 수록 좋다는 문구 추가',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      )),
-                                  SizedBox(height: 20),
                                   TextField(
                                     maxLines: 1,
                                     maxLength: 20,
@@ -205,45 +200,146 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                             borderSide: BorderSide(
                                                 color: Colors.black54))),
                                   ),
-                                  SizedBox(height: 10.0),
-                                  Text('모임 날짜',
-                                      style: TextStyle(
-                                          fontSize: 16, color: colorGrey)),
-                                  SizedBox(height: 8),
-                                  ElevatedButton(
-                                    onPressed: () => _selectDate(context),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFF6ACA9A),
+                                  SizedBox(height: 28.0),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('모임 날짜 및 시간',
+                                          style: TextStyle(
+                                              fontSize: 16, color: colorGrey)),
+                                      Row(
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () =>
+                                                _selectDate(context),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Color(0xFF6ACA9A),
+                                            ),
+                                            child: Text(
+                                                '${dateFormatter.format(_selectedDate)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                )),
+                                          ),
+                                          SizedBox(
+                                            width: 15,
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () =>
+                                                _selectTime(context),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Color(0xFF6ACA9A),
+                                            ),
+                                            child: Text(
+                                                '${_selectedTime.format(context)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                )),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                  ),
+                                  GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () {
+                                        setState(() {
+                                          _tappedCategory = !_tappedCategory;
+                                        });
+                                      },
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                '카테고리',
+                                                style: TextStyle(
+                                                    color: colorGrey,
+                                                    fontSize: 16),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    _selectedCategory,
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  AnimatedRotation(
+                                                    turns: _tappedCategory
+                                                        ? 1 / 4
+                                                        : 0,
+                                                    duration: Duration(
+                                                        milliseconds: 500),
+                                                    curve: Curves.decelerate,
+                                                    child: Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 20,
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      )),
+                                  AnimatedCrossFade(
+                                    firstChild: SizedBox(
+                                      width: double.infinity,
                                     ),
-                                    child: Text(
-                                        '${dateFormatter.format(_selectedDate)}',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                        )),
+                                    secondChild: SizedBox(width: double.infinity,
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                      child: Wrap(
+                                          direction: Axis.horizontal,
+                                          // 나열 방향
+                                          alignment: WrapAlignment.start,
+                                          // 정렬 방식
+                                          spacing: 7,
+                                          // 좌우 간격
+                                          runSpacing: 7,
+                                          // 상하 간격
+                                          children:
+                                          _categories.map((e) => GestureDetector(
+                                            behavior: HitTestBehavior.translucent,
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedCategory = e;
+                                                _tappedCategory = false;
+                                              });
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.only(
+                                                  right: 10, left: 10, top: 7, bottom: 7),
+                                              decoration: BoxDecoration(
+                                                color: _selectedCategory == e ? colorGrey : Color(0xFFEAEAEA),
+                                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                              ),
+                                              child: Text('$e', style: TextStyle(color: _selectedCategory == e ? Colors.white : Colors.black, fontSize: 14),),
+                                            ),
+                                          )
+                                          ).toList()),
+                                    ),),
+                                    crossFadeState: _tappedCategory
+                                        ? CrossFadeState.showSecond
+                                        : CrossFadeState.showFirst,
+                                    duration:
+                                    Duration(milliseconds: 500),
+                                    sizeCurve: Curves.decelerate,
                                   ),
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text('모임 시간',
-                                      style: TextStyle(
-                                          fontSize: 16, color: colorGrey)),
-                                  SizedBox(height: 8),
-                                  ElevatedButton(
-                                    onPressed: () => _selectTime(context),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFF6ACA9A),
-                                    ),
-                                    child:
-                                        Text('${_selectedTime.format(context)}',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                            )),
-                                  ),
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 35),
                                   GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () async {
@@ -259,37 +355,31 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        Text('모임 장소 ',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: colorGrey)),
+                                        Row(
                                           children: [
-                                            Text('모임 장소',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: colorGrey)),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
                                             Text(
                                                 _llName == null
-                                                    ? '해당 영역을 눌러 모임 장소를 지정해주세요'
+                                                    ? '미지정'
                                                     : _llName!.AddressName,
-                                                style: TextStyle(fontSize: 15)),
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            SizedBox(width: 10),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 20,
+                                            )
                                           ],
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          size: 20,
                                         )
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: 5),
-                                  SizedBox(height: 10),
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 35),
                                   GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
@@ -304,15 +394,12 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
+                                        Text('인원 수',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: colorGrey)),
                                         Row(
                                           children: [
-                                            Text('인원 수',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: colorGrey)),
-                                            SizedBox(
-                                              width: 10.0,
-                                            ),
                                             Text('${_selectedPerson}',
                                                 style: TextStyle(
                                                     fontSize: 16,
@@ -320,18 +407,13 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                                     fontWeight:
                                                         FontWeight.bold)),
                                             SizedBox(
-                                              width: 10.0,
+                                              width: 10,
                                             ),
-                                            Text(
-                                                '${_selectedPerson == "무제한" ? "" : "명"}',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: colorGrey)),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 20,
+                                            )
                                           ],
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          size: 20,
                                         )
                                         // DropdownButton(
                                         //   value: _selectedPerson,
@@ -351,11 +433,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: 10),
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 35),
                                   GestureDetector(
                                     onTap: () {
                                       showCupertinoModalPopup<void>(
@@ -369,7 +447,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                     behavior: HitTestBehavior.translucent,
                                     child: _buildAgeSelect(),
                                   ),
-                                  SizedBox(height: 10),
+                                  SizedBox(height: 25),
                                   // Row(
                                   //   children: [
                                   //     DropdownButton(
@@ -398,17 +476,12 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                   //             fontSize: 16, color: colorGrey)),
                                   //   ],
                                   // )
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
                                   AnimatedPadding(
                                     padding: _selectedGender == 0
                                         ? EdgeInsets.only(top: 15, bottom: 0)
                                         : EdgeInsets.only(top: 15, bottom: 10),
                                     duration: Duration(milliseconds: 200),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         const Text(
                                           "성별 ",
@@ -447,9 +520,6 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                               style: TextStyle(
                                                   color: Color(0xAAAA0000))))
                                       : const Text('')),
-                                  const Divider(
-                                    thickness: 1,
-                                  ),
                                   SizedBox(height: 55),
                                 ]),
                           ),
@@ -462,62 +532,72 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                 child: AnimatedOpacity(
                   opacity: _btnVisible ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
-                  child: !_btnVisible ? SizedBox() : Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 18),
-                      child: InkWell(
-                          onTap: () {
-                            if(!_btnVisible) return;
-                            // 게시물 양식 확인
-                            var errMsg = _checkIsInputEmpty();
-                            if (errMsg != "Success") {
-                              showAlert(errMsg, context, colorError);
-                              return;
-                            }
-                            bool success = false;
-                            _tryUploadPost().then((value) {
-                              success = value;
-                              if(success) {
-                                postManager.reloadPages("").then((value) {
-                                  setState(() => _isUploading = false);
-                                  showAlert(success ? "글 작성 완료!" : "글 작성에 실패했습니다!", context, success ? colorSuccess : colorError);
-                                  Navigator.pop(context);
-                                });
-                              }
-                            });
-                          },
-                          child: SizedBox(
-                            height: 50,
-                            width: MediaQuery.of(context).size.width - 40,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: colorSuccess,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.grey,
-                                        offset: Offset(1, 1),
-                                        blurRadius: 4.5)
-                                  ]),
-                              child: Center(
-                                  child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "글쓰기 ",
-                                    style: TextStyle(color: Colors.white),
+                  child: !_btnVisible
+                      ? SizedBox()
+                      : Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 18),
+                            child: InkWell(
+                                onTap: () {
+                                  if (!_btnVisible) return;
+                                  // 게시물 양식 확인
+                                  var errMsg = _checkIsInputEmpty();
+                                  if (errMsg != "Success") {
+                                    showAlert(errMsg, context, colorError);
+                                    return;
+                                  }
+                                  bool success = false;
+                                  _tryUploadPost().then((value) {
+                                    success = value;
+                                    if (success) {
+                                      postManager.reloadPages("").then((value) {
+                                        setState(() => _isUploading = false);
+                                        showAlert(
+                                            success
+                                                ? "글 작성 완료!"
+                                                : "글 작성에 실패했습니다!",
+                                            context,
+                                            success
+                                                ? colorSuccess
+                                                : colorError);
+                                        Navigator.pop(context);
+                                      });
+                                    }
+                                  });
+                                },
+                                child: SizedBox(
+                                  height: 50,
+                                  width: MediaQuery.of(context).size.width - 40,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(4),
+                                        color: colorSuccess,
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.grey,
+                                              offset: Offset(1, 1),
+                                              blurRadius: 4.5)
+                                        ]),
+                                    child: Center(
+                                        child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "글쓰기 ",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    )),
                                   ),
-                                  Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              )),
-                            ),
-                          )),
-                    ),
-                  ),
+                                )),
+                          ),
+                        ),
                 ),
               ),
               _isUploading
@@ -550,28 +630,25 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     return Column(
       children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(children: [
-            Text('희망 연령대', style: TextStyle(fontSize: 16, color: colorGrey)),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              (_maxAge == _minAge && _maxAge == -1) ? "상관 없음" :
-              '${_minAge == -1 ? "" : _minAge} ~ ${_maxAge == -1 ? "" : _maxAge}',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-            SizedBox(
-              width: 3,
-            ),
-            Text(
-              (_maxAge == _minAge && _maxAge == -1) ? "" : "세",
-              style: TextStyle(fontSize: 16),
-            ),
-          ]),
-          Transform.rotate(angle: (_isDropDownAge ? 90 : 0) * math.pi / 180,
-            child: Icon(Icons.arrow_forward_ios, size: 20,),),
+          Text('희망 연령대', style: TextStyle(fontSize: 16, color: colorGrey)),
+          Row(
+            children: [
+              Text(
+                (_maxAge == _minAge && _maxAge == -1)
+                    ? "상관 없음"
+                    : '${_minAge == -1 ? "" : _minAge} ~ ${_maxAge == -1 ? "" : _maxAge}',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 20,
+              )
+            ],
+          )
         ]),
-
       ],
     );
   }
@@ -614,10 +691,14 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         setState(() {
           if (isLeft) {
             _minAgeIdx = selectedItem;
-            _minAge = (_minAgeItems![selectedItem] == "상관 없음" ? -1 : int.parse(_minAgeItems![selectedItem]));
+            _minAge = (_minAgeItems![selectedItem] == "상관 없음"
+                ? -1
+                : int.parse(_minAgeItems![selectedItem]));
           } else {
             _maxAgeIdx = selectedItem;
-            _maxAge = (_maxAgeItems![selectedItem] == "상관 없음" ? -1 : int.parse(_maxAgeItems![selectedItem]));
+            _maxAge = (_maxAgeItems![selectedItem] == "상관 없음"
+                ? -1
+                : int.parse(_maxAgeItems![selectedItem]));
           }
         });
       },
@@ -696,16 +777,16 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     _minAgeItems = _buildDropdownItems(19, 45);
     _maxAgeItems = _buildDropdownItems(19, 45);
     _scrollController = ScrollController();
-    _scrollController!.addListener(() {
-      setState(() {
-        if (_scrollController!.offset >
-            _scrollController!.position.maxScrollExtent / 2) {
-          _btnVisible = true;
-        } else {
-          _btnVisible = false;
-        }
-      });
-    });
+    // _scrollController!.addListener(() {
+    //   setState(() {
+    //     if (_scrollController!.offset >
+    //         _scrollController!.position.maxScrollExtent / 2) {
+    //       _btnVisible = true;
+    //     } else {
+    //       _btnVisible = false;
+    //     }
+    //   });
+    // });
   }
 
   @override
@@ -735,9 +816,18 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     // 게시물 양식 조건이 모두 맞으면 업로드 시도
     setState(() => _isUploading = true); // 업로드 시작
     DateTime dt = DateTime.now();
-    successUpload = await addPost(_head!.text, _body!.text, _selectedGender!, _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
+    successUpload = await addPost(
+        _head!.text,
+        _body!.text,
+        _selectedGender!,
+        _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
         "${dateFormatter.format(_selectedDate)} ${_selectedTime.to24hours()}:00",
-        _llName!, "${dateFormatter.format(DateTime.now())} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}", _minAge, _maxAge, "Example");
+        _llName!,
+        "${dateFormatter.format(DateTime.now())} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}",
+        _selectedCategory,
+        _minAge,
+        _maxAge,
+        "Example");
     profileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     successUpload = await profileEntity!.addPostId();
     print('게시물 업로드 완료 !!');
@@ -769,7 +859,6 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     }
     return msg;
   }
-
 }
 
 extension TimeOfDayConverter on TimeOfDay {

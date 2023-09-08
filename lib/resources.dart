@@ -5,6 +5,7 @@ const Color colorSuccess = const Color(0xFF6ACA89);
 const Color colorGrey = const Color(0xFF777777);
 const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
+var CategoryList = List.of(["술", "밥", "영화", "산책", "공부", "취미", "운동", "기타", "음악", "게임"]);
 
 Color getColorForScore(int score) {
   if (score < 20) {
