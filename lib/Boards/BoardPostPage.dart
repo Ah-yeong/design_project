@@ -269,10 +269,10 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     color: const Color(0xFFBFBFBF)),
-                child: const Padding(
+                child: Padding(
                   padding:
                       EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
-                  child: Text("20~24세",
+                  child: Text(post.getCategory(),
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
               ),
@@ -283,10 +283,10 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     color: const Color(0xFFBFBFBF)),
-                child: const Padding(
+                child: Padding(
                   padding:
                       EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
-                  child: Text("남자만",
+                  child: Text(getGenderText(post),
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
               ),
@@ -297,10 +297,10 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
                     color: const Color(0xFFBFBFBF)),
-                child: const Padding(
+                child: Padding(
                   padding:
                       EdgeInsets.only(right: 5, left: 5, top: 3, bottom: 3),
-                  child: Text("영화",
+                  child: Text(getAgeText(post),
                       style: TextStyle(color: Colors.white, fontSize: 10)),
                 ),
               ),

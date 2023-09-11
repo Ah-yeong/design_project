@@ -61,6 +61,11 @@ class PostPageManager {
     return;
   }
 
+  void removePost(EntityPost post) {
+    list.remove(post);
+    _loadedCount -= 1;
+  }
+
   int get maxCount => _maxCount;
   int get loadedCount => _loadedCount;
   int get lastLoaded => _lastLoaded;
