@@ -14,8 +14,10 @@ final formKey = GlobalKey<FormState>();
 
 class BoardSearchListPage extends StatefulWidget {
   final String search_value;
+  final String? category;
 
-  const BoardSearchListPage({super.key, required this.search_value});
+  const BoardSearchListPage(
+      {super.key, required this.search_value, this.category});
 
   @override
   State<StatefulWidget> createState() => _BoardSearchListPage();
@@ -23,6 +25,7 @@ class BoardSearchListPage extends StatefulWidget {
 
 class _BoardSearchListPage extends State<BoardSearchListPage> {
   String? _search_value;
+  String? _paramCategory;
   var count = 10;
 
   ScrollController _scrollController = ScrollController();
@@ -40,8 +43,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   List<String> _sortingOptionList = List.of(["최신순", "거리 가까운 순", "모임 시간 빠른 순"]);
   List<String> _timeOptionList =
       List.of(["제한 없음", "1시간 이내", "6시간 이내", "1일 이내", "7일 이내", "직접 입력"]);
-  List<String> _genderOptionList =
-  List.of(["제한 없음", "남자만", "여자만"]);
+  List<String> _genderOptionList = List.of(["제한 없음", "남자만", "여자만"]);
   List<String> _categoryList = CategoryList;
   int _minPeople = 2;
   int _maxPeople = 9;
@@ -140,24 +142,40 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                               ],
                             ),
                           ))),
-                  Expanded(
-                      child: ListView.builder(
-                    itemBuilder: (context, index) => GestureDetector(
-                      onTap: () {
-                        naviToPost(index);
-                      },
-                      child: Card(
-                          child: Padding(
-                              padding: const EdgeInsets.all(7),
-                              child: buildFriendRow(
-                                  _pageManager.list[
-                                      _pageManager.list.length - index - 1],
-                                  _pageManager.list[
-                                          _pageManager.list.length - index - 1]
-                                      .distance))),
-                    ),
-                    itemCount: _pageManager.loadedCount,
-                  ))
+                  _pageManager.list.length != 0
+                      ? Expanded(
+                          child: ListView.builder(
+                          itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              naviToPost(index);
+                            },
+                            child: Card(
+                                child: Padding(
+                                    padding: const EdgeInsets.all(7),
+                                    child: buildFriendRow(
+                                        _pageManager.list[
+                                            _pageManager.list.length -
+                                                index -
+                                                1],
+                                        _pageManager
+                                            .list[_pageManager.list.length -
+                                                index -
+                                                1]
+                                            .distance))),
+                          ),
+                          itemCount: _pageManager.loadedCount,
+                        ))
+                      : Expanded(
+                          child: Center(
+                              child: Text(
+                            "검색된 모임이 없습니다",
+                            style: TextStyle(
+                                color: colorGrey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15),
+                          )),
+                        ),
+                  _pageManager.list.length == 0 ? SizedBox(width: double.infinity, height: 65,) : SizedBox()
                 ],
               ));
   }
@@ -201,16 +219,20 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
     super.initState();
     _searchHistory = List.empty(growable: true);
     _search_value = widget.search_value;
-    _pageManager.loadPages(_search_value!).then((value) => setState(() {}));
+    if (widget.category != null) {
+      _paramCategory = widget.category;
+      _filteringCategory = true;
+      _selectedCategory.add(_paramCategory!);
+    }
+    _applyFiltering();
     _scrollController.addListener(() {
       setState(() {
         if (_scrollController.offset + 100 <
                 _scrollController.position.minScrollExtent &&
             _scrollController.position.outOfRange &&
             _pageManager.isLoading) {
-          _pageManager
-              .reloadPages(_search_value!)
-              .then((value) => setState(() {}));
+          _pageManager.reloadPages(_search_value!).then((value) => setState(() {
+              }));
         }
       });
     });
@@ -921,17 +943,17 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                           _genderOptionList[index],
                           style: _selectedGenderTemp == index
                               ? TextStyle(
-                              color: colorSuccess,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)
+                                  color: colorSuccess,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16)
                               : TextStyle(color: Colors.black, fontSize: 15),
                         ),
                         _selectedGenderTemp == index
                             ? Icon(
-                          Icons.check_rounded,
-                          color: colorSuccess,
-                          size: 22,
-                        )
+                                Icons.check_rounded,
+                                color: colorSuccess,
+                                size: 22,
+                              )
                             : SizedBox()
                       ],
                     ),
@@ -970,17 +992,17 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                             ]),
                         child: Center(
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "적용하기",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17),
-                                ),
-                              ],
-                            )),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "적용하기",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17),
+                            ),
+                          ],
+                        )),
                       ),
                     )),
               ),
@@ -1040,11 +1062,13 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         // 모임 인원 필터
         if (_filteringPeople) {
           // maxPerson이 무제한인 경우 -1
-          if ( post.getPostMaxPerson() == -1 ) {
-            if ( _maxPeople != 9 ) { // RangeSlider의 우측 범위가 맨 오른쪽이 아니면 삭제
+          if (post.getPostMaxPerson() == -1) {
+            if (_maxPeople != 9) {
+              // RangeSlider의 우측 범위가 맨 오른쪽이 아니면 삭제
               removeFlag = true;
             }
-          } else if ( _minPeople > post.getPostMaxPerson() || _maxPeople < post.getPostMaxPerson() ) {
+          } else if (_minPeople > post.getPostMaxPerson() ||
+              _maxPeople < post.getPostMaxPerson()) {
             removeFlag = true;
           }
         }
@@ -1052,16 +1076,15 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         // 거리 필터
         if (_filteringDistance) {
           LLName temp = post.getLLName();
-          double dist = getDistance(temp.latLng.latitude, temp.latLng.longitude);
+          double dist =
+              getDistance(temp.latLng.latitude, temp.latLng.longitude);
           post.distance = dist;
-          if (dist > (_distanceValue + 1) * 100)
-            removeFlag = true;
+          if (dist > (_distanceValue + 1) * 100) removeFlag = true;
         }
 
         // 성별 필터
         if (_filteringGender) {
-          if (post.getPostGender() != _selectedGender)
-            removeFlag = true;
+          if (post.getPostGender() != _selectedGender) removeFlag = true;
         }
 
         // 모임 시간 필터
@@ -1072,16 +1095,29 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           Duration timeGap = currentTime.difference(beforeTime);
 
           int _sTime;
-          switch(_selectedTime) {
-            case 1: _sTime = 1; break;
-            case 2: _sTime = 6; break;
-            case 3: _sTime = 24; break;
-            case 4: _sTime = 24 * 7; break;
-            case 5: _sTime = 24 * 7 * 4; break;
-            default: _sTime = 0; break;
+          switch (_selectedTime) {
+            case 1:
+              _sTime = 1;
+              break;
+            case 2:
+              _sTime = 6;
+              break;
+            case 3:
+              _sTime = 24;
+              break;
+            case 4:
+              _sTime = 24 * 7;
+              break;
+            case 5:
+              _sTime = 24 * 7 * 4;
+              break;
+            default:
+              _sTime = 0;
+              break;
           }
-          print(timeGap.inHours);
-          if (timeGap.inHours > _sTime) {
+          if (timeGap.inHours > 0) {
+            removeFlag = true;
+          } else if (-1 * timeGap.inHours > _sTime ) {
             removeFlag = true;
           }
         }
@@ -1099,7 +1135,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         }
       }
 
-      for(EntityPost target in removeList) {
+      for (EntityPost target in removeList) {
         _pageManager.removePost(target);
       }
 
@@ -1109,128 +1145,140 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
 
   List<Widget> _buildFilteringContents() {
     return <Widget>[
-      _filteringTime ? buildSortingButton(
-          _filteringTime
-              ? _timeOptionList[_selectedTime]
-              : "모임 시간", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 1),
-            backgroundColor: Colors.transparent);
-      }, _filteringTime) : SizedBox(),
+      _filteringTime
+          ? buildSortingButton(
+              _filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 1),
+                  backgroundColor: Colors.transparent);
+            }, _filteringTime)
+          : SizedBox(),
 
-      _filteringPeople ? buildSortingButton(
-          _filteringPeople
-              ? _peopleFilterText
-              : "최대 인원", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 2),
-            backgroundColor: Colors.transparent);
-      }, _filteringPeople) : SizedBox(),
+      _filteringPeople
+          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원",
+              () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 2),
+                  backgroundColor: Colors.transparent);
+            }, _filteringPeople)
+          : SizedBox(),
 
-      _filteringDistance ? buildSortingButton(
-          _filteringDistance
-              ? "${(_distanceValue + 1) * 100}m 이내"
-              : "거리", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 3),
-            backgroundColor: Colors.transparent);
-      }, _filteringDistance) : SizedBox(),
+      _filteringDistance
+          ? buildSortingButton(
+              _filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리",
+              () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 3),
+                  backgroundColor: Colors.transparent);
+            }, _filteringDistance)
+          : SizedBox(),
 
-      _filteringCategory ? buildSortingButton(
-          _selectedCategory.length != 0 && _filteringCategory
-              ? _selectedCategory.length == 1
-              ? _selectedCategory.first
-              : "${_selectedCategory.first} 외 ${_selectedCategory.length - 1}개"
-              : "카테고리", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 4),
-            backgroundColor: Colors.transparent);
-      }, _filteringCategory) : SizedBox(),
+      _filteringCategory
+          ? buildSortingButton(
+              _selectedCategory.length != 0 && _filteringCategory
+                  ? _selectedCategory.length == 1
+                      ? _selectedCategory.first
+                      : "${_selectedCategory.first} 외 ${_selectedCategory.length - 1}개"
+                  : "카테고리", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 4),
+                  backgroundColor: Colors.transparent);
+            }, _filteringCategory)
+          : SizedBox(),
 
-      _filteringGender ? buildSortingButton(
-          _filteringGender
-              ? getGenderTextForInteger(_selectedGender)
-              : "성별", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 5),
-            backgroundColor: Colors.transparent);
-      }, _filteringGender) : SizedBox(),
+      _filteringGender
+          ? buildSortingButton(
+              _filteringGender
+                  ? getGenderTextForInteger(_selectedGender)
+                  : "성별", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 5),
+                  backgroundColor: Colors.transparent);
+            }, _filteringGender)
+          : SizedBox(),
 
       // --------------------- 후순위 --------------------- //
-      !_filteringTime ? buildSortingButton(
-          _filteringTime
-              ? _timeOptionList[_selectedTime]
-              : "모임 시간", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 1),
-            backgroundColor: Colors.transparent);
-      }, _filteringTime) : SizedBox(),
+      !_filteringTime
+          ? buildSortingButton(
+              _filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 1),
+                  backgroundColor: Colors.transparent);
+            }, _filteringTime)
+          : SizedBox(),
 
-      !_filteringPeople ? buildSortingButton(
-          _filteringPeople
-              ? _peopleFilterText
-              : "최대 인원", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 2),
-            backgroundColor: Colors.transparent);
-      }, _filteringPeople) : SizedBox(),
+      !_filteringPeople
+          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원",
+              () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 2),
+                  backgroundColor: Colors.transparent);
+            }, _filteringPeople)
+          : SizedBox(),
 
-      !_filteringDistance ? buildSortingButton(
-          _filteringDistance
-              ? "${(_distanceValue + 1) * 100}m 이내"
-              : "거리", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 3),
-            backgroundColor: Colors.transparent);
-      }, _filteringDistance) : SizedBox(),
+      !_filteringDistance
+          ? buildSortingButton(
+              _filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리",
+              () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 3),
+                  backgroundColor: Colors.transparent);
+            }, _filteringDistance)
+          : SizedBox(),
 
-      !_filteringCategory? buildSortingButton(
-          _selectedCategory.length != 0 && _filteringCategory
-              ? _selectedCategory.length == 1
-              ? _selectedCategory.first
-              : "${_selectedCategory.first} 외 ${_selectedCategory.length - 1}개"
-              : "카테고리", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 4),
-            backgroundColor: Colors.transparent);
-      }, _filteringCategory) : SizedBox(),
+      !_filteringCategory
+          ? buildSortingButton(
+              _selectedCategory.length != 0 && _filteringCategory
+                  ? _selectedCategory.length == 1
+                      ? _selectedCategory.first
+                      : "${_selectedCategory.first} 외 ${_selectedCategory.length - 1}개"
+                  : "카테고리", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 4),
+                  backgroundColor: Colors.transparent);
+            }, _filteringCategory)
+          : SizedBox(),
 
-      !_filteringGender ? buildSortingButton(
-          _filteringGender
-              ? getGenderTextForInteger(_selectedGender)
-              : "성별", () {
-        showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) =>
-                _buildModalSheet(context, 5),
-            backgroundColor: Colors.transparent);
-      }, _filteringGender) : SizedBox(),
-
+      !_filteringGender
+          ? buildSortingButton(
+              _filteringGender
+                  ? getGenderTextForInteger(_selectedGender)
+                  : "성별", () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildModalSheet(context, 5),
+                  backgroundColor: Colors.transparent);
+            }, _filteringGender)
+          : SizedBox(),
     ];
   }
 
   String getGenderTextForInteger(int gender) {
-    if (gender == 0) return "성별";
-    else if (gender == 1) return "남자만";
-    else return "여자만";
+    if (gender == 0)
+      return "성별";
+    else if (gender == 1)
+      return "남자만";
+    else
+      return "여자만";
   }
 }
 
