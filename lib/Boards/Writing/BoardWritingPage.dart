@@ -214,7 +214,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                             onPressed: () =>
                                                 _selectDate(context),
                                             style: ElevatedButton.styleFrom(
-                                              primary: Color(0xFF6ACA9A),
+                                              primary: colorSuccess,
                                             ),
                                             child: Text(
                                                 '${dateFormatter.format(_selectedDate)}',
@@ -229,7 +229,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                             onPressed: () =>
                                                 _selectTime(context),
                                             style: ElevatedButton.styleFrom(
-                                              primary: Color(0xFF6ACA9A),
+                                              primary: colorSuccess,
                                             ),
                                             child: Text(
                                                 '${_selectedTime.format(context)}',
@@ -847,6 +847,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
       msg = "내용을 입력해주세요!";
     } else if (_body!.text.trim().length < 10) {
       msg = "내용은 열 글자 이상이어야 합니다!";
+    } else if (_selectedCategory == "없음") {
+      msg = "카테고리를 지정해주세요! ";
     } else if (_llName == null) {
       msg = "모임 장소를 선택해주세요!";
     } else if (_selectedPerson == "선택") {
@@ -861,6 +863,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
   }
 }
 
+// 올린 시간 정규화
 extension TimeOfDayConverter on TimeOfDay {
   String to24hours() {
     final hour = this.hour.toString().padLeft(2, "0");
