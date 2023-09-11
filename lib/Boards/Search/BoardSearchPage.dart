@@ -64,7 +64,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                         disabledBorder: _buildOutlineInputBorder(),
                         focusedBorder: _buildOutlineInputBorder()),
                     onFieldSubmitted: (search_value) {
-                      _searchPost(search_value);
+                      _searchPost(search_value, null);
                     },
                   ),
                 )),
@@ -85,30 +85,40 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                     ),
                   ), // 지금 시간대 추천 카테고리
                   Padding(
-                      padding: const EdgeInsets.fromLTRB(15, 16, 16, 16),
-                      child: SizedBox(
-                        height: 31,
-                        width: double.maxFinite,
-                        child: ListView.builder(
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        child: Wrap(
+                            direction: Axis.horizontal,
+                            // 나열 방향
+                            alignment: WrapAlignment.start,
+                            // 정렬 방식
+                            spacing: 7,
+                            // 좌우 간격
+                            runSpacing: 7,
+                            // 상하 간격
+                            children: CategoryList
+                                .map((e) => GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                _searchPost("", e);
+                              },
                               child: Container(
-                                decoration: _buildBoxDecoration(),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 10, left: 10, top: 7, bottom: 7),
-                                  child: Text(tempCategory![index],
-                                      style: const TextStyle(
-                                          color: Colors.black, fontSize: 14)),
+                                padding: const EdgeInsets.only(
+                                    right: 10, left: 10, top: 7, bottom: 7),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFEAEAEA),
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                                ),
+                                child: Text(
+                                  '$e',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 14),
                                 ),
                               ),
-                            );
-                          },
-                          scrollDirection: Axis.horizontal,
-                          itemCount: itemCnt,
-                        ),
-                      )), // 카테고리 스크롤뷰
+                            ))
+                                .toList())
+                      ), // 카테고리 스크롤뷰
                   const Padding(
                     padding: EdgeInsets.fromLTRB(13, 0, 13, 0),
                     child: Divider(
@@ -197,7 +207,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                             MainAxisAlignment.spaceBetween,
                             children: [
                               GestureDetector(
-                                onTap: () => _searchPost(_searchHistory![_searchHistory!.length - index - 1]),
+                                onTap: () => _searchPost(_searchHistory![_searchHistory!.length - index - 1], null),
                                 child: Row(
                                   children: [
                                     const Icon(Icons.search_sharp),
@@ -234,11 +244,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
     );
   }
 
-  _searchPost(String search_value) {
-    if(search_value != "" && search_value.length < 2) {
-      showAlert("검색어를 두 글자 이상 입력해주세요", context, colorSuccess);
-      return;
-    }
+  _searchPost(String search_value, String? category) {
     if(search_value != "") {
       if(_searchHistoryEnabled) {
         if(_searchHistory!.length == 20) {
@@ -252,7 +258,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
         _storage!.setStringList("search_history", _searchHistory!);
       }
     }
-    Get.off(() => BoardSearchListPage(search_value: search_value));
+    Get.off(() => BoardSearchListPage(search_value: search_value, category: category,));
   }
 
   BoxDecoration _buildBoxDecoration() {
