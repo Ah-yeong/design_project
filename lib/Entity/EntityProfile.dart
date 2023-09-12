@@ -28,7 +28,6 @@ class EntityProfiles {
 
   Future<void> loadProfile() async {
     // 포스팅 로드
-    isLoading = false;
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
           birth = ds.get("birth");
@@ -50,6 +49,7 @@ class EntityProfiles {
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
         });
+    isLoading = false;
   }
 
   String getProfileId() => profileId;
