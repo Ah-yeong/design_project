@@ -7,7 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:design_project/Resources/resources.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NameSignUpScreen extends StatefulWidget {
   @override
@@ -33,6 +34,14 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   int month = 1;
   int day = 1;
 
+  List<String> sigKorNames = [];
+  String? selectedSiDo = null;
+  String? selectedSiGunGu = null;
+  List<String> siDoList = [];
+  Map<String, List<String>> siGunGuMap = {};
+  int currentPage = 1;
+  int totalPage = 1;
+
   final List<String> mbti = [
     'ENFP', 'ENFJ', 'ENTP', 'ENTJ',
     'ESFP', 'ESFJ', 'ESTP', 'ESTJ',
@@ -42,8 +51,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 
   final List<String> hobby = [
     '영화', '노래', '술', '책',
-    '취미1','취미2','취미3','취미4',
-    '취미5', '취미6', '취미6', '취미7'
+    '춤', '축구', '여행', '공연',
+    '공예', '요리', '게임', '쇼핑',
+    '영화', '노래', '술', '책',
+    '춤', '축구', '여행', '공연',
+    '공예', '요리', '게임', '쇼핑'
   ];
 
   final List<String> commute = [
@@ -51,7 +63,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   ];
 
   int _selectedMBTIIndex = -1;
-  List<bool> _selectedHobby = List.generate(16, (index) => false);
+  List<bool> _selectedHobby = List.generate(32, (index) => false);
 
   Color ButtonColor1 = Colors.grey;
   Color ButtonColor2 = Colors.grey;
@@ -59,11 +71,52 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 
   int _commuteIndex = -1;
 
+  Future<void> fetchData(int page) async {
+    String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADSIGG_INFO&page=';
+    String? pageUrl = url + page.toString();
+    final response = await http.get(Uri.parse(pageUrl));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final features = data['response']['result']['featureCollection']['features'];
+
+      for (var feature in features) {
+        String sigKorName = feature['properties']['full_nm'];
+        sigKorNames.add(sigKorName);
+
+        // 시/도와 시/군/구 분리
+        List<String> parts = sigKorName.split(' ');
+        if (parts.length == 2) {
+          String siDo = parts[0];
+          String siGunGu = parts[1];
+          if (!siDoList.contains(siDo)) {
+            siDoList.add(siDo);
+          }
+
+          if (!siGunGuMap.containsKey(siDo)) {
+            siGunGuMap[siDo] = [];
+          }
+          siGunGuMap[siDo]?.add(siGunGu);
+        }
+      }
+      final pageData = data['response']['page'];
+      currentPage = int.parse(pageData['current']);
+      totalPage = int.parse(pageData['total']);
+
+      if (currentPage < totalPage) {
+        fetchData(currentPage + 1);
+      }
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     controllerNickName = TextEditingController();
     controllerText = TextEditingController();
+    fetchData(currentPage);
   }
 
   final _picker = ImagePicker();
@@ -234,6 +287,94 @@ class _NicknameFormState extends State<NameSignUpScreen> {
     );
   }
 
+  void _showSidoPicker() {
+    String sido ='';
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: CupertinoPicker(
+                  backgroundColor: Colors.white,
+                  itemExtent: 32,
+                  onSelectedItemChanged: (int index) {
+                    setState(() {
+                      sido = siDoList[index];
+                    });
+                  },
+                  children: List<Widget>.generate(siDoList.length, (int index) {
+                    return Center(
+                      child: Text(
+                        siDoList[index],
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    );
+                  }),
+                )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedSiDo = sido;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSiGunGuPicker() {
+    String? siGunGu ='';
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  child: CupertinoPicker(
+                    backgroundColor: Colors.white,
+                    itemExtent: 32,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        siGunGu = siGunGuMap[selectedSiDo!]?[index];
+                      });
+                    },
+                    children: List<Widget>.generate(siGunGuMap[selectedSiDo!]!.length, (int index) {
+                      return Center(
+                        child: Text(
+                          siGunGuMap[selectedSiDo!]![index],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedSiGunGu = siGunGu;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +383,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black,),
           onPressed: () {
-            Navigator.of(context).pop();
+            if (pageIndex > 1) {
+              setState(() {
+                pageIndex--; // 이전 페이지로 이동
+              });
+            }
           },
         ),
         title: Text(
@@ -483,7 +628,6 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                   femaleButtonColor = _unSelectedColor;
                   maleButtonColor = _selectedColor;
                   gender = 'male';
-
                 });
               },
               child: Text(
@@ -522,8 +666,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                   ),
                 ],
               ),
-            )
-            ,
+            ),
             SizedBox(width: 5),
             ElevatedButton(
               onPressed: _showMonthPicker,
@@ -574,39 +717,42 @@ class _NicknameFormState extends State<NameSignUpScreen> {
       children: [
         SizedBox(height: 6),
         Text(
-            '나만의 프로필을 작성해주세요 !',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            )
+          '나만의 프로필을 작성해주세요 !',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(height: 6),
         Text(
-            '자세하게 입력할수록 본인의 개성을 드러내는 프로필 생성이 가능합니다.',
-            style: TextStyle(
-              fontSize: 14,
-            )
+          '지금부터의 항목은 모두 선택사항입니다. \n자세하게 입력할수록 본인의 개성을 드러내는 프로필 생성이 가능합니다.',
+          style: TextStyle(
+            fontSize: 14,
+          ),
         ),
         SizedBox(height: 20),
         Text(
-            ' MBTI',
-            style: TextStyle(
-              fontSize: 16,
-            )
+          ' MBTI',
+          style: TextStyle(
+            fontSize: 16,
+          ),
         ),
         SizedBox(height: 10.0),
         Container(
-          height: 180,
           child: GridView.count(
             crossAxisCount: 4, // 4열
             crossAxisSpacing: 5, // 열 사이의 간격 5
             mainAxisSpacing: 5, // 행 사이의 간격 5
             childAspectRatio: 2.0,
+            shrinkWrap: true, // 내부 컨텐츠에 맞게 크기 조정
+            physics: NeverScrollableScrollPhysics(),
             children: List.generate(
               16, // 4행 4열 = 총 16개의 버튼
                   (index) => ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: _selectedMBTIIndex == index ? MaterialStateProperty.all(_selectedColor) : MaterialStateProperty.all(_unSelectedColor),
+                  backgroundColor: _selectedMBTIIndex == index
+                      ? MaterialStateProperty.all(_selectedColor)
+                      : MaterialStateProperty.all(_unSelectedColor),
                 ),
                 onPressed: () {
                   setState(() {
@@ -619,33 +765,34 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                     }
                   });
                 },
-                child: Text(mbti[index],
+                child: Text(
+                  mbti[index],
                   style: TextStyle(fontSize: 14),
                 ), // 엠비티아이 텍스트 설정
               ),
             ),
           ),
         ),
-        SizedBox(height: 16.0),
         Text(
-            ' 취미',
-            style: TextStyle(
-              fontSize: 16,
-            )
+          ' 취미',
+          style: TextStyle(
+            fontSize: 16,
+          ),
         ),
         SizedBox(height: 10.0),
-        SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Container(
-            height: 180,
-            child: GridView.count(
-              crossAxisCount: 4, // 4열
-              crossAxisSpacing: 5, // 열 사이의 간격 5
-              mainAxisSpacing: 5, // 행 사이의 간격 5
-              childAspectRatio: 2.0,
-              children: List.generate(
-                12, // 4행 4열 = 총 16개의 버튼
-                    (index) => ElevatedButton(
+        Container(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, // 4열
+                crossAxisSpacing: 5, // 열 사이의 간격 5
+                mainAxisSpacing: 5, // 행 사이의 간격 5
+                childAspectRatio: 2.0,
+              ),
+              itemCount: hobby.length, // hobby 배열의 길이만큼 아이템을 생성
+              shrinkWrap: true, // 내부 컨텐츠에 맞게 크기 조정
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(
                       _selectedHobby[index] ? _selectedColor : _unSelectedColor,
@@ -654,14 +801,14 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                   onPressed: () {
                     _onPressed(index);
                   },
-                  child: Text(hobby[index],
+                  child: Text(
+                    hobby[index],
                     style: TextStyle(fontSize: 14),
-                  ), // 취미 텍스트 설정
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
-        ),
       ],
     );
   }
@@ -776,8 +923,53 @@ class _NicknameFormState extends State<NameSignUpScreen> {
             )
         ),
         SizedBox(height: 10.0),
-      ],
-    );
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _showSidoPicker,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _unSelectedColor,
+                  padding: EdgeInsets.only(left: 6.0),
+                  // fixedSize: Size.fromWidth(110),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(selectedSiDo ?? '시/도 선택'),
+                    Padding(
+                      padding: EdgeInsets.only(left: 5.0),
+                      child: Icon(Icons.arrow_drop_down),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _showSiGunGuPicker,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _unSelectedColor,
+                  fixedSize: Size.fromWidth(80),
+                  padding: EdgeInsets.only(left: 6.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(selectedSiGunGu ?? '시/군/구 선택'),
+                    Padding(
+                      padding: EdgeInsets.only(left: 5.0),
+                      child: Icon(Icons.arrow_drop_down),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+          ],
+        );
   }
 
   Widget _buildInputForm(int index) {
@@ -808,6 +1000,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   _createProfile() async {
     List<int> hobbyIndex = [];
     List<String> selectedHobby = [];
+    print(FirebaseAuth.instance.currentUser!.uid);
     for (int i = 0; i < _selectedHobby.length; i++) {
       if (_selectedHobby[i]) {
         hobbyIndex.add(i);
@@ -830,8 +1023,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'commuteIndex' : _commuteIndex,
         'commute' : commute[_commuteIndex],
         'mannerGroup': 50,
-        // 'post':1,
-        'profileImagePath': _image
+        'post': null,
+        'group': null,
+        'profileImagePath': _image,
+        'addr1': selectedSiDo,
+        'addr2': selectedSiGunGu,
       });
       print('Profile data updated successfully.');
     } catch (e) {

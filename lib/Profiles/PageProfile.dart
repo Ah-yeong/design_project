@@ -262,7 +262,33 @@ class _PageProfileState extends State<PageProfile> {
                                   )
                                 ]
                             ),
-                            // Divider(thickness: 1, height: 1),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Divider(thickness: 1, height: 1),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Row(
+                                children: [
+                                  Text(
+                                    '거주지',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      // fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                        textAlign: TextAlign.right,
+                                        "${myProfile!.addr1} ${myProfile!.addr2}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      )
+                                  )
+                                ]
+                            ),
                           ],
                         ),
                       )
