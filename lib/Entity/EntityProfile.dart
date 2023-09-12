@@ -19,6 +19,8 @@ class EntityProfiles {
   var group;
   bool isLoading = true;
   // bool isLoaded = false;
+  var addr1;
+  var addr2;
 
   EntityProfiles(var this.profileId) {
     print("프로필 연결됨");
@@ -26,27 +28,28 @@ class EntityProfiles {
 
   Future<void> loadProfile() async {
     // 포스팅 로드
-    print(profileId);
+    isLoading = false;
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
-      birth = ds.get("birth");
-      age = 23;
-      profileImagePath = "assets/images/userImage.png";
-      commute = ds.get("commute");
-      commuteIndex = ds.get("commuteIndex");
-      // gender = ds.get("gender");
-      hobby = ds.get("hobby");
-      // _hobbyIndex = ds.get("hobbyIndex");
-      mbti = ds.get("mbti");
-      mbtiIndex = ds.get("mbtiIndex");
-      name = ds.get("nickName");
-      major = "소프트웨어학과";
-      textInfo = ds.get("textInfo");
-      mannerGroup = ds.get("mannerGroup");
-      post = ds.get("post");
-      group = ds.get("group");
-    });
-    isLoading = false;
+          birth = ds.get("birth");
+          age = 23;
+          profileImagePath = "assets/images/userImage.png";
+          commute = ds.get("commute");
+          commuteIndex = ds.get("commuteIndex");
+          gender = ds.get("gender");
+          hobby = ds.get("hobby");
+          // _hobbyIndex = ds.get("hobbyIndex");
+          mbti = ds.get("mbti");
+          mbtiIndex = ds.get("mbtiIndex");
+          name = ds.get("nickName");
+          major = "소프트웨어학과";
+          textInfo = ds.get("textInfo");
+          mannerGroup = ds.get("mannerGroup");
+          post = ds.get("post");
+          //group = ds.get("group");
+          addr1 = ds.get("addr1");
+          addr2 = ds.get("addr2");
+        });
   }
 
   String getProfileId() => profileId;
