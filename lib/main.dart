@@ -1,14 +1,15 @@
-import 'package:design_project/Boards/List/BoardLocationPage.dart';
+import 'dart:async';
+
 import 'package:design_project/Boards/List/BoardMain.dart';
-import 'package:design_project/Boards/Writing/BoardWritingPage.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Auth/SignUpPage.dart';
-import 'resources.dart';
+import 'Resources/resources.dart';
 import 'package:get/get.dart';
-import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -50,97 +51,188 @@ class _MyHomePage extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController? controllerId;
   TextEditingController? controllerPw;
+  bool _isRememberId = false;
+  bool _isLoading = false;
+  bool _splashScreenAnimated = false;
+  bool _splashScreenShow = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 1,
-        title: Text(
-          '로그인',
-          style: TextStyle(
-              fontSize: 16,
-              color: Colors.black
-          ),
-        ),
-        backgroundColor: Colors.white,
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        bottom: true,
-          child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            Center(
-              child: ElevatedButton(
-                child: Row(
+          bottom: false,
+          top: false,
+          child: Stack(
+            children: [
+              Form(
+                key: _formKey,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Hero(tag: 'detail', child: Icon(Icons.arrow_right_alt)),
-                    Text('- 페이지 강제이동 - 커밋 풀')
+                  children: [
+                    Center(
+                      child: Text(
+                        "마음 맞는, 사람끼리",
+                        style: TextStyle(
+                          fontSize: 35,
+                          color: Colors.black87,
+                          fontFamily: "logo",
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    AnimatedOpacity(
+                      opacity: _splashScreenShow ? 1 : 0,
+                      duration: Duration(milliseconds: 500),
+                      child: AnimatedCrossFade(
+                        firstChild: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(40),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      height: 50,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFE8E8E8),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 20),
+                                        child: TextFormField(
+                                            controller: controllerId,
+                                            style: TextStyle(fontSize: 15),
+                                            decoration: InputDecoration(
+                                                hintText: "사용자 아이디",
+                                                hintStyle:
+                                                    TextStyle(fontSize: 15),
+                                                border: InputBorder.none)),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Container(
+                                        height: 50,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFE8E8E8),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 20),
+                                          child: TextFormField(
+                                              controller: controllerPw,
+                                              obscureText: true,
+                                              style: TextStyle(fontSize: 15),
+                                              decoration: InputDecoration(
+                                                hintText: "사용자 비밀번호",
+                                                hintStyle:
+                                                    TextStyle(fontSize: 15),
+                                                border: InputBorder.none,
+                                                counterText: "",
+                                              )),
+                                        )),
+                                    SizedBox(height: 8),
+                                    GestureDetector(
+                                      child: Row(
+                                        children: [
+                                          Transform.scale(
+                                              scale: 0.9,
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: Checkbox(
+                                                  value: _isRememberId,
+                                                  onChanged: (_val) {
+                                                    setState(() {
+                                                      _isRememberId = _val!;
+                                                    });
+                                                  },
+                                                  activeColor: colorSuccess,
+                                                ),
+                                              )),
+                                          Text(
+                                            " 아이디 저장",
+                                            style: TextStyle(fontSize: 15),
+                                          )
+                                        ],
+                                      ),
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () {
+                                        setState(() {
+                                          _isRememberId = !_isRememberId;
+                                        });
+                                      },
+                                    ),
+                                    SizedBox(height: 20),
+                                    SizedBox(
+                                      height: 50,
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _isLoading = true;
+                                          });
+                                          _login();
+                                        },
+                                        child: const Text(
+                                          '로그인',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: colorSuccess),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 35,
+                                      width: 100,
+                                      child: GestureDetector(
+                                        child: Center(
+                                          child: Text(
+                                            "회원가입",
+                                            style: TextStyle(
+                                                fontSize: 15, color: colorGrey),
+                                          ),
+                                        ),
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (cont) =>
+                                                      const SignUpPage()));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        secondChild: SizedBox(width: double.infinity),
+                        crossFadeState: !_splashScreenAnimated
+                            ? CrossFadeState.showSecond
+                            : CrossFadeState.showFirst,
+                        duration: Duration(milliseconds: 800),
+                        sizeCurve: Curves.easeOutCubic,
+                      ),
+                      curve: Curves.linear,
+                    )
                   ],
                 ),
-                onPressed: () {
-                  Get.off(() => BoardPageMainHub());
-                },
               ),
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: controllerId,
-                          decoration: const InputDecoration(
-                          hintText: "글 제목 (최대 20자)",
-                          border: OutlineInputBorder(),
-                          counterText: "",
-                          )
-                        ),
-                        TextField(
-                          controller: controllerPw,
-                          obscureText: true,
-                            decoration: const InputDecoration(
-                              hintText: "글 제목 (최대 20자)",
-                              border: OutlineInputBorder(),
-                              counterText: "",
-                            )
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    child: ElevatedButton(
-                      onPressed: () => _login(),
-                      child: const Text('로그인'),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    child: ElevatedButton(
-                      onPressed: () => _logout(),
-                      child: const Text('로그아웃'),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            ElevatedButton(
-                child: Text('회원가입'),
-                onPressed: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (cont) => const SignUpPage()));
-                }),
-          ],
-        ),
-      )),
+              _isLoading ? buildContainerLoading() : SizedBox(),
+            ],
+          )),
     );
   }
 
@@ -155,13 +247,9 @@ class _MyHomePage extends State<MyHomePage> {
   _login() async {
     if (controllerId!.text.isEmpty) {
       showAlert("이메일을 입력해주세요!", context, colorWarning);
-      return;
-    }
-    if (controllerPw!.text.isEmpty) {
+    } else if (controllerPw!.text.isEmpty) {
       showAlert("비밀번호를 입력해주세요!", context, colorWarning);
-      return;
-    }
-    if (_formKey.currentState!.validate()) {
+    } else if (_formKey.currentState!.validate()) {
       FocusScope.of(context).requestFocus(FocusNode());
 
       // Firebase 사용자 인증, 등록
@@ -171,7 +259,9 @@ class _MyHomePage extends State<MyHomePage> {
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
         } else {
-          showAlert("이메일로 인증 주소를 보냈습니다!\n인증 주소를 클릭해주세요.", context, colorSuccess);
+          showAlert(
+              "이메일로 인증 주소를 보냈습니다!\n인증 주소를 클릭해주세요.", context, colorSuccess);
+          _loadingCompleted();
           return;
         }
       } on FirebaseAuthException catch (e) {
@@ -180,13 +270,20 @@ class _MyHomePage extends State<MyHomePage> {
         if (e.code == 'user-not-found' || e.code == 'wrong-password') {
           message = '사용자 이름 및 암호를 확인하세요';
         } else if (e.code == 'invalid-email') {
-          message = '이메일을 확인하세요';
+          message = '이메일 형식이 잘못되었습니다';
         } else {
           message = e.code;
         }
         showAlert(message, context, colorError);
       }
     }
+    _loadingCompleted();
+  }
+
+  _loadingCompleted() {
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   _logout() async {
@@ -203,7 +300,16 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
-
+    Timer(Duration(milliseconds: 2500), () {
+      setState(() {
+        _splashScreenAnimated = true;
+        Timer(Duration(milliseconds: 800), () {
+          setState(() {
+            _splashScreenShow = true;
+          });
+        });
+      });
+    });
     _auth();
   }
 }

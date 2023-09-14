@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../resources.dart';
+import '../Resources/resources.dart';
 import 'ChatScreen.dart';
 
 class ChatRoomListScreen extends StatefulWidget {
@@ -112,14 +113,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
                 );
               },
             )
-          : Center(
-              child: SizedBox(
-                  height: 65,
-                  width: 65,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4,
-                    color: colorSuccess,
-                  ))),
+          : buildLoadingProgress(),
     );
   }
 }

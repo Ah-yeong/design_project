@@ -1,4 +1,4 @@
-import 'package:design_project/resources.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'package:get/get.dart';
 import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
 import 'package:flutter/material.dart';

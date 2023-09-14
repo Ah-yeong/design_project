@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:design_project/Boards/List/BoardPostListPage.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:design_project/resources.dart';
+import 'package:design_project/Resources/resources.dart';
 import '../Boards/BoardProfilePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -42,13 +43,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   Widget build(BuildContext context) {
     mediaSize = MediaQuery.of(context).size;
     return !isLoaded
-        ? const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              color: Colors.black,
-              backgroundColor: Colors.white,
-            ),
-          )
+        ? buildLoadingProgress()
         : Scaffold(
             appBar: AppBar(
               title: const Text(

@@ -12,22 +12,13 @@
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Ydg-fD-yQy"/>
-                        <viewControllerLayoutGuide type="bottom" id="xbc-2k-c8Z"/>
+                        <viewControllerLayoutGuide type="top" id="5ZZ-cX-hL8"/>
+                        <viewControllerLayoutGuide type="bottom" id="N0I-I9-mDN"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                    <view key="view" contentMode="scaleToFill" id="T5b-uS-zEX">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="Kfa-4u-7YR">
-                                <rect key="frame" x="109" y="350" width="196" height="196"/>
-                            </imageView>
-                        </subviews>
-                        <color key="backgroundColor" red="0.50980395079999996" green="0.78431367870000002" blue="0.61960786580000005" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                        <constraints>
-                            <constraint firstItem="Kfa-4u-7YR" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="DxV-jW-DfT"/>
-                            <constraint firstItem="Kfa-4u-7YR" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="teV-Hw-eDE"/>
-                        </constraints>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -35,7 +26,4 @@
             <point key="canvasLocation" x="80.916030534351137" y="264.08450704225356"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="LaunchImage" width="196" height="196"/>
-    </resources>
 </document>

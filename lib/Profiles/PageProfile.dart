@@ -6,7 +6,7 @@ import '../Boards/BoardPostPage.dart';
 import '../Entity/EntityProfile.dart';
 import '../Entity/EntityPost.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:design_project/resources.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'PageProfileEdit.dart';
 import 'package:design_project/Boards/List/BoardPostListPage.dart';
 
