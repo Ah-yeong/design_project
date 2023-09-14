@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:design_project/Entity/EntityLatLng.dart';
-import 'package:design_project/resources.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

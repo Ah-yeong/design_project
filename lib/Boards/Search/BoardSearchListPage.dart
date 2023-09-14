@@ -1,12 +1,13 @@
 import 'package:design_project/Entity/EntityLatLng.dart';
 import 'package:design_project/Entity/EntityPostPageManager.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../Entity/EntityPost.dart';
-import '../../resources.dart';
+import '../../Resources/resources.dart';
 import '../List/BoardPostListPage.dart';
 import '../BoardPostPage.dart';
 
@@ -110,14 +111,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           backgroundColor: Colors.white,
         ),
         body: _pageManager.isLoading
-            ? Center(
-                child: SizedBox(
-                    height: 65,
-                    width: 65,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 4,
-                      color: colorSuccess,
-                    )))
+            ? buildLoadingProgress()
             : Column(
                 children: [
                   SizedBox(

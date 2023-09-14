@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
-import 'package:design_project/resources.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';

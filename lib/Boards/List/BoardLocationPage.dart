@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ import 'dart:ui' as ui;
 import 'dart:async';
 
 import '../../Entity/EntityPost.dart';
-import '../../resources.dart';
+import '../../Resources/resources.dart';
 
 class BoardLocationPage extends StatefulWidget {
   const BoardLocationPage({super.key});
@@ -44,14 +45,7 @@ class _BoardLocationPage extends State<BoardLocationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: postManager.isLoading ? Center(
-            child: SizedBox(
-                height: 65,
-                width: 65,
-                child: CircularProgressIndicator(
-                  strokeWidth: 4,
-                  color: colorSuccess,
-                ))) :
+        body: postManager.isLoading ? buildLoadingProgress() :
         SafeArea(
             bottom: false,
             child: Stack(

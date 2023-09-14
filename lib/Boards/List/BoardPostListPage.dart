@@ -2,10 +2,11 @@ import 'package:design_project/Boards/List/BoardHomePage.dart';
 import 'package:design_project/Boards/BoardPostPage.dart';
 import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
 import 'package:design_project/Entity/EntityPost.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'BoardMain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../resources.dart';
+import '../../Resources/resources.dart';
 
 class BoardGroupListPage extends StatefulWidget {
   const BoardGroupListPage({super.key});
@@ -22,14 +23,7 @@ with AutomaticKeepAliveClientMixin{
 
   @override
   Widget build(BuildContext context) {
-    return postManager.isLoading ? Center(
-      child: SizedBox(
-        height: 65,
-        width: 65,
-        child: CircularProgressIndicator(
-          strokeWidth: 4,
-          color: colorSuccess,
-        )))
+    return postManager.isLoading ? buildLoadingProgress()
       : CustomScrollView(
       controller: _scrollController,
       slivers: [

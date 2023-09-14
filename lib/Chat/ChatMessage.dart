@@ -1,8 +1,9 @@
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Chat/models/MessageFormat.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '../resources.dart';
+import '../Resources/resources.dart';
 import 'ChatBubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -167,16 +168,7 @@ class _MessagesState extends State<Messages> {
     //   }
     // });
 
-    return !(spLoaded && dbLoaded) ? Center(
-      child: Center(
-          child: SizedBox(
-              height: 65,
-              width: 65,
-              child: CircularProgressIndicator(
-                strokeWidth: 4,
-                color: colorSuccess,
-              ))),
-    ) : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+    return !(spLoaded && dbLoaded) ? buildLoadingProgress() : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
       stream: FirebaseFirestore.instance
           .collection(chatColName)
           .doc(chatDocName).snapshots(),

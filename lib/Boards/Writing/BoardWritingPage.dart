@@ -3,6 +3,7 @@ import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Boards/Writing/BoardSelectPositionPage.dart';
 import 'package:design_project/Entity/EntityPost.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +12,7 @@ import 'dart:math' as math;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../Entity/EntityLatLng.dart';
 import '../../Entity/EntityProfile.dart';
-import '../../resources.dart';
+import '../../Resources/resources.dart';
 
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:geocoding/geocoding.dart';
@@ -607,14 +608,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                       child: Container(
                         padding: EdgeInsets.only(bottom: 50),
                         color: Color(0x66000000),
-                        child: Center(
-                            child: SizedBox(
-                                height: 50,
-                                width: 50,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 4,
-                                  color: Colors.white,
-                                ))),
+                        child: buildLoadingProgress(),
                       ),
                     )
                   : SizedBox()

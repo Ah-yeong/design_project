@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-import '../resources.dart';
+import '../Resources/resources.dart';
 
 
 class SignUpPage extends StatefulWidget {
@@ -29,196 +29,189 @@ class _SignUpPage extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("회원가입"),
-      ),
       body: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(40),
           child: Form(
             key: _formKey,
             child: SafeArea(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey5,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 3, bottom: 7),
-                                ),
-                                Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 20),
-                                      child: Icon(
-                                        Icons.mail,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.emailAddress,
-                                        controller: controllerId,
-                                        decoration: InputDecoration(
-                                          hintText: "아이디"
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 7),
-                                  child: Divider(
-                                    thickness: 1.5,
-                                    height: 0,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 20),
-                                      child: Icon(
-                                        Icons.lock,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: TextFormField(
-                                          controller: controllerPw,
-                                          obscureText: true,
-                                          decoration: InputDecoration(
-                                              hintText: "아이디"
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 7),
-                                  child: Divider(
-                                    thickness: 1.5,
-                                    height: 0,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 20),
-                                      child: Icon(
-                                        Icons.lock_clock,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: TextFormField(
-                                          controller: controllerPwConfirm,
-                                          obscureText: true,
-                                          decoration: InputDecoration(
-                                              hintText: "아이디"
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 7, bottom: 0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                    Center(
+                      child: Text(
+                        "회원가입",
+                        style: TextStyle(
+                          fontSize: 33,
+                          color: Colors.black87,
+                          fontFamily: "logo",
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 30,),
+                    Text("아이디 관련", style: TextStyle(fontSize: 15),),
+                    const SizedBox(height: 2,),
+                    Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: TextFormField(
+                              controller: controllerId,
+                              style: TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                hintText: "이메일 아이디",
+                                hintStyle: TextStyle(fontSize: 15),
+                                border: InputBorder.none,
+                                counterText: "",
+                              )),
+                        )),
+                    const SizedBox(height: 2,),
+                    Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: TextFormField(
+                              controller: controllerPw,
+                              obscureText: true,
+                              style: TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                hintText: "비밀번호",
+                                hintStyle: TextStyle(fontSize: 15),
+                                border: InputBorder.none,
+                                counterText: "",
+                              )),
+                        )),
+                    const SizedBox(height: 2),
+                    Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: TextFormField(
+                              controller: controllerPwConfirm,
+                              obscureText: true,
+                              style: TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                hintText: "비밀번호 확인",
+                                hintStyle: TextStyle(fontSize: 15),
+                                border: InputBorder.none,
+                                counterText: "",
+                              )),
+                        )),
                     const SizedBox(
                       height: 20,
                     ),
+                    Text("학교 관련", style: TextStyle(fontSize: 15),),
+                    const SizedBox(height: 2,),
                     Container(
-                      decoration: BoxDecoration(
-                        color: colorGrey,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 3, bottom: 7),
-                                ),
-                                Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 20),
-                                      child: Icon(
-                                        CupertinoIcons.person_fill,
-                                        color: CupertinoColors.secondaryLabel,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.name,
-                                        controller: controllerNick,
-                                        decoration: InputDecoration(
-                                            hintText: "닉네임"
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10, right: 10, top: 7, bottom: 7),
-                                  child: Divider(
-                                    thickness: 1.5,
-                                    height: 0,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 20),
-                                      child: Icon(
-                                        CupertinoIcons.number,
-                                        color: CupertinoColors.secondaryLabel,
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: TextFormField(
-                                          keyboardType: TextInputType.number,
-                                          controller: controllerClassId,
-                                          obscureText: true,
-                                          decoration: InputDecoration(
-                                              hintText: "학번"
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 7, bottom: 0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: TextFormField(
+                              controller: controllerNick,
+                              obscureText: true,
+                              style: TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                hintText: "닉네임",
+                                hintStyle: TextStyle(fontSize: 15),
+                                border: InputBorder.none,
+                                counterText: "",
+                              )),
+                        )),
+                    const SizedBox(
+                      height: 2,
+                    ),
+                    Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: TextFormField(
+                              controller: controllerClassId,
+                              obscureText: true,
+                              style: TextStyle(fontSize: 15),
+                              decoration: InputDecoration(
+                                hintText: "학번",
+                                hintStyle: TextStyle(fontSize: 15),
+                                border: InputBorder.none,
+                                counterText: "",
+                              )),
+                        )),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    Align(
+                     alignment: Alignment.center,
+                     child: Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         Icon(Icons.info_outline, color: Colors.grey, size: 13,),
+                         Text(" 동일한 아이디, 닉네임, 학번으로 계정을 생성할 수 없어요!", style: TextStyle(fontSize: 12, color: Colors.grey),),
+                       ],
+                     )
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 30,
                     ),
                     SizedBox(
+                      height: 50,
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _signup,
-                        child: const Text('회원가입'),
+                        child: const Text("가입하기", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                        style:
+                        ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                       ),
-                    )
+                    ),
+                    Center(
+                      child: SizedBox(
+                        height: 35,
+                        width: 100,
+                        child: GestureDetector(
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.arrow_back, size: 14, color: colorGrey),
+                                Text(
+                                  " 이전으로",
+                                  style: TextStyle(
+                                      fontSize: 15, color: colorGrey),
+                                ),
+                              ],
+                            )
+                          ),
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 )),
           )),
