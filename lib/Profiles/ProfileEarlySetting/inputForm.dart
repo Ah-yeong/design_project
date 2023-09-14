@@ -37,8 +37,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   List<String> sigKorNames = [];
   String? selectedSiDo = null;
   String? selectedSiGunGu = null;
+  String? selectedDong = null;
   List<String> siDoList = [];
   Map<String, List<String>> siGunGuMap = {};
+  Map<String, List<String>> siGunGuMapSet = {};
+  Map<String, List<String>> dongMap = {};
   int currentPage = 1;
   int totalPage = 1;
 
@@ -72,7 +75,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   int _commuteIndex = -1;
 
   Future<void> fetchData(int page) async {
-    String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADSIGG_INFO&page=';
+    String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADEMD_INFO&page=';
     String? pageUrl = url + page.toString();
     final response = await http.get(Uri.parse(pageUrl));
 
@@ -86,9 +89,10 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 
         // 시/도와 시/군/구 분리
         List<String> parts = sigKorName.split(' ');
-        if (parts.length == 2) {
+        if (parts.length == 3) {
           String siDo = parts[0];
           String siGunGu = parts[1];
+          String dong = parts[2];
           if (!siDoList.contains(siDo)) {
             siDoList.add(siDo);
           }
@@ -96,7 +100,16 @@ class _NicknameFormState extends State<NameSignUpScreen> {
           if (!siGunGuMap.containsKey(siDo)) {
             siGunGuMap[siDo] = [];
           }
-          siGunGuMap[siDo]?.add(siGunGu);
+          if (!siGunGuMap[siDo]!.contains(siGunGu)) {
+            siGunGuMap[siDo]?.add(siGunGu);
+          }
+
+          if (!dongMap.containsKey(siGunGu)) {
+            dongMap[siGunGu] = [];
+          }
+          if (!dongMap[siGunGu]!.contains(dong)) {
+            dongMap[siGunGu]?.add(dong);
+          }
         }
       }
       final pageData = data['response']['page'];
@@ -119,8 +132,8 @@ class _NicknameFormState extends State<NameSignUpScreen> {
     fetchData(currentPage);
   }
 
-  final _picker = ImagePicker();
-  File? _image;
+  final ImagePicker picker = ImagePicker();
+  XFile? _image;
 
 //   // 앨범 접근 권한 요청
 //   Future<bool> requestAlbumPermission() async {
@@ -134,12 +147,12 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 //     return status.isGranted;
 //   }
 //
-  Future<void> _getImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
-
+  Future<void> _getImage(ImageSource imageSource) async {
+    final XFile? pickedFile = await picker.pickImage(source: imageSource);
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _image = XFile(pickedFile!.path);
+        print(pickedFile.path);
       });
     }
   }
@@ -320,6 +333,8 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 onPressed: () {
                   setState(() {
                     selectedSiDo = sido;
+                    selectedSiGunGu = null;
+                    selectedDong = null;
                   });
                   Navigator.of(context).pop();
                 },
@@ -333,6 +348,9 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 
   void _showSiGunGuPicker() {
     String? siGunGu ='';
+    siGunGuMap.forEach((key, value) {
+      value.sort();
+    });
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -364,6 +382,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 onPressed: () {
                   setState(() {
                     selectedSiGunGu = siGunGu;
+                    selectedDong = null;
                   });
                   Navigator.of(context).pop();
                 },
@@ -372,6 +391,65 @@ class _NicknameFormState extends State<NameSignUpScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showDongPicker() {
+    String? dong ='';
+    siGunGuMap.forEach((key, value) {
+      value.sort();
+    });
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  child: CupertinoPicker(
+                    backgroundColor: Colors.white,
+                    itemExtent: 32,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        dong = dongMap[selectedSiGunGu!]?[index];
+                      });
+                    },
+                    children: List<Widget>.generate(dongMap[selectedSiGunGu!]!.length, (int index) {
+                      return Center(
+                        child: Text(
+                          dongMap[selectedSiGunGu!]![index],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedDong = dong;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPhotoArea() {
+    return _image != null ? Container(
+        width: 300,
+        height: 300,
+        child: Image.file(File(_image!.path)), //가져온 이미지를 화면에 띄워주는 코드
+      ) : Container(
+        width: 300,
+        height: 300,
+        color: Colors.grey,
     );
   }
 
@@ -471,54 +549,48 @@ class _NicknameFormState extends State<NameSignUpScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(height: 20),
-                InkWell(
-                  onTap: () async {
-                    final source = await showDialog<ImageSource>(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('사진 업로드'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, ImageSource.camera);
-                              },
-                              child: Text('카메라로 직접 촬영'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, ImageSource.gallery);
-                              },
-                              child: Text('앨범에서 가져오기'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                    if (source != null) {
-                      await _getImage(source);
-                    }
-                  },
-                  child: CircleAvatar(
-                    radius: 100,
-                    backgroundImage: _image != null ? FileImage(_image!) : null,
-                    child: _image == null
-                        ? Icon(
-                      Icons.person,
-                      size: 80,
-                    )
-                        : null,
-                  ),
-                ),
+                // InkWell(
+                //   onTap: () async {
+                //     final source = await showDialog<ImageSource>(
+                //       context: context,
+                //       builder: (context) {
+                //         return AlertDialog(
+                //           title: Text('사진 업로드'),
+                //           actions: [
+                //             TextButton(
+                //               onPressed: () {
+                //                 _getImage(ImageSource.camera);
+                //               },
+                //               child: Text('카메라로 직접 촬영'),
+                //             ),
+                //             TextButton(
+                //               onPressed: () {
+                //                 _getImage(ImageSource.gallery);
+                //               },
+                //               child: Text('앨범에서 가져오기'),
+                //             ),
+                //           ],
+                //         );
+                //       },
+                //     );
+                //     if (source != null) {
+                //       await _getImage(source);
+                //     }
+                //   },
+                //   child: CircleAvatar(
+                //     radius: 100,
+                //     backgroundImage: _image != null ? AssetImage(_image!.path) : null,
+                //     child: _image == null
+                //         ? Icon(
+                //       Icons.person,
+                //       size: 80,
+                //     )
+                //         : null,
+                //   ),
+                // ),
+                _buildPhotoArea(),
                 SizedBox(
                   height: 26,
-                ),
-                Text(
-                    '[위의 아이콘을 클릭]',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    )
                 ),
                 SizedBox(
                   height: 10,
@@ -530,6 +602,24 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                       color: Colors.grey,
                     )
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _getImage(ImageSource.camera); //getImage 함수를 호출해서 카메라로 찍은 사진 가져오기
+                      },
+                      child: Text("카메라"),
+                    ),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        _getImage(ImageSource.gallery); //getImage 함수를 호출해서 카메라로 찍은 사진 가져오기
+                      },
+                      child: Text("갤러리"),
+                    ),
+                  ],
+                )
               ],
             ),
           )
@@ -923,50 +1013,66 @@ class _NicknameFormState extends State<NameSignUpScreen> {
             )
         ),
         SizedBox(height: 10.0),
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _showSidoPicker,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _unSelectedColor,
-                  padding: EdgeInsets.only(left: 6.0),
-                  // fixedSize: Size.fromWidth(110),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(selectedSiDo ?? '시/도 선택'),
-                    Padding(
-                      padding: EdgeInsets.only(left: 5.0),
-                      child: Icon(Icons.arrow_drop_down),
-                    ),
-                  ],
-                ),
+        ElevatedButton(
+          onPressed: _showSidoPicker,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: selectedSiDo == null ? _unSelectedColor : _selectedColor,
+            padding: EdgeInsets.only(left: 6.0),
+            // fixedSize: Size.fromWidth(110),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                selectedSiDo ?? '시/도',
+                // style: TextStyle(fontSize: 12),
               ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _showSiGunGuPicker,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _unSelectedColor,
-                  fixedSize: Size.fromWidth(80),
-                  padding: EdgeInsets.only(left: 6.0),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(selectedSiGunGu ?? '시/군/구 선택'),
-                    Padding(
-                      padding: EdgeInsets.only(left: 5.0),
-                      child: Icon(Icons.arrow_drop_down),
-                    ),
-                  ],
-                ),
+              Padding(
+                padding: EdgeInsets.only(left: 5.0),
+                child: Icon(Icons.arrow_drop_down),
               ),
-            )
-          ],
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _showSiGunGuPicker,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: selectedSiGunGu == null ? _unSelectedColor : _selectedColor,
+            padding: EdgeInsets.only(left: 6.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                selectedSiGunGu ?? '시/군/구',
+                // style: TextStyle(fontSize: 12),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 5.0),
+                child: Icon(Icons.arrow_drop_down),
+              ),
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _showDongPicker,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: selectedDong == null ? _unSelectedColor : _selectedColor,
+            padding: EdgeInsets.only(left: 6.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                selectedDong ?? '읍/면/동',
+                // style: TextStyle(fontSize: 12),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 5.0),
+                child: Icon(Icons.arrow_drop_down),
+              ),
+            ],
+          ),
         ),
           ],
         );
