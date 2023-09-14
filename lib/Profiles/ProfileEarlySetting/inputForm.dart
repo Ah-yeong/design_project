@@ -34,6 +34,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   int month = 1;
   int day = 1;
 
+
   List<String> sigKorNames = [];
   String? selectedSiDo = null;
   String? selectedSiGunGu = null;
