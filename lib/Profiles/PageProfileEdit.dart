@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -6,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'PageProfile.dart';
+import 'package:http/http.dart' as http;
+import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
 
 class PageProfileEdit extends StatefulWidget {
   @override
@@ -39,6 +44,17 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   Color _selectedColor = Color(0xFF6ACA9A);
   Color _unSelectedColor = Colors.grey;
 
+  List<String> sigKorNames = [];
+  String? selectedSiDo = null;
+  String? selectedSiGunGu = null;
+  String? selectedDong = null;
+  List<String> siDoList = [];
+  Map<String, List<String>> siGunGuMap = {};
+  Map<String, List<String>> siGunGuMapSet = {};
+  Map<String, List<String>> dongMap = {};
+  int currentPage = 1;
+  int totalPage = 1;
+
   Future<void> _getImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
 
@@ -48,6 +64,197 @@ class _PageProfileEditState extends State<PageProfileEdit> {
         print(_image);
       });
     }
+  }
+
+  Future<void> fetchData(int page) async {
+    String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADEMD_INFO&page=';
+    String? pageUrl = url + page.toString();
+    final response = await http.get(Uri.parse(pageUrl));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      final features = data['response']['result']['featureCollection']['features'];
+
+      for (var feature in features) {
+        String sigKorName = feature['properties']['full_nm'];
+        sigKorNames.add(sigKorName);
+
+        // 시/도와 시/군/구 분리
+        List<String> parts = sigKorName.split(' ');
+        if (parts.length == 3) {
+          String siDo = parts[0];
+          String siGunGu = parts[1];
+          String dong = parts[2];
+          if (!siDoList.contains(siDo)) {
+            siDoList.add(siDo);
+          }
+
+          if (!siGunGuMap.containsKey(siDo)) {
+            siGunGuMap[siDo] = [];
+          }
+          if (!siGunGuMap[siDo]!.contains(siGunGu)) {
+            siGunGuMap[siDo]?.add(siGunGu);
+          }
+
+          if (!dongMap.containsKey(siGunGu)) {
+            dongMap[siGunGu] = [];
+          }
+          if (!dongMap[siGunGu]!.contains(dong)) {
+            dongMap[siGunGu]?.add(dong);
+          }
+        }
+      }
+      final pageData = data['response']['page'];
+      currentPage = int.parse(pageData['current']);
+      totalPage = int.parse(pageData['total']);
+
+      if (currentPage < totalPage) {
+        fetchData(currentPage + 1);
+      }
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  void _showSidoPicker() {
+    String sido ='';
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  child: CupertinoPicker(
+                    backgroundColor: Colors.white,
+                    itemExtent: 32,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        sido = siDoList[index];
+                      });
+                    },
+                    children: List<Widget>.generate(siDoList.length, (int index) {
+                      return Center(
+                        child: Text(
+                          siDoList[index],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedSiDo = sido;
+                    selectedSiGunGu = null;
+                    selectedDong = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSiGunGuPicker() {
+    String? siGunGu ='';
+    siGunGuMap.forEach((key, value) {
+      value.sort();
+    });
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  child: CupertinoPicker(
+                    backgroundColor: Colors.white,
+                    itemExtent: 32,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        siGunGu = siGunGuMap[selectedSiDo!]?[index];
+                      });
+                    },
+                    children: List<Widget>.generate(siGunGuMap[selectedSiDo!]!.length, (int index) {
+                      return Center(
+                        child: Text(
+                          siGunGuMap[selectedSiDo!]![index],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedSiGunGu = siGunGu;
+                    selectedDong = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDongPicker() {
+    String? dong ='';
+    siGunGuMap.forEach((key, value) {
+      value.sort();
+    });
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 3,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  child: CupertinoPicker(
+                    backgroundColor: Colors.white,
+                    itemExtent: 32,
+                    onSelectedItemChanged: (int index) {
+                      setState(() {
+                        dong = dongMap[selectedSiGunGu!]?[index];
+                      });
+                    },
+                    children: List<Widget>.generate(dongMap[selectedSiGunGu!]!.length, (int index) {
+                      return Center(
+                        child: Text(
+                          dongMap[selectedSiGunGu!]![index],
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }),
+                  )
+              ),
+              CupertinoButton(
+                child: Text('저장'),
+                onPressed: () {
+                  setState(() {
+                    selectedDong = dong;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   TextEditingController? _nicknameController;
@@ -401,11 +608,79 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 15),
+                      Text(
+                          ' 통학 여부',
+                          style: TextStyle(
+                            fontSize: 14,
+                          )
+                      ),
+                      ElevatedButton(
+                        onPressed: _showSidoPicker,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selectedSiDo == null ? _unSelectedColor : _selectedColor,
+                          padding: EdgeInsets.only(left: 6.0),
+                          // fixedSize: Size.fromWidth(110),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              selectedSiDo ?? '시/도',
+                              // style: TextStyle(fontSize: 12),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 5.0),
+                              child: Icon(Icons.arrow_drop_down),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _showSiGunGuPicker,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selectedSiGunGu == null ? _unSelectedColor : _selectedColor,
+                          padding: EdgeInsets.only(left: 6.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              selectedSiGunGu ?? '시/군/구',
+                              // style: TextStyle(fontSize: 12),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 5.0),
+                              child: Icon(Icons.arrow_drop_down),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _showDongPicker,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selectedDong == null ? _unSelectedColor : _selectedColor,
+                          padding: EdgeInsets.only(left: 6.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              selectedDong ?? '읍/면/동',
+                              // style: TextStyle(fontSize: 12),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 5.0),
+                              child: Icon(Icons.arrow_drop_down),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.all(20.0),
+                    padding: EdgeInsets.fromLTRB(20, 10, 20, 20),
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -450,6 +725,9 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       }
       _mbtiIndex = myProfile!.mbtiIndex;
       // _hobbyIndex = myProfile!.hobbyIndex;
+      selectedSiDo = myProfile!.addr1;
+      selectedSiGunGu = myProfile!.addr2;
+      // selectedDong = myProfile!.addr3;
       setState(() {});
     });
   }
@@ -468,6 +746,9 @@ class _PageProfileEditState extends State<PageProfileEdit> {
         // 'hobby': selectedHobby,
         'commuteIndex' : _commuteIndex,
         'commute' : commute[_commuteIndex],
+        'addr1' : selectedSiDo,
+        'addr2' : selectedSiGunGu,
+        // 'addr3' : selectedDong
       });
       print('Profile data updated successfully.');
     } catch (e) {
