@@ -1,30 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
+import 'package:design_project/Chat/models/ChatStorage.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
-import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import 'ChatMessage.dart';
-import 'PageUserPosition.dart';
 
 class ChatScreen extends StatefulWidget {
   final int? postId;
+  final List<String>? members;
   final String? recvUserId;
-  const ChatScreen({Key? key, this.postId, this.recvUserId}) : super(key: key);
+  const ChatScreen({Key? key, this.postId, this.recvUserId, this.members}) : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState(postId, recvUserId);
+  _ChatScreenState createState() => _ChatScreenState(postId, recvUserId, members);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _authentication = FirebaseAuth.instance;
   User? loggedUser;
   final int? postId;
+  List<String>? members;
   final String? recvUserId;
-  _ChatScreenState(this.postId, this.recvUserId);
+  _ChatScreenState(this.postId, this.recvUserId, this.members);
 
-  bool isLoaded = false;
+  ChatStorage? _savedChat;
+
+  bool _chatLoaded = false;
+  bool _isLoaded = false;
 
   late EntityProfiles recvUser;
   late bool isGroupChat;
@@ -32,29 +35,27 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    _savedChat = ChatStorage(postId == null ? recvUserId! : postId.toString());
+    _savedChat!.init().then((value) {
+      setState(() {
+        _chatLoaded = true;
+      });
+    });
     if (recvUserId != null) {
       recvUser = EntityProfiles(recvUserId);
       recvUser.loadProfile().then((value) {
         setState(() {
-          isLoaded = true;
+          _isLoaded = true;
         });
       });
     } else {
-      isLoaded = true;
+      if (members == null) {
+        _initGroupChat().then((value) => setState(() => _isLoaded = true));
+      } else {
+        _isLoaded = true;
+      }
     }
     isGroupChat = postId != null;
-  }
-
-  void getCurrentUser() {
-    try {
-      final user = _authentication.currentUser;
-      if (user != null) {
-        loggedUser = user;
-      }
-    } catch (e) {
-      print(e);
-    }
   }
 /*
 
@@ -65,13 +66,13 @@ class _ChatScreenState extends State<ChatScreen> {
       return Scaffold(
         appBar: AppBar(
           elevation: 1,
-          title: Text('${isGroupChat ? postManager.list[postId!].getPostHead() : isLoaded == true ? recvUser.name : "불러오는 중"} ', style: TextStyle(color: Colors.black, fontSize: 19),),
+          title: Text(_isLoaded == false ? "불러오는 중" : isGroupChat ? "그룹채팅 (${members!.length} 명)" : recvUser.name, style: TextStyle(color: Colors.black, fontSize: 19)),
           backgroundColor: Colors.white,
           leading: BackButton(
             color: Colors.black,
           ),
         ),
-        body: isLoaded == false ? Center(
+        body: (_isLoaded == false || _chatLoaded == false) ? Center(
           child: CircularProgressIndicator(),
         ) : Container(
           child: Column(
@@ -86,11 +87,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: FloatingActionButton.extended(
                         elevation: 0,
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => GoogleMapPage()),
-                          );
+                          _savedChat!.getStorage().remove("${myUuid}_ChatData_${isGroupChat ? postId : recvUserId}");
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => GoogleMapPage()),
+                          // );
                         },
                         label: Container(
                           width: 100,
@@ -161,7 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
               Expanded(
-                child: Messages(postId: postId, recvUser: recvUserId,),
+                child: ChatMessage(postId: postId, recvUser: recvUserId, members: members,),
               ),
               //NewMessage(),
             ],
@@ -169,34 +171,48 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
     }
+    
+    Future<void> _initGroupChat() async {
+      await FirebaseFirestore.instance.collection("PostGroupChat").doc(postId.toString()).get().then((ds) {
+        members = List.empty(growable: true);
+        for (dynamic data in ds.get("members")) {
+          members!.add(data.toString());
+        }
+      });
+    }
 }
 
-Future<void> addChatDataList(String uid, bool isGroupChat, {int? postId, String? recvUserId}) async {
+// uid에 해당하는 UserChatData에 채팅방 postId 또는 채팅 상대 recvUserId 연결
+Future<void> addChatDataList(bool isGroupChat, {String? uid, String? recvUserId, int? postId, List<String>? members,}) async {
   String colName = "UserChatData";
-  final doc = await FirebaseFirestore.instance.collection(colName).doc(uid).get();
-  if ( !doc.exists ) {
-    if (isGroupChat) {
-      await FirebaseFirestore.instance.collection(colName).doc(uid).set({"chat" : []
-      , "group_chat" : postId!});
-    } else {
-      await FirebaseFirestore.instance.collection(colName).doc(uid).set({"chat" : [getNameChatRoom(uid, recvUserId!)]
-        , "group_chat" : []});
+  var doc;
+  if(isGroupChat) {
+    for (String uuid in members!) {
+      doc = await FirebaseFirestore.instance.collection(colName).doc(uuid).get();
+      if (!doc.exists) {  // 그룹채팅방인데, 각 인원에 대해 documents가 없는 경우
+        await FirebaseFirestore.instance.collection(colName).doc(uuid).set({"chat" : []
+          , "group_chat" : [postId]});
+      } else {  // 그룹채팅방인데, 각 인원에 대해 documents가 존재하는 경우
+        late List<dynamic> groupChatList;
+        await FirebaseFirestore.instance.collection(colName).doc(uuid).get().then((ds) {
+          groupChatList = ds.get("group_chat");
+        });
+        if(groupChatList.contains(postId!)) return;
+        groupChatList.add(postId);
+        await FirebaseFirestore.instance.collection(colName).doc(uuid).update({"group_chat" : groupChatList});
+      }
     }
   } else {
-    if (isGroupChat) {
-      late List<int> groupChatList;
-      await FirebaseFirestore.instance.collection(colName).doc(uid).get().then((ds) {
-        groupChatList = ds.get("group_chat");
-      });
-      if(groupChatList.contains(postId!)) return;
-      groupChatList.add(postId);
-      await FirebaseFirestore.instance.collection(colName).doc(uid).update({"group_chat" : groupChatList});
-    } else {
+    doc = await FirebaseFirestore.instance.collection(colName).doc(uid).get();
+    if ( !doc.exists ) { // 그룹채팅방이 아닌데, Documents가 없을 경우
+      await FirebaseFirestore.instance.collection(colName).doc(uid).set({"chat" : [getNameChatRoom(uid!, recvUserId!)]
+        , "group_chat" : []});
+    } else { // 그룹채팅방이 아닌데, Documents가 존재할 경우
       late List<dynamic> chatList;
       await FirebaseFirestore.instance.collection(colName).doc(uid).get().then((ds) {
         chatList = ds.get("chat");
       });
-      if(chatList.contains(getNameChatRoom(uid, recvUserId!))) return;
+      if(chatList.contains(getNameChatRoom(uid!, recvUserId!))) return;
       chatList.add(getNameChatRoom(uid, recvUserId));
       await FirebaseFirestore.instance.collection(colName).doc(uid).update({"chat" : chatList});
     }

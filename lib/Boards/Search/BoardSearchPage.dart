@@ -1,3 +1,4 @@
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/resources.dart';
 import 'package:get/get.dart';
 import 'package:design_project/Boards/Search/BoardSearchListPage.dart';
@@ -30,8 +31,8 @@ class _BoardSearchPage extends State<BoardSearchPage> {
     itemCnt = tempCategory!.length;
     loadStorage().then((value) => {
       setState(() {
-      _searchHistory = _storage!.getStringList("search_history") ?? _searchHistory;
-      _searchHistoryEnabled = _storage!.getBool("search_history_enabled") ?? _searchHistoryEnabled;
+      _searchHistory = _storage!.getStringList("${myUuid}_search_history") ?? _searchHistory;
+      _searchHistoryEnabled = _storage!.getBool("${myUuid}_search_history_enabled") ?? _searchHistoryEnabled;
       })
     });
 
@@ -147,7 +148,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                                   onTap: () {
                                     setState(() {
                                       _searchHistory!.clear();
-                                      _storage!.setStringList("search_history", _searchHistory!);
+                                      _storage!.setStringList("${myUuid}_search_history", _searchHistory!);
                                     });
                                   },
                                   child: const Text("모두 지우기", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
@@ -157,9 +158,9 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                                   onTap: () {
                                     setState(() {
                                       _searchHistoryEnabled = !_searchHistoryEnabled;
-                                      _storage!.setStringList("search_history", List.empty());
+                                      _storage!.setStringList("${myUuid}_search_history", List.empty());
                                       _searchHistory!.clear();
-                                      _storage!.setBool("search_history_enabled", _searchHistoryEnabled);
+                                      _storage!.setBool("${myUuid}_search_history_enabled", _searchHistoryEnabled);
                                     });
                                   },
                                   child: Text("저장 기능 ${_searchHistoryEnabled ? "끄기" : "켜기"}", style: TextStyle(fontSize: 12, color: Color(0xFF888888)),),
@@ -219,7 +220,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
                                 onTap: () {
                                   setState(() {
                                     _searchHistory!.removeAt(_searchHistory!.length - index - 1);
-                                    _storage!.setStringList("search_history", _searchHistory!);
+                                    _storage!.setStringList("${myUuid}_search_history", _searchHistory!);
                                   });
                                 },
                                 child: const Icon(Icons.close),
@@ -255,7 +256,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
           _searchHistory!.remove(search_value);
         }
         _searchHistory!.add(search_value);
-        _storage!.setStringList("search_history", _searchHistory!);
+        _storage!.setStringList("${myUuid}_search_history", _searchHistory!);
       }
     }
     Get.off(() => BoardSearchListPage(search_value: search_value, category: category,));

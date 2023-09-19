@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../Resources/resources.dart';
 import 'ChatScreen.dart';
+import 'models/ChatRoom.dart';
 
 class ChatRoomListScreen extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class ChatRoomListScreen extends StatefulWidget {
 }
 
 class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
-  List<chatRoom> list = List.empty(growable: true);
+  List<ChatRoom> list = List.empty(growable: true);
   bool isLoaded = false;
 
   @override
@@ -38,10 +39,10 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
         str = str.replaceAll("-", "").replaceAll(uid, "");
         EntityProfiles _profile = EntityProfiles(str);
         await _profile.loadProfile();
-        list.add(chatRoom(false, null, str, _profile.name));
+        list.add(ChatRoom(isGroupChat: false, recvUserNick: _profile.name, recvUserId: str));
       }
       for (int postId in groupList) {
-        list.add(chatRoom(true, postId, null, null));
+        list.add(ChatRoom(isGroupChat: true, postId: postId));
       }
     }
     return;
@@ -99,7 +100,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
                                   SizedBox(height: 20,),
                                   Text('${list[index].isGroupChat
                                       ? postManager.list[list[index].postId!].getPostHead()
-                                      : "${list[index].nickname} 님과의 대화"}'),
+                                      : "${list[index].recvUserNick} 님과의 대화"}'),
                                   SizedBox(height: 20,),
                                 ],
                               ),
@@ -116,13 +117,4 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
           : buildLoadingProgress(),
     );
   }
-}
-
-class chatRoom {
-  late bool isGroupChat;
-  int? postId;
-  String? recvUserId;
-  String? nickname;
-
-  chatRoom(this.isGroupChat, this.postId, this.recvUserId, this.nickname);
 }

@@ -1,3 +1,4 @@
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
 import 'package:design_project/Entity/EntityPostPageManager.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
@@ -236,9 +237,9 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
     loadStorage().then((value) => {
           setState(() {
             _searchHistory =
-                _storage!.getStringList("search_history") ?? _searchHistory;
+                _storage!.getStringList("${myUuid}_search_history") ?? _searchHistory;
             _searchHistoryEnabled =
-                _storage!.getBool("search_history_enabled") ??
+                _storage!.getBool("${myUuid}_search_history_enabled") ??
                     _searchHistoryEnabled;
           })
         });
@@ -259,7 +260,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           _searchHistory!.remove(search_value);
         }
         _searchHistory!.add(search_value);
-        _storage!.setStringList("search_history", _searchHistory!);
+        _storage!.setStringList("${myUuid}_search_history", _searchHistory!);
       }
     }
     setState(() {});

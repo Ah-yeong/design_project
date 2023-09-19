@@ -162,7 +162,6 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "upTime" : upTime,
       "viewCount" : 1
     });
-    await addChatDataList(uuid, true, postId: new_post_id);
     return true;
   } catch (e) {
     return false;
