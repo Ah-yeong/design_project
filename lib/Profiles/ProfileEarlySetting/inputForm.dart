@@ -332,7 +332,8 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedSiDo = sido;
+                    if(selectedSiDo==''){selectedSiDo = siDoList[0];}
+                    else{selectedSiDo = sido;}
                     selectedSiGunGu = null;
                     selectedDong = null;
                   });
@@ -381,7 +382,8 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedSiGunGu = siGunGu;
+                    if(selectedSiGunGu==''){selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];}
+                    else{selectedSiGunGu = siGunGu;}
                     selectedDong = null;
                   });
                   Navigator.of(context).pop();
@@ -429,7 +431,8 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedDong = dong;
+                    if(selectedDong == ''){selectedDong = dongMap[selectedSiGunGu!]![0];}
+                    else{selectedDong = dong;}
                   });
                   Navigator.of(context).pop();
                 },
@@ -1129,7 +1132,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'commuteIndex' : _commuteIndex,
         'commute' : commute[_commuteIndex],
         'mannerGroup': 50,
-        'post': null,
+        'post': FieldValue.arrayUnion([]),
         'group': null,
         'profileImagePath': _image,
         'addr1': selectedSiDo,
