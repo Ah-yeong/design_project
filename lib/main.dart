@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Auth/SignUpPage.dart';
 import 'Resources/resources.dart';
 import 'package:get/get.dart';
@@ -55,6 +56,12 @@ class _MyHomePage extends State<MyHomePage> {
   bool _isLoading = false;
   bool _splashScreenAnimated = false;
   bool _splashScreenShow = false;
+  bool _fadeOutLogo = false;
+
+  // About save options
+  SharedPreferences? _localdb;
+  bool? _saveIdEnabled;
+  String? _savedId;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +77,7 @@ class _MyHomePage extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    AnimatedOpacity(opacity: _fadeOutLogo ? 0 : 1, duration: Duration(milliseconds: 500), child:
                     Center(
                       child: Text(
                         "마음 맞는, 사람끼리",
@@ -80,10 +88,10 @@ class _MyHomePage extends State<MyHomePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
+                    ),),
                     AnimatedOpacity(
                       opacity: _splashScreenShow ? 1 : 0,
-                      duration: Duration(milliseconds: 500),
+                      duration: Duration(milliseconds: 450),
                       child: AnimatedCrossFade(
                         firstChild: Center(
                           child: Column(
@@ -152,6 +160,7 @@ class _MyHomePage extends State<MyHomePage> {
                                                   onChanged: (_val) {
                                                     setState(() {
                                                       _isRememberId = _val!;
+                                                      saveOption(_isRememberId);
                                                     });
                                                   },
                                                   activeColor: colorSuccess,
@@ -167,6 +176,7 @@ class _MyHomePage extends State<MyHomePage> {
                                       onTap: () {
                                         setState(() {
                                           _isRememberId = !_isRememberId;
+                                          saveOption(_isRememberId);
                                         });
                                       },
                                     ),
@@ -240,7 +250,21 @@ class _MyHomePage extends State<MyHomePage> {
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        Get.off(() => BoardPageMainHub());
+        setState(() {
+          _fadeOutLogo = true;
+        });
+        Timer(Duration(milliseconds: 550), () {
+          Get.off(() => BoardPageMainHub());
+        });
+      } else {
+        setState(() {
+          _splashScreenAnimated = true;
+          Timer(Duration(milliseconds: 800), () {
+            setState(() {
+              _splashScreenShow = true;
+            });
+          });
+        });
       }
     });
   }
@@ -259,6 +283,7 @@ class _MyHomePage extends State<MyHomePage> {
             email: controllerId!.text, password: controllerPw!.text);
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
+          saveId(controllerId!.text);
         } else {
           showAlert(
               "이메일로 인증 주소를 보냈습니다!\n인증 주소를 클릭해주세요.", context, colorSuccess);
@@ -296,21 +321,43 @@ class _MyHomePage extends State<MyHomePage> {
     super.dispose();
   }
 
+  void saveOption(bool option) {
+    _localdb!.setBool("login_option_save_enabled", option);
+    if (option == false) {
+      _localdb!.remove("login_option_saved_id");
+    }
+  }
+
+  void saveId(String id) {
+    _localdb!.setString("login_option_saved_id", id);
+  }
+
+  Future<void> _loadStorage() async {
+    _localdb = await SharedPreferences.getInstance();
+    return;
+  }
+
   @override
   void initState() {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
-    Timer(Duration(milliseconds: 2500), () {
+    _loadStorage().then((value) => {
       setState(() {
-        _splashScreenAnimated = true;
-        Timer(Duration(milliseconds: 800), () {
-          setState(() {
-            _splashScreenShow = true;
-          });
-        });
-      });
+        _saveIdEnabled = _localdb!.getBool("login_option_save_enabled");
+        _savedId = _localdb!.getString("login_option_saved_id");
+        if (_saveIdEnabled != null) {
+          _isRememberId = _saveIdEnabled!;
+          if (_saveIdEnabled == true && _savedId != null) {
+            controllerId!.text = _savedId!;
+          }
+        }
+      })
     });
-    _auth();
+
+    Timer(Duration(milliseconds: 2500), () {
+      _auth();
+    });
+
   }
 }

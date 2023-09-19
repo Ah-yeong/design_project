@@ -19,8 +19,9 @@ class BoardPageMainHub extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardPageMainHub();
 }
 
-final PostPageManager postManager = PostPageManager();
-final EntityProfiles myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
+PostPageManager postManager = PostPageManager();
+EntityProfiles? myProfileEntity;
+String? myUuid;
 
 class _BoardPageMainHub extends State<BoardPageMainHub> {
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
@@ -113,7 +114,11 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
   @override
   void initState() {
     super.initState();
-    myProfileEntity.loadProfile();
+    postManager = PostPageManager();
+    myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
+    myProfileEntity!.loadProfile();
+    myUuid = FirebaseAuth.instance.currentUser!.uid;
     _pageController = PageController();
+
   }
 }
