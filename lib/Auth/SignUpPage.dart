@@ -19,7 +19,6 @@ class _SignUpPage extends State<SignUpPage> {
   TextEditingController? controllerId;
   TextEditingController? controllerPw;
   TextEditingController? controllerPwConfirm;
-  TextEditingController? controllerNick;
   TextEditingController? controllerClassId;
   bool isSignin = false;
 
@@ -128,29 +127,6 @@ class _SignUpPage extends State<SignUpPage> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 20),
                           child: TextFormField(
-                              controller: controllerNick,
-                              obscureText: true,
-                              style: TextStyle(fontSize: 15),
-                              decoration: InputDecoration(
-                                hintText: "닉네임",
-                                hintStyle: TextStyle(fontSize: 15),
-                                border: InputBorder.none,
-                                counterText: "",
-                              )),
-                        )),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE8E8E8),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: TextFormField(
                               controller: controllerClassId,
                               obscureText: true,
                               style: TextStyle(fontSize: 15),
@@ -170,7 +146,7 @@ class _SignUpPage extends State<SignUpPage> {
                        mainAxisAlignment: MainAxisAlignment.center,
                        children: [
                          Icon(Icons.info_outline, color: Colors.grey, size: 13,),
-                         Text(" 동일한 아이디, 닉네임, 학번으로 계정을 생성할 수 없어요!", style: TextStyle(fontSize: 12, color: Colors.grey),),
+                         Text(" 동일한 아이디, 학번으로 계정을 생성할 수 없어요!", style: TextStyle(fontSize: 12, color: Colors.grey),),
                        ],
                      )
                     ),
@@ -224,15 +200,6 @@ class _SignUpPage extends State<SignUpPage> {
 
       try {
         CollectionReference users = FirebaseFirestore.instance.collection('NickClassData');
-        await users.doc('nickNames').get().then((DocumentSnapshot snapshot) {
-          try {
-            if(snapshot.get(controllerNick!.value.text) != null) {
-              throw FirebaseAuthException(code: "nickname-already-in-use");
-            }
-          } catch (e) {
-            e.toString();
-          }
-        });
         await users.doc('classIds').get().then((DocumentSnapshot snapshot) {
           try {
             if(snapshot.get(controllerClassId!.value.text) != null) {
@@ -245,10 +212,10 @@ class _SignUpPage extends State<SignUpPage> {
         final credential = await _auth.createUserWithEmailAndPassword(
             email: controllerId!.value.text, password: controllerPw!.value.text);
         FirebaseAuth.instance.currentUser!.sendEmailVerification();
-        var nickList = await FirebaseFirestore.instance.collection('NickClassData')
-            .doc('nickNames').get();
-        var classIdList = await FirebaseFirestore.instance.collection('NickClassData')
-            .doc('classIds').get();
+        // var nickList = await FirebaseFirestore.instance.collection('NickClassData')
+        //     .doc('nickNames').get();
+        // var classIdList = await FirebaseFirestore.instance.collection('NickClassData')
+        //     .doc('classIds').get();
         showAlert("이메일로 인증 주소가 발급되었습니다!", context, colorSuccess);
         if (credential.user != null) {
             await FirebaseFirestore.instance
@@ -257,7 +224,6 @@ class _SignUpPage extends State<SignUpPage> {
               .set({
             'emailAddress' : controllerId!.value.text,
             'password' : controllerPw!.value.text,
-            'nickName' : controllerNick!.value.text,
             'classId' : controllerClassId!.value.text,
           });
             await FirebaseFirestore.instance
@@ -268,24 +234,15 @@ class _SignUpPage extends State<SignUpPage> {
             });
           await FirebaseFirestore.instance
               .collection('NickClassData')
-              .doc('nickNames')
-              .update({controllerNick!.value.text : '1'});
-          await FirebaseFirestore.instance
-              .collection('NickClassData')
               .doc('classIds')
               .update({controllerClassId!.value.text : '1'});
-          setState(() {
-            isSignin = true;
-            controllerPw!.clear();
-          });
+          Navigator.of(context).pop();
         }
       } on FirebaseAuthException catch (e) {
         String message = '';
 
         if(e.code == 'email-already-in-use') {
           message = '이메일이 이미 사용중입니다.';
-        } else if (e.code == 'nickname-already-in-use') {
-          message = '닉네임이 이미 사용중입니다.';
         } else if (e.code == 'classid-already-in-use') {
           message = '학번이 이미 사용중입니다.';
         } else if (e.code == 'weak-password'){
@@ -305,7 +262,6 @@ class _SignUpPage extends State<SignUpPage> {
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
     controllerPwConfirm = TextEditingController();
-    controllerNick = TextEditingController();
     controllerClassId = TextEditingController();
   }
 }
