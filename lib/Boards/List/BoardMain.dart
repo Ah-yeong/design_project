@@ -158,5 +158,6 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
     myProfileEntity!.loadProfile();
     myUuid = FirebaseAuth.instance.currentUser!.uid;
     _pageController = PageController();
+
   }
 }
