@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Chat/models/ChatStorage.dart';
 import 'package:design_project/Entity/EntityProfile.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
@@ -57,10 +58,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     isGroupChat = postId != null;
   }
-/*
 
- */
-  // T
+  @override
+  void dispose() {
+    updateChatList(myUuid!);
+    super.dispose();
+  }
+
   @override
     Widget build(BuildContext context) {
       return Scaffold(

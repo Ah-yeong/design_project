@@ -22,9 +22,7 @@ class EntityProfiles {
   var addr1;
   var addr2;
 
-  EntityProfiles(var this.profileId) {
-    print("프로필 연결됨");
-  }
+  EntityProfiles(var this.profileId) {}
 
   Future<void> loadProfile() async {
     // 포스팅 로드

@@ -1,5 +1,6 @@
 import 'package:design_project/Profiles/pageMyGroup.dart';
 import 'package:design_project/Profiles/pageMyPost.dart';
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../Boards/BoardPostPage.dart';
@@ -15,7 +16,8 @@ class PageProfile extends StatefulWidget {
   _PageProfileState createState() => _PageProfileState();
 }
 
-class _PageProfileState extends State<PageProfile> {
+class _PageProfileState extends State<PageProfile>
+  with AutomaticKeepAliveClientMixin{
   EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
   MannerTemperatureWidget? mannerWidget;
@@ -38,10 +40,7 @@ class _PageProfileState extends State<PageProfile> {
           child: SizedBox(
               height: 65,
               width: 65,
-              child: CircularProgressIndicator(
-                strokeWidth: 4,
-                color: colorSuccess,
-              ))) :
+              child: buildLoadingProgress())) :
       SingleChildScrollView(
         child:Center(
           child: Column(
@@ -486,6 +485,9 @@ class _PageProfileState extends State<PageProfile> {
       ],
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class MannerTemperatureWidget extends StatelessWidget {

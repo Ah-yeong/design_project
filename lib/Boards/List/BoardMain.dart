@@ -41,32 +41,40 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
         backgroundColor: Colors.white,
         bottomNavigationBar:
         BottomAppBar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 1,),
-              Expanded(child: GestureDetector(
-                  onTap: () => _onTappedItem(0),
-                  child: SizedBox(height: 50, width: 50, child: Icon(Icons.home_outlined, color: _selectedIdx == 0 ? Colors.lime : Colors.black)))
-              ),
-              const Spacer(flex: 1,),
-              Expanded(child: GestureDetector(
-                  onTap: () => _onTappedItem(1),
-                  child: SizedBox(height: 50, width: 50, child: Icon(Icons.mark_unread_chat_alt_outlined, color: _selectedIdx== 1 ? Colors.lime : Colors.black)))
-              ),
-              const Spacer(flex: 3,),
-              Expanded(child: GestureDetector(
-                  onTap: () => _onTappedItem(2),
-                  child: SizedBox(height: 50, width: 50, child: Icon(Icons.notifications_active_outlined, color: _selectedIdx == 2 ? Colors.lime : Colors.black)))
-              ),
-              const Spacer(flex: 1,),
-              Expanded(child: GestureDetector(
-                  onTap: () => _onTappedItem(3),
-                  child: SizedBox(height: 50, width: 50, child: Icon(Icons.person_outline, color: _selectedIdx == 3 ? Colors.lime : Colors.black)))
-              ),
-              const Spacer(flex: 1,),
-            ],
+          child: Container(
+            height: 50.7,
+            child: Column(
+              children: [
+                Divider(height: 0.7, thickness: 0.7, color: colorLightGrey,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 1,),
+                    Expanded(child: GestureDetector(
+                        onTap: () => _onTappedItem(0),
+                        child: SizedBox(height: 50, width: 50, child: Icon(Icons.home_outlined, color: _selectedIdx == 0 ? Colors.lime : Colors.black)))
+                    ),
+                    const Spacer(flex: 1,),
+                    Expanded(child: GestureDetector(
+                        onTap: () => _onTappedItem(1),
+                        child: SizedBox(height: 50, width: 50, child: Icon(Icons.mark_unread_chat_alt_outlined, color: _selectedIdx== 1 ? Colors.lime : Colors.black)))
+                    ),
+                    const Spacer(flex: 3,),
+                    Expanded(child: GestureDetector(
+                        onTap: () => _onTappedItem(2),
+                        child: SizedBox(height: 50, width: 50, child: Icon(Icons.notifications_active_outlined, color: _selectedIdx == 2 ? Colors.lime : Colors.black)))
+                    ),
+                    const Spacer(flex: 1,),
+                    Expanded(child: GestureDetector(
+                        onTap: () => _onTappedItem(3),
+                        child: SizedBox(height: 50, width: 50, child: Icon(Icons.person_outline, color: _selectedIdx == 3 ? Colors.lime : Colors.black)))
+                    ),
+                    const Spacer(flex: 1,),
+                  ],
+                ),
+              ],
+            ),
           ),
         ), // 바텀 앱바
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
