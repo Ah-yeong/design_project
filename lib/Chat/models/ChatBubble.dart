@@ -69,12 +69,15 @@ class ChatBubble extends StatelessWidget {
                         padding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                         margin:
-                            EdgeInsets.fromLTRB(12, _longBubble ? _invisibleTime ? 3 : 7 : 4 , 12, 0),
+                            EdgeInsets.fromLTRB(12, 3 , 12, _invisibleTime ? 0 : 5),
                         child: Text(
                           message,
                           style: TextStyle(
                             color: textColor,
                           ),
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 6.5 / 10,
                         ),
                       ),
                       if (!isMe && !_invisibleTime)

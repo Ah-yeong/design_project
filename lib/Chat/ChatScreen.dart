@@ -78,101 +78,103 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         body: (_isLoaded == false || _chatLoaded == false) ? Center(
           child: CircularProgressIndicator(),
-        ) : Container(
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ) : Container(child:
+              Stack(
+                fit: StackFit.expand,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: FloatingActionButton.extended(
-                        elevation: 0,
-                        onPressed: () {
-                          _savedChat!.getStorage().remove("${myUuid}_ChatData_${isGroupChat ? postId : recvUserId}");
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) => GoogleMapPage()),
-                          // );
-                        },
-                        label: Container(
-                          width: 100,
-                          child: Text('위치 공유',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        backgroundColor: Color(0x996ACA89),
-                        heroTag: null,
-
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: FloatingActionButton.extended(
-                        elevation: 0,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('모임'),
-                                content: Container(
-                                  width: double.maxFinite,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        '시간: 18:30 PM',
-                                        style: TextStyle(fontSize: 18),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        '장소: 안서 동보 앞 GS25',
-                                        style: TextStyle(fontSize: 18),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text('닫기'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        label: Container(
-                          width: 100,
-                          child: Text('모임 일정',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        backgroundColor: Color(0x996ACA89),
-                        heroTag: null,
-                      ),
-                    ),
-                  ),
+                  ChatMessage(postId: postId, recvUser: recvUserId, members: members,),
+                  // Align(
+                  //   alignment: Alignment.topCenter,
+                  //   child: Padding(
+                  //     padding: EdgeInsets.only(top: 10),
+                  //     child: Row(
+                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //       children: [
+                  //         Expanded(
+                  //           child: Padding(
+                  //             padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  //             child: FloatingActionButton.extended(
+                  //               elevation: 0,
+                  //               onPressed: () {
+                  //                 _savedChat!.getStorage().remove("${myUuid}_ChatData_${isGroupChat ? postId : recvUserId}");
+                  //                 // Navigator.push(
+                  //                 //   context,
+                  //                 //   MaterialPageRoute(
+                  //                 //       builder: (context) => GoogleMapPage()),
+                  //                 // );
+                  //               },
+                  //               label: Container(
+                  //                 width: 100,
+                  //                 child: Text('위치 공유',
+                  //                   textAlign: TextAlign.center,
+                  //                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  //                 ),
+                  //               ),
+                  //               backgroundColor: colorError,
+                  //               heroTag: null,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //         Expanded(
+                  //           child: Padding(
+                  //             padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  //             child: FloatingActionButton.extended(
+                  //               elevation: 0,
+                  //               onPressed: () {
+                  //                 showDialog(
+                  //                   context: context,
+                  //                   builder: (BuildContext context) {
+                  //                     return AlertDialog(
+                  //                       title: Text('모임'),
+                  //                       content: Container(
+                  //                         width: double.maxFinite,
+                  //                         child: Column(
+                  //                           mainAxisSize: MainAxisSize.min,
+                  //                           crossAxisAlignment: CrossAxisAlignment.start,
+                  //                           children: <Widget>[
+                  //                             Text(
+                  //                               '시간: 18:30 PM',
+                  //                               style: TextStyle(fontSize: 18),
+                  //                             ),
+                  //                             SizedBox(height: 10),
+                  //                             Text(
+                  //                               '장소: 안서 동보 앞 GS25',
+                  //                               style: TextStyle(fontSize: 18),
+                  //                             ),
+                  //                           ],
+                  //                         ),
+                  //                       ),
+                  //                       actions: <Widget>[
+                  //                         TextButton(
+                  //                           onPressed: () {
+                  //                             Navigator.of(context).pop();
+                  //                           },
+                  //                           child: Text('닫기'),
+                  //                         ),
+                  //                       ],
+                  //                     );
+                  //                   },
+                  //                 );
+                  //               },
+                  //               label: Container(
+                  //                 width: 100,
+                  //                 child: Text('모임 일정',
+                  //                   textAlign: TextAlign.center,
+                  //                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  //                 ),
+                  //               ),
+                  //               backgroundColor: Color(0xFF999999),
+                  //               heroTag: null,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                 ],
-              ),
-              Expanded(
-                child: ChatMessage(postId: postId, recvUser: recvUserId, members: members,),
-              ),
-              //NewMessage(),
-            ],
+              )
           ),
-        ),
       );
     }
     

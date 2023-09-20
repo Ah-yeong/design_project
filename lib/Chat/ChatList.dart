@@ -103,7 +103,6 @@ with AutomaticKeepAliveClientMixin{
                 if (!snapshot.hasData) {
                   return buildLoadingProgress();
                 }
-                print("[debug] Stream Builder Access");
 
                 List<ChatRoom> list = snapshot.data!;
                 list.sort();
@@ -174,7 +173,7 @@ with AutomaticKeepAliveClientMixin{
                                         // 마지막 채팅 시간 표시
                                         list[index].lastChat != null
                                             ? Text(
-                                          "${list[index].lastChat}",
+                                          list[index].lastChat!.length > 15 ? "${list[index].lastChat!.substring(0, 15)}..." : "${list[index].lastChat}",
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: (list[index].unreadCount! > 0

@@ -2,7 +2,8 @@ import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/material.dart';
-import 'ChatBubble.dart';
+import 'package:flutter/services.dart';
+import 'models/ChatBubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -43,14 +44,16 @@ class _ChatMessageState extends State<ChatMessage> {
   bool calculateChecker = false;
   bool spLoaded = false;
   bool dbLoaded = false;
+
+  FocusNode? myFocus;
   late ChatStorage? _savedChat;
 
   @override
   void initState() {
     super.initState();
+    myFocus = FocusNode();
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId!.toString());
-    _savedChat!.init().then((value) =>
-        setState(() {
+    _savedChat!.init().then((value) => setState(() {
           spLoaded = true;
           _savedChat!.load();
         }));
@@ -64,8 +67,7 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   Future<void> _initDatabases() async {
-    if (recvUserId != null && postId != null)
-      return; // 둘 다 입력되었을 때는 예외로 함
+    if (recvUserId != null && postId != null) return; // 둘 다 입력되었을 때는 예외로 함
     isGroupChat = recvUserId == null; // userId, postId 둘 중 하나만 들어와야 함
 
     // 보내는 유저 이름에 대하여 채팅 Collection, Document 이름 설정
@@ -87,10 +89,12 @@ class _ChatMessageState extends State<ChatMessage> {
       if (isGroupChat) {
         addChatDataList(true, postId: postId, members: members);
       } else {
-        addChatDataList(uid: FirebaseAuth.instance.currentUser!.uid,
+        addChatDataList(
+            uid: FirebaseAuth.instance.currentUser!.uid,
             false,
             recvUserId: recvUserId!);
-        addChatDataList(uid: recvUserId!,
+        addChatDataList(
+            uid: recvUserId!,
             false,
             recvUserId: FirebaseAuth.instance.currentUser!.uid);
       }
@@ -101,40 +105,47 @@ class _ChatMessageState extends State<ChatMessage> {
     _savedChat!.savedChatList.add(ChatDataModel(
         text: message, ts: timestamp, nickName: myProfileEntity!.name));
     _savedChat!.save();
-    var documentSnapshots = await FirebaseFirestore.instance.collection(
-        chatColName).doc(chatDocName).get();
-    if (!documentSnapshots.exists) { // document가 존재하지 않으면 members 초기화 후 삽입
-      await FirebaseFirestore.instance.collection(chatColName)
+    var documentSnapshots = await FirebaseFirestore.instance
+        .collection(chatColName)
+        .doc(chatDocName)
+        .get();
+    if (!documentSnapshots.exists) {
+      // document가 존재하지 않으면 members 초기화 후 삽입
+      await FirebaseFirestore.instance
+          .collection(chatColName)
           .doc(chatDocName)
           .set({
         "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
-        "contents": [{
-          "sender": sendUserId
-          , "readBy": [sendUserId]
-          , "message": message
-          , "timestamp": timestamp
-          , "nickname": myProfileEntity!.name
-        }
+        "contents": [
+          {
+            "sender": sendUserId,
+            "readBy": [sendUserId],
+            "message": message,
+            "timestamp": timestamp,
+            "nickname": myProfileEntity!.name
+          }
         ]
       });
-    } else { // document가 이미 존재하면 메시지 추가
+    } else {
+      // document가 이미 존재하면 메시지 추가
       List<dynamic> contents = documentSnapshots.data()!["contents"];
       contents.add({
-        "sender": sendUserId
-        , "readBy": [sendUserId]
-        , "message": message
-        , "timestamp": timestamp
-        , "nickname": myProfileEntity!.name
+        "sender": sendUserId,
+        "readBy": [sendUserId],
+        "message": message,
+        "timestamp": timestamp,
+        "nickname": myProfileEntity!.name
       });
-      await FirebaseFirestore.instance.collection(chatColName)
+      await FirebaseFirestore.instance
+          .collection(chatColName)
           .doc(chatDocName)
           .update({"contents": contents});
     }
 
     _chatController.clear();
+    FocusScope.of(context).requestFocus(myFocus);
     if (isGroupChat) {
-      for (String member in members!)
-        updateChatList(member);
+      for (String member in members!) updateChatList(member);
     } else {
       updateChatList(recvUserId!);
     }
@@ -144,16 +155,18 @@ class _ChatMessageState extends State<ChatMessage> {
     return;
   }
 
-  Future<void> _removeReadChat(List<ChatDataModel> removeList,
-      List<ChatDataModel> readList) async {
+  Future<void> _removeReadChat(
+      List<ChatDataModel> removeList, List<ChatDataModel> readList) async {
     List<dynamic> messageList;
-    await FirebaseFirestore.instance.collection(chatColName)
+    await FirebaseFirestore.instance
+        .collection(chatColName)
         .doc(chatDocName)
         .get()
         .then((ds) {
       if (ds.data() == null || !ds.data()!.containsKey("contents")) return;
       messageList = ds.get("contents");
-      messageList.removeWhere((message) { // 일단 삭제할 거 다 삭제
+      messageList.removeWhere((message) {
+        // 일단 삭제할 거 다 삭제
         for (int i = 0; i < removeList.length; i++) {
           if (removeList[i].text == message['message'] &&
               removeList[i].ts == message['timestamp']) {
@@ -162,7 +175,8 @@ class _ChatMessageState extends State<ChatMessage> {
         }
         return false;
       });
-      for (int i = 0; i < messageList.length; i++) { // 삭제하고 남은 각 메시지에 대해서
+      for (int i = 0; i < messageList.length; i++) {
+        // 삭제하고 남은 각 메시지에 대해서
         for (int j = 0; j < readList.length; j++) {
           if (messageList[i]['message'] == readList[j].text &&
               messageList[i]['timestamp'] == readList[j].ts) {
@@ -173,7 +187,8 @@ class _ChatMessageState extends State<ChatMessage> {
           }
         }
       }
-      FirebaseFirestore.instance.collection(chatColName)
+      FirebaseFirestore.instance
+          .collection(chatColName)
           .doc(chatDocName)
           .update({"contents": messageList});
     });
@@ -194,150 +209,200 @@ class _ChatMessageState extends State<ChatMessage> {
     //     });
     //   }
     // });
-    return !(spLoaded && dbLoaded) ? buildLoadingProgress() : StreamBuilder<
-        DocumentSnapshot<Map<String, dynamic>>?>(
-      stream: FirebaseFirestore.instance
-          .collection(chatColName)
-          .doc(chatDocName).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: buildLoadingProgress(),
-          );
-        }
-        final List<dynamic> chatDocs = !snapshot.data!.exists ? [] : snapshot
-            .data!.get("contents");
-        final List<dynamic> members = !snapshot.data!.exists ? [] : snapshot
-            .data!.get("members");
-        final membersCount = members.length;
-
-        List<ChatBubble> bubbles = [];
-        DateTime? currentDate;
-
-        // // Timestamp 순으로 정렬하기 위해 Comparator 선언 후 정렬
-        // Comparator<dynamic> comparator = (a, b) => (b['timestamp'] as Timestamp).compareTo(a['timestamp']);
-        // chatDocs.sort(comparator);
-        for (int i = 0; i < _savedChat!.savedChatList.length; i++) {
-          final chat = _savedChat!.savedChatList[i];
-          final isMe = chat.nickName == myProfileEntity!.name;
-          final timestamp = chat.ts;
-          final dateTime = timestamp.toDate();
-          final year = dateTime.year;
-          final month = dateTime.month;
-          final day = dateTime.day;
-
-          // 날짜가 바뀌면 날짜를 표시
-          if (currentDate == null || currentDate.year != year ||
-              currentDate.month != month || currentDate.day != day) {
-            currentDate = DateTime(year, month, day);
-            final formattedDate = DateFormat('yyyy-MM-dd E').format(
-                currentDate);
-            // 날짜구부 표시 위젯
-            bubbles.add(
-                ChatBubble("", true, "", formattedDate, isDayDivider: true,));
-          }
-          final formattedTime = DateFormat.jm().format(dateTime);
-          // 채팅 구분 표시 위젯
-          final userName = chat.nickName;
-          bool isFirst = i - 1 >= 0
-              ? _savedChat!.savedChatList[i - 1].nickName != userName
-              ? true
-              : false
-              : true;
-          bool isLast = i + 1 < _savedChat!.savedChatList.length
-              ? _savedChat!.savedChatList[i + 1].nickName != userName
-              ? true
-              : false
-              : true;
-          if (isFirst && isLast) {
-            bubbles.add(ChatBubble(chat.text, isMe, userName, formattedTime));
-          } else if (isFirst) {
-            bubbles.add(ChatBubble(chat.text, isMe, userName, formattedTime, invisibleTime: _savedChat!.savedChatList[i + 1].ts == timestamp,));
-          } else if (isLast) {
-            bubbles.add(ChatBubble(chat.text, isMe, userName, formattedTime, longBubble: true,));
-          } else {
-            final bool isEqualsTime = DateFormat.jm().format(_savedChat!.savedChatList[i + 1].ts.toDate()) == formattedTime;
-            bubbles.add(ChatBubble(chat.text, isMe, userName, formattedTime, longBubble: true, invisibleTime: isEqualsTime));
-          }
-        }
-        if (calculateChecker == false) {
-          calculateChecker = true;
-          List<ChatDataModel> _removeList = List.empty(growable: true);
-          List<ChatDataModel> _readList = List.empty(growable: true);
-          for (int i = 0; i < chatDocs.length; i++) {
-            final chat = chatDocs[i];
-            final timestamp = chat['timestamp'] as Timestamp;
-
-            if (!chat['readBy'].contains(user!.uid)) {
-              final bool isReadedAll = chat['readBy'].length + 1 ==
-                  membersCount;
-              if (isReadedAll) {
-                _removeList.add(ChatDataModel(text: chat['message'],
-                    ts: timestamp,
-                    nickName: chat['nickname']));
-              } else {
-                _readList.add(ChatDataModel(text: chat['message'],
-                    ts: timestamp,
-                    nickName: chat['nickname']));
-              }
-              _savedChat!.savedChatList.add(ChatDataModel(text: chat['message'],
-                  ts: timestamp,
-                  nickName: chat['nickname']));
-              _savedChat!.save();
-            } else {
-              continue;
-            }
-          }
-          if (_removeList.length + _readList.length > 0) {
-            _removeReadChat(_removeList, _readList).then((value) { //-> 데이터베이스에서 삭제 및 읽음 표시
-              _removeList.clear();
-              _readList.clear();
-              calculateChecker = false;
-            });
-          } else {
-            calculateChecker = false;
-          }
-        }
-        return SafeArea(
+    return !(spLoaded && dbLoaded)
+        ? buildLoadingProgress()
+        : SafeArea(
             child: Column(
-              children: [
-                SizedBox(height: 2,),
-                Expanded(
-                  child: ListView(
-                    reverse: true,
-                    children: bubbles.reversed.toList(),
-                  ),
-                ),
-                SizedBox(height: 12,),
-                Container(
-                  width: 382,
-                  height: 40,
-                  margin: EdgeInsets.only(bottom: 16.0), // 상단 여백 조정
-                  child: TextField(
-                    controller: _chatController,
-                    onSubmitted: (value) {
+            children: [
+              SizedBox(
+                height: 2,
+              ),
+              // 채팅 내용 (버블)
+              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+                stream: FirebaseFirestore.instance
+                    .collection(chatColName)
+                    .doc(chatDocName)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: buildLoadingProgress(),
+                    );
+                  }
+                  final List<dynamic> chatDocs = !snapshot.data!.exists
+                      ? []
+                      : snapshot.data!.get("contents");
+                  final List<dynamic> members = !snapshot.data!.exists
+                      ? []
+                      : snapshot.data!.get("members");
+                  final membersCount = members.length;
+
+                  List<ChatBubble> bubbles = [];
+                  DateTime? currentDate;
+
+                  // // Timestamp 순으로 정렬하기 위해 Comparator 선언 후 정렬
+                  // Comparator<dynamic> comparator = (a, b) => (b['timestamp'] as Timestamp).compareTo(a['timestamp']);
+                  // chatDocs.sort(comparator);
+                  for (int i = 0; i < _savedChat!.savedChatList.length; i++) {
+                    final chat = _savedChat!.savedChatList[i];
+                    final isMe = chat.nickName == myProfileEntity!.name;
+                    final timestamp = chat.ts;
+                    final dateTime = timestamp.toDate();
+                    final year = dateTime.year;
+                    final month = dateTime.month;
+                    final day = dateTime.day;
+
+                    // 날짜가 바뀌면 날짜를 표시
+                    if (currentDate == null ||
+                        currentDate.year != year ||
+                        currentDate.month != month ||
+                        currentDate.day != day) {
+                      currentDate = DateTime(year, month, day);
+                      final formattedDate =
+                          DateFormat('yyyy-MM-dd E').format(currentDate);
+                      // 날짜구부 표시 위젯
+                      bubbles.add(ChatBubble(
+                        "",
+                        true,
+                        "",
+                        formattedDate,
+                        isDayDivider: true,
+                      ));
+                    }
+                    final formattedTime = DateFormat.jm().format(dateTime);
+                    // 채팅 구분 표시 위젯
+                    final userName = chat.nickName;
+                    bool isFirst = i - 1 >= 0
+                        ? _savedChat!.savedChatList[i - 1].nickName != userName
+                            ? true
+                            : false
+                        : true;
+                    bool isLast = i + 1 < _savedChat!.savedChatList.length
+                        ? _savedChat!.savedChatList[i + 1].nickName != userName
+                            ? true
+                            : false
+                        : true;
+                    if (isFirst && isLast) {
+                      bubbles.add(
+                          ChatBubble(chat.text, isMe, userName, formattedTime));
+                    } else if (isFirst) {
+                      bubbles.add(ChatBubble(
+                        chat.text,
+                        isMe,
+                        userName,
+                        formattedTime,
+                        invisibleTime:
+                            _savedChat!.savedChatList[i + 1].ts == timestamp,
+                      ));
+                    } else if (isLast) {
+                      bubbles.add(ChatBubble(
+                        chat.text,
+                        isMe,
+                        userName,
+                        formattedTime,
+                        longBubble: true,
+                      ));
+                    } else {
+                      final bool isEqualsTime = DateFormat.jm().format(
+                              _savedChat!.savedChatList[i + 1].ts.toDate()) ==
+                          formattedTime;
+                      bubbles.add(ChatBubble(
+                          chat.text, isMe, userName, formattedTime,
+                          longBubble: true, invisibleTime: isEqualsTime));
+                    }
+                  }
+                  if (calculateChecker == false) {
+                    calculateChecker = true;
+                    List<ChatDataModel> _removeList =
+                        List.empty(growable: true);
+                    List<ChatDataModel> _readList = List.empty(growable: true);
+                    for (int i = 0; i < chatDocs.length; i++) {
+                      final chat = chatDocs[i];
+                      final timestamp = chat['timestamp'] as Timestamp;
+
+                      if (!chat['readBy'].contains(user!.uid)) {
+                        final bool isReadedAll =
+                            chat['readBy'].length + 1 == membersCount;
+                        if (isReadedAll) {
+                          _removeList.add(ChatDataModel(
+                              text: chat['message'],
+                              ts: timestamp,
+                              nickName: chat['nickname']));
+                        } else {
+                          _readList.add(ChatDataModel(
+                              text: chat['message'],
+                              ts: timestamp,
+                              nickName: chat['nickname']));
+                        }
+                        _savedChat!.savedChatList.add(ChatDataModel(
+                            text: chat['message'],
+                            ts: timestamp,
+                            nickName: chat['nickname']));
+                        _savedChat!.save();
+                      } else {
+                        continue;
+                      }
+                    }
+                    if (_removeList.length + _readList.length > 0) {
+                      _removeReadChat(_removeList, _readList).then((value) {
+                        //-> 데이터베이스에서 삭제 및 읽음 표시
+                        _removeList.clear();
+                        _readList.clear();
+                        calculateChecker = false;
+                      });
+                    } else {
+                      calculateChecker = false;
+                    }
+                  }
+                  return Expanded(
+                    child: ListView(
+                      reverse: true,
+                      children: bubbles.reversed.toList(),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              Container(
+                width: double.infinity,
+                height: 40,
+                margin: EdgeInsets.only(bottom: 16.0, right: 12, left: 12),
+                // 상단 및 양쪽 여백 조정
+                child: Theme(data: Theme.of(context).copyWith(primaryColor: Colors.red), child: TextField(
+                  focusNode: myFocus,
+                  controller: _chatController,
+                  onSubmitted: (value) {
+                    if (_chatController.text.length != 0)
                       _sendMessage();
-                    },
-                    decoration: InputDecoration(
-                      hintText: '메시지 입력',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(9.0),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 12.0, horizontal: 10),
-                      suffixIcon: IconButton(
+                  },
+                  maxLength: 200,
+                  maxLengthEnforcement: MaxLengthEnforcement.none,
+                  maxLines: 1,
+                  cursorColor: colorGrey,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    hintText: '',
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    suffixIcon: IconButton(
                         onPressed: () {
-                          _sendMessage();
+                          if (_chatController.text.length != 0)
+                            _sendMessage();
                         },
-                        icon: Icon(Icons.send),
-                      ),
+                        icon: Icon(Icons.arrow_upward_outlined), color: Colors.greenAccent),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(13.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: colorGrey, width: 1.5),
+                      borderRadius: BorderRadius.circular(13.0),
                     ),
                   ),
-                ),
-              ],
-            ));
-      },
-    );
+                ),)
+              ),
+            ],
+          ));
   }
 }
 
