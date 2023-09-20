@@ -806,6 +806,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
   // 게시물 업로드 시도
   Future<bool> _tryUploadPost() async {
     bool successUpload = false;
+    bool successUploadProfiles = false;
 
     // 게시물 양식 조건이 모두 맞으면 업로드 시도
     setState(() => _isUploading = true); // 업로드 시작
@@ -817,16 +818,15 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
         "${dateFormatter.format(_selectedDate)} ${_selectedTime.to24hours()}:00",
         _llName!,
-        "${dateFormatter.format(DateTime.now())} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}",
+        "${dateFormatter.format(dt)} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}",
         _selectedCategory,
         _minAge,
         _maxAge,
-        "Example");
+        myProfileEntity!.name);
     profileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    successUpload = await profileEntity!.addPostId();
-    print('게시물 업로드 완료 !!');
+    successUploadProfiles = await profileEntity!.addPostId();
 
-    return successUpload;
+    return successUpload && successUploadProfiles;
   }
 
   String _checkIsInputEmpty() {

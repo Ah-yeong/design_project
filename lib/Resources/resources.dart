@@ -1,11 +1,15 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 const Color colorSuccess = const Color(0xFF6ACA89);
 const Color colorGrey = const Color(0xFF777777);
 const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
+const Color colorLightGrey = const Color(0xFFCCCCCC);
 var CategoryList = List.of(["술", "밥", "영화", "산책", "공부", "취미", "운동", "기타", "음악", "게임"]);
 
 Color getColorForScore(int score) {
@@ -20,6 +24,12 @@ Color getColorForScore(int score) {
   } else {
     return Colors.blue;
   }
+}
+
+void updateChatList(String uuid) {
+  Random rd = Random();
+  FirebaseFirestore.instance.collection("UserChatData").doc(uuid).update(
+      {"streamIO" : rd.nextInt(100000000).toInt()});
 }
 
 void showAlert(String message, BuildContext cont, Color color) {
@@ -39,3 +49,10 @@ void showAlert(String message, BuildContext cont, Color color) {
   ScaffoldMessenger.of(cont).showSnackBar(snackBar);
 } // 메시지 박스 띄우기
 
+extension TimestampToDateFormat on Timestamp {
+  String toFormattedString() {
+    final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+    DateTime dt = this.toDate();
+    return "${dateFormatter.format(dt)} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}";
+  }
+}

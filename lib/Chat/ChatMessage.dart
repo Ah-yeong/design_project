@@ -1,5 +1,6 @@
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
+import 'package:design_project/Resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'ChatBubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -131,6 +132,13 @@ class _ChatMessageState extends State<ChatMessage> {
     }
 
     _chatController.clear();
+    if (isGroupChat) {
+      for (String member in members!)
+        updateChatList(member);
+    } else {
+      updateChatList(recvUserId!);
+    }
+
     //savedChatData.add(MessageModel(senderUid: sendUserId, message: message, timestamp: timestamp.toString(), nickName: myProfileEntity.name).toMap());
     //_preferences.setString('chat_data_${isGroupChat ? postId : recvUserId}', json.encode(savedChatData));
     return;
@@ -194,7 +202,7 @@ class _ChatMessageState extends State<ChatMessage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
-            child: CircularProgressIndicator(),
+            child: buildLoadingProgress(),
           );
         }
         final List<dynamic> chatDocs = !snapshot.data!.exists ? [] : snapshot
@@ -290,8 +298,6 @@ class _ChatMessageState extends State<ChatMessage> {
             calculateChecker = false;
           }
         }
-
-
         return SafeArea(
             child: Column(
               children: [

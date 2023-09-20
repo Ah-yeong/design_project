@@ -44,13 +44,18 @@ class PageAlert extends StatelessWidget {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) =>
                         ChatScreen(
+                          recvUserId: "ki654uiWotZTum8GetnSC7HTgIk2",)));
+              } else if (index == 4) {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        ChatScreen(
                           postId: 1,
                           members: [
                             "EM4L1plnXrOJDvRkfkX9k1DJRX32",
                             "dBfF9GPpQqVvxY3SxNmWpdT1er43",
                             "ki654uiWotZTum8GetnSC7HTgIk2"
                           ],)));
-              } else if (index == 4) {
+              } else if (index == 5) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => NameSignUpScreen()));
               }
@@ -74,8 +79,9 @@ class PageAlert extends StatelessWidget {
       case 0: return "로그아웃";
       case 1: return "부계정과 대화하기";
       case 2: return "본계정과 대화하기";
-      case 3: return "그룹채팅 대화하기 (본,부1,부2)";
-      case 4: return "프로필 재설정";
+      case 3: return "세번째 계정과 대화하기";
+      case 4: return "그룹채팅 대화하기 (본,부1,부2)";
+      case 5: return "프로필 재설정";
 
     }
     return "알림 제목 $index";
@@ -86,8 +92,9 @@ class PageAlert extends StatelessWidget {
       case 0: return "제곧내";
       case 1: return "현재 : ${myUuid}";
       case 2: return "현재 : ${myUuid}}";
-      case 3: return "limkg999, jongwon1019, gitlimjw";
-      case 4: return "처음 계정 생성 시 설정 필요";
+      case 3: return "현재 : ${myUuid}}";
+      case 4: return "limkg999, jongwon1019, gitlimjw";
+      case 5: return "처음 계정 생성 시 설정 필요";
 
     }
     return "알림 내용 $index";
