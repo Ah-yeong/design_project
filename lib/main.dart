@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:design_project/Auth/PageEmailVerified.dart';
+import 'package:design_project/Auth/PageResetPassword.dart';
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +10,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Auth/SignUpPage.dart';
+import 'Auth/PageSignUp.dart';
 import 'Resources/resources.dart';
 import 'package:get/get.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -29,10 +30,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS가 다크모드일 때도 상단 글자 검은색으로 고정
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown
-    ]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return GetMaterialApp(
       title: 'Capstone design',
       localizationsDelegates: [
@@ -70,6 +69,8 @@ class _MyHomePage extends State<MyHomePage> {
   bool? _saveIdEnabled;
   String? _savedId;
 
+  bool _isManager = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,18 +85,27 @@ class _MyHomePage extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AnimatedOpacity(opacity: _fadeOutLogo ? 0 : 1, duration: Duration(milliseconds: 500), child:
-                    Center(
-                      child: Text(
-                        "마음 맞는, 사람끼리",
-                        style: TextStyle(
-                          fontSize: 35,
-                          color: Colors.black87,
-                          fontFamily: "logo",
-                          fontWeight: FontWeight.bold,
+                    AnimatedOpacity(
+                      opacity: _fadeOutLogo ? 0 : 1,
+                      duration: Duration(milliseconds: 500),
+                      child: Center(
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              setState(() {
+                                _isManager = !_isManager;
+                              });
+                            },
+                        child: Text(
+                          "마음 맞는, 사람끼리",
+                          style: TextStyle(
+                            fontSize: 35,
+                            color: Colors.black87,
+                            fontFamily: "logo",
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ),),
+                      )),
+                    ),
                     AnimatedOpacity(
                       opacity: _splashScreenShow ? 1 : 0,
                       duration: Duration(milliseconds: 450),
@@ -122,11 +132,14 @@ class _MyHomePage extends State<MyHomePage> {
                                         child: TextFormField(
                                             controller: controllerId,
                                             style: TextStyle(fontSize: 15),
+                                            maxLength: _isManager ? 100 : 9,
+                                            textInputAction: TextInputAction.next,
                                             decoration: InputDecoration(
-                                                hintText: "사용자 아이디",
+                                                hintText: "아이디 (학번)",
                                                 hintStyle:
                                                     TextStyle(fontSize: 15),
-                                                border: InputBorder.none)),
+                                                border: InputBorder.none,
+                                            counterText: '')),
                                       ),
                                     ),
                                     SizedBox(height: 8),
@@ -146,7 +159,7 @@ class _MyHomePage extends State<MyHomePage> {
                                               obscureText: true,
                                               style: TextStyle(fontSize: 15),
                                               decoration: InputDecoration(
-                                                hintText: "사용자 비밀번호",
+                                                hintText: "비밀번호",
                                                 hintStyle:
                                                     TextStyle(fontSize: 15),
                                                 border: InputBorder.none,
@@ -154,38 +167,65 @@ class _MyHomePage extends State<MyHomePage> {
                                               )),
                                         )),
                                     SizedBox(height: 8),
-                                    GestureDetector(
-                                      child: Row(
-                                        children: [
-                                          Transform.scale(
-                                              scale: 0.9,
-                                              child: SizedBox(
-                                                width: 24,
-                                                height: 24,
-                                                child: Checkbox(
-                                                  value: _isRememberId,
-                                                  onChanged: (_val) {
-                                                    setState(() {
-                                                      _isRememberId = _val!;
-                                                      saveOption(_isRememberId);
-                                                    });
-                                                  },
-                                                  activeColor: colorSuccess,
-                                                ),
-                                              )),
-                                          Text(
-                                            " 아이디 저장",
-                                            style: TextStyle(fontSize: 15),
-                                          )
-                                        ],
-                                      ),
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        setState(() {
-                                          _isRememberId = !_isRememberId;
-                                          saveOption(_isRememberId);
-                                        });
-                                      },
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        GestureDetector(
+                                          child: Row(
+                                            children: [
+                                              Transform.scale(
+                                                  scale: 0.9,
+                                                  child: SizedBox(
+                                                    width: 24,
+                                                    height: 24,
+                                                    child: Checkbox(
+                                                      value: _isRememberId,
+                                                      onChanged: (_val) {
+                                                        setState(() {
+                                                          _isRememberId = _val!;
+                                                          saveOption(
+                                                              _isRememberId);
+                                                        });
+                                                      },
+                                                      activeColor: colorSuccess,
+                                                    ),
+                                                  )),
+                                              Text(
+                                                " 아이디 저장",
+                                                style: TextStyle(fontSize: 15),
+                                              )
+                                            ],
+                                          ),
+                                          behavior: HitTestBehavior.translucent,
+                                          onTap: () {
+                                            setState(() {
+                                              _isRememberId = !_isRememberId;
+                                              saveOption(_isRememberId);
+                                            });
+                                          },
+                                        ),
+                                        GestureDetector(
+                                          child: Container(
+                                            height: 18,
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color: colorGrey
+                                                )
+                                              )
+                                            ),
+                                            child: Text(
+                                              "비밀번호 재설정",
+                                              style: TextStyle(fontSize: 14, color: colorGrey),
+                                            ),
+                                          ),
+                                          behavior: HitTestBehavior.translucent,
+                                          onTap: () {
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageResetPassword()));
+                                          },
+                                        ),
+                                      ],
                                     ),
                                     SizedBox(height: 20),
                                     SizedBox(
@@ -243,7 +283,36 @@ class _MyHomePage extends State<MyHomePage> {
                         sizeCurve: Curves.easeOutCubic,
                       ),
                       curve: Curves.linear,
-                    )
+                    ),
+                    // 관리자 로그인버튼
+                    AnimatedCrossFade(firstChild: SizedBox(width: double.infinity,),
+                        secondChild: Padding(
+                          padding: const EdgeInsets.only(left:40, right:40),
+                          child: SizedBox(
+                            height: 50,
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                _login(manager: true);
+                              },
+                              child: const Text(
+                                '관리자 로그인',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Colors.deepPurpleAccent),
+                            ),
+                          ),
+                        ),
+                        crossFadeState: _isManager ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                        duration: Duration(milliseconds: 500),
+                    sizeCurve: Curves.easeOutQuart,)
                   ],
                 ),
               ),
@@ -252,18 +321,30 @@ class _MyHomePage extends State<MyHomePage> {
           )),
     );
   }
+
   //test
 
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        setState(() {
-          _fadeOutLogo = true;
-        });
-        Timer(Duration(milliseconds: 550), () {
-          Get.off(() => BoardPageMainHub());
-        });
+        // 로고 페이드 아웃 및 메인으로 넘어가기
+        if (FirebaseAuth.instance.currentUser!.emailVerified) {
+          setState(() {
+            _fadeOutLogo = true;
+          });
+          Timer(Duration(milliseconds: 550), () {
+            Get.off(() => BoardPageMainHub());
+          });
+        } else {
+          setState(() {
+            _fadeOutLogo = true;
+          });
+          Timer(Duration(milliseconds: 550), () {
+            Get.off(() => PageEmailVerified());
+          });
+        }
       } else {
+        // 로고 상단으로 올리고 가입화면 표시하기
         setState(() {
           _splashScreenAnimated = true;
           Timer(Duration(milliseconds: 800), () {
@@ -276,9 +357,15 @@ class _MyHomePage extends State<MyHomePage> {
     });
   }
 
-  _login() async {
+  _login({bool? manager}) async {
+    manager = manager ?? false;
+    if (!manager && (controllerId!.text.length != 9 || !controllerId!.text.isNumericOnly)) {
+      showAlert("학번을 제대로 입력해주세요!", context, colorError);
+      _loadingCompleted();
+      return;
+    }
     if (controllerId!.text.isEmpty) {
-      showAlert("이메일을 입력해주세요!", context, colorWarning);
+      showAlert("학번을 입력해주세요!", context, colorWarning);
     } else if (controllerPw!.text.isEmpty) {
       showAlert("비밀번호를 입력해주세요!", context, colorWarning);
     } else if (_formKey.currentState!.validate()) {
@@ -287,13 +374,12 @@ class _MyHomePage extends State<MyHomePage> {
       // Firebase 사용자 인증, 등록
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: controllerId!.text, password: controllerPw!.text);
+            email: manager ? controllerId!.text : "${controllerId!.text}@sangmyung.kr", password: controllerPw!.text);
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
           saveId(controllerId!.text);
         } else {
-          showAlert(
-              "이메일로 인증 주소를 보냈습니다!\n인증 주소를 클릭해주세요.", context, colorSuccess);
+          Get.off(() => const PageEmailVerified());
           _loadingCompleted();
           return;
         }
@@ -301,9 +387,9 @@ class _MyHomePage extends State<MyHomePage> {
         String message = '';
 
         if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-          message = '사용자 이름 및 암호를 확인하세요';
+          message = '학번 또는 비밀번호를 확인하세요';
         } else if (e.code == 'invalid-email') {
-          message = '이메일 형식이 잘못되었습니다';
+          message = '학번이 잘못되었습니다';
         } else {
           message = e.code;
         }
@@ -317,10 +403,6 @@ class _MyHomePage extends State<MyHomePage> {
     setState(() {
       _isLoading = false;
     });
-  }
-
-  _logout() async {
-    await FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -350,21 +432,20 @@ class _MyHomePage extends State<MyHomePage> {
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
     _loadStorage().then((value) => {
-      setState(() {
-        _saveIdEnabled = _localdb!.getBool("login_option_save_enabled");
-        _savedId = _localdb!.getString("login_option_saved_id");
-        if (_saveIdEnabled != null) {
-          _isRememberId = _saveIdEnabled!;
-          if (_saveIdEnabled == true && _savedId != null) {
-            controllerId!.text = _savedId!;
-          }
-        }
-      })
-    });
+          setState(() {
+            _saveIdEnabled = _localdb!.getBool("login_option_save_enabled");
+            _savedId = _localdb!.getString("login_option_saved_id");
+            if (_saveIdEnabled != null) {
+              _isRememberId = _saveIdEnabled!;
+              if (_saveIdEnabled == true && _savedId != null) {
+                controllerId!.text = _savedId!;
+              }
+            }
+          })
+        });
 
     Timer(Duration(milliseconds: 2500), () {
       _auth();
     });
-
   }
 }
