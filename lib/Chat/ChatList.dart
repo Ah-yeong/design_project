@@ -97,17 +97,18 @@ with AutomaticKeepAliveClientMixin{
           StreamBuilder<List<ChatRoom>>(
               stream: chatStream,
               builder: (context, snapshot) {
+                List<ChatRoom> list;
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return buildLoadingProgress();
                 }
                 if (!snapshot.hasData) {
-                  return buildLoadingProgress();
+                  list = [];
+                } else {
+                  list = snapshot.data!;
+                  list.sort();
                 }
 
-                List<ChatRoom> list = snapshot.data!;
-                list.sort();
-
-                return ListView.separated(
+                return list.length != 0 ? ListView.separated(
                   itemCount: list.length,
                   separatorBuilder: (context, index) => Padding(
                     padding: EdgeInsets.only(left: 10, right: 10),
@@ -210,7 +211,13 @@ with AutomaticKeepAliveClientMixin{
                           )),
                     );
                   },
-                );
+                ) :
+                Center(
+                  child: Text(
+                    "진행 중인 채팅이 없어요", style: TextStyle(color: colorGrey),
+                  ),
+                )
+                ;
               }),
         ],
       ),
