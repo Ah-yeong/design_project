@@ -32,170 +32,173 @@ class _SignUpPage extends State<SignUpPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Padding(padding: EdgeInsets.all(40),
-          child: Form(
-            key: _formKey,
-            child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        "회원가입",
-                        style: TextStyle(
-                          fontSize: 33,
-                          color: Colors.black87,
-                          fontFamily: "logo",
-                          fontWeight: FontWeight.bold,
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Stack(
+          children: [
+            Padding(padding: EdgeInsets.all(40),
+            child: Form(
+              key: _formKey,
+              child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Text(
+                          "회원가입",
+                          style: TextStyle(
+                            fontSize: 33,
+                            color: Colors.black87,
+                            fontFamily: "logo",
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE8E8E8),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: TextFormField(
-                              controller: _controllerId,
-                              style: TextStyle(fontSize: 15),
-                              maxLength: 9,
-                              decoration: InputDecoration(
-                                hintText: "학번",
-                                hintStyle: TextStyle(fontSize: 15),
-                                border: InputBorder.none,
-                                counterText: "",
-                              )),
-                        )),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE8E8E8),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: TextFormField(
-                              controller: _controllerPw,
-                              obscureText: true,
-                              style: TextStyle(fontSize: 15),
-                              decoration: InputDecoration(
-                                hintText: "비밀번호",
-                                hintStyle: TextStyle(fontSize: 15),
-                                border: InputBorder.none,
-                                counterText: "",
-                              )),
-                        )),
-                    const SizedBox(height: 2),
-                    Container(
-                        height: 50,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFE8E8E8),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: TextFormField(
-                              controller: _controllerPwConfirm,
-                              obscureText: true,
-                              style: TextStyle(fontSize: 15),
-                              decoration: InputDecoration(
-                                hintText: "비밀번호 확인",
-                                hintStyle: TextStyle(fontSize: 15),
-                                border: InputBorder.none,
-                                counterText: "",
-                              )),
-                        )),
-                    const SizedBox(
-                      height: 7.5,
-                    ),
-                    Align(
-                        alignment: Alignment.center,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: _infoTextHighlight! ? colorError : colorGrey,
-                              size: 13,
-                            ),
-                            Text(
-                              " ${_infoText}",
-                              style: TextStyle(
-                                  fontWeight: _infoTextHighlight! ? FontWeight.bold : FontWeight.normal,
-                                  fontSize: 13,
-                                  color: _infoTextHighlight! ? colorError : colorGrey),
-                            )
-                          ],
-                        )
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    SizedBox(
-                      height: 50,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          _signup();
-                        },
-                        child: const Text(
-                          "가입하기",
-                          style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            elevation: 0, backgroundColor: colorSuccess),
+                      const SizedBox(
+                        height: 30,
                       ),
-                    ),
-                    Center(
-                      child: SizedBox(
-                        height: 35,
-                        width: 100,
-                        child: GestureDetector(
-                          child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.arrow_back, size: 14, color: colorGrey),
-                                  Text(
-                                    " 이전으로",
-                                    style: TextStyle(fontSize: 15, color: colorGrey),
-                                  ),
-                                ],
-                              )),
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () {
-                            Navigator.of(context).pop();
+                      const SizedBox(
+                        height: 2,
+                      ),
+                      Container(
+                          height: 50,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE8E8E8),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: TextFormField(
+                                controller: _controllerId,
+                                style: TextStyle(fontSize: 15),
+                                maxLength: 9,
+                                decoration: InputDecoration(
+                                  hintText: "학번",
+                                  hintStyle: TextStyle(fontSize: 15),
+                                  border: InputBorder.none,
+                                  counterText: "",
+                                )),
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                          height: 50,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE8E8E8),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: TextFormField(
+                                controller: _controllerPw,
+                                obscureText: true,
+                                style: TextStyle(fontSize: 15),
+                                decoration: InputDecoration(
+                                  hintText: "비밀번호",
+                                  hintStyle: TextStyle(fontSize: 15),
+                                  border: InputBorder.none,
+                                  counterText: "",
+                                )),
+                          )),
+                      const SizedBox(height: 2),
+                      Container(
+                          height: 50,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE8E8E8),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: TextFormField(
+                                controller: _controllerPwConfirm,
+                                obscureText: true,
+                                style: TextStyle(fontSize: 15),
+                                decoration: InputDecoration(
+                                  hintText: "비밀번호 확인",
+                                  hintStyle: TextStyle(fontSize: 15),
+                                  border: InputBorder.none,
+                                  counterText: "",
+                                )),
+                          )),
+                      const SizedBox(
+                        height: 7.5,
+                      ),
+                      Align(
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: _infoTextHighlight! ? colorError : colorGrey,
+                                size: 13,
+                              ),
+                              Text(
+                                " ${_infoText}",
+                                style: TextStyle(
+                                    fontWeight: _infoTextHighlight! ? FontWeight.bold : FontWeight.normal,
+                                    fontSize: 13,
+                                    color: _infoTextHighlight! ? colorError : colorGrey),
+                              )
+                            ],
+                          )
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            _signup();
                           },
+                          child: const Text(
+                            "가입하기",
+                            style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              elevation: 0, backgroundColor: colorSuccess),
                         ),
                       ),
-                    ),
-                  ],
-                )),
-          ),),
-          _isLoading ? buildContainerLoading() : SizedBox()
-        ],
+                      Center(
+                        child: SizedBox(
+                          height: 35,
+                          width: 100,
+                          child: GestureDetector(
+                            child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.arrow_back, size: 14, color: colorGrey),
+                                    Text(
+                                      " 이전으로",
+                                      style: TextStyle(fontSize: 15, color: colorGrey),
+                                    ),
+                                  ],
+                                )),
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),),
+            _isLoading ? buildContainerLoading() : SizedBox()
+          ],
+        ),
       ),
     );
   }

@@ -78,246 +78,249 @@ class _MyHomePage extends State<MyHomePage> {
       body: SafeArea(
           bottom: false,
           top: false,
-          child: Stack(
-            children: [
-              Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedOpacity(
-                      opacity: _fadeOutLogo ? 0 : 1,
-                      duration: Duration(milliseconds: 500),
-                      child: Center(
-                          child: GestureDetector(
-                            onDoubleTap: () {
-                              setState(() {
-                                _isManager = !_isManager;
-                              });
-                            },
-                        child: Text(
-                          "마음 맞는, 사람끼리",
-                          style: TextStyle(
-                            fontSize: 35,
-                            color: Colors.black87,
-                            fontFamily: "logo",
-                            fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: Stack(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedOpacity(
+                        opacity: _fadeOutLogo ? 0 : 1,
+                        duration: Duration(milliseconds: 500),
+                        child: Center(
+                            child: GestureDetector(
+                              onDoubleTap: () {
+                                setState(() {
+                                  _isManager = !_isManager;
+                                });
+                              },
+                          child: Text(
+                            "마음 맞는, 사람끼리",
+                            style: TextStyle(
+                              fontSize: 35,
+                              color: Colors.black87,
+                              fontFamily: "logo",
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      )),
-                    ),
-                    AnimatedOpacity(
-                      opacity: _splashScreenShow ? 1 : 0,
-                      duration: Duration(milliseconds: 450),
-                      child: AnimatedCrossFade(
-                        firstChild: Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(40),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      height: 50,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFE8E8E8),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 20),
-                                        child: TextFormField(
-                                            controller: controllerId,
-                                            style: TextStyle(fontSize: 15),
-                                            maxLength: _isManager ? 100 : 9,
-                                            textInputAction: TextInputAction.next,
-                                            decoration: InputDecoration(
-                                                hintText: "아이디 (학번)",
-                                                hintStyle:
-                                                    TextStyle(fontSize: 15),
-                                                border: InputBorder.none,
-                                            counterText: '')),
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Container(
+                        )),
+                      ),
+                      AnimatedOpacity(
+                        opacity: _splashScreenShow ? 1 : 0,
+                        duration: Duration(milliseconds: 450),
+                        child: AnimatedCrossFade(
+                          firstChild: Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(40),
+                                  child: Column(
+                                    children: [
+                                      Container(
                                         height: 50,
                                         width: double.infinity,
                                         decoration: BoxDecoration(
                                           color: Color(0xFFE8E8E8),
-                                          borderRadius:
-                                              BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Padding(
                                           padding:
                                               const EdgeInsets.only(left: 20),
                                           child: TextFormField(
-                                              controller: controllerPw,
-                                              obscureText: true,
+                                              controller: controllerId,
                                               style: TextStyle(fontSize: 15),
+                                              maxLength: _isManager ? 100 : 9,
+                                              textInputAction: TextInputAction.next,
                                               decoration: InputDecoration(
-                                                hintText: "비밀번호",
-                                                hintStyle:
-                                                    TextStyle(fontSize: 15),
-                                                border: InputBorder.none,
-                                                counterText: "",
-                                              )),
-                                        )),
-                                    SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        GestureDetector(
-                                          child: Row(
-                                            children: [
-                                              Transform.scale(
-                                                  scale: 0.9,
-                                                  child: SizedBox(
-                                                    width: 24,
-                                                    height: 24,
-                                                    child: Checkbox(
-                                                      value: _isRememberId,
-                                                      onChanged: (_val) {
-                                                        setState(() {
-                                                          _isRememberId = _val!;
-                                                          saveOption(
-                                                              _isRememberId);
-                                                        });
-                                                      },
-                                                      activeColor: colorSuccess,
-                                                    ),
-                                                  )),
-                                              Text(
-                                                " 아이디 저장",
+                                                  hintText: "아이디 (학번)",
+                                                  hintStyle:
+                                                      TextStyle(fontSize: 15),
+                                                  border: InputBorder.none,
+                                              counterText: '')),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Container(
+                                          height: 50,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFFE8E8E8),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 20),
+                                            child: TextFormField(
+                                                controller: controllerPw,
+                                                obscureText: true,
                                                 style: TextStyle(fontSize: 15),
-                                              )
-                                            ],
-                                          ),
-                                          behavior: HitTestBehavior.translucent,
-                                          onTap: () {
-                                            setState(() {
-                                              _isRememberId = !_isRememberId;
-                                              saveOption(_isRememberId);
-                                            });
-                                          },
-                                        ),
-                                        GestureDetector(
-                                          child: Container(
-                                            height: 18,
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: BorderSide(
-                                                  color: colorGrey
+                                                decoration: InputDecoration(
+                                                  hintText: "비밀번호",
+                                                  hintStyle:
+                                                      TextStyle(fontSize: 15),
+                                                  border: InputBorder.none,
+                                                  counterText: "",
+                                                )),
+                                          )),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          GestureDetector(
+                                            child: Row(
+                                              children: [
+                                                Transform.scale(
+                                                    scale: 0.9,
+                                                    child: SizedBox(
+                                                      width: 24,
+                                                      height: 24,
+                                                      child: Checkbox(
+                                                        value: _isRememberId,
+                                                        onChanged: (_val) {
+                                                          setState(() {
+                                                            _isRememberId = _val!;
+                                                            saveOption(
+                                                                _isRememberId);
+                                                          });
+                                                        },
+                                                        activeColor: colorSuccess,
+                                                      ),
+                                                    )),
+                                                Text(
+                                                  " 아이디 저장",
+                                                  style: TextStyle(fontSize: 15),
                                                 )
-                                              )
+                                              ],
                                             ),
+                                            behavior: HitTestBehavior.translucent,
+                                            onTap: () {
+                                              setState(() {
+                                                _isRememberId = !_isRememberId;
+                                                saveOption(_isRememberId);
+                                              });
+                                            },
+                                          ),
+                                          GestureDetector(
+                                            child: Container(
+                                              height: 18,
+                                              decoration: BoxDecoration(
+                                                border: Border(
+                                                  bottom: BorderSide(
+                                                    color: colorGrey
+                                                  )
+                                                )
+                                              ),
+                                              child: Text(
+                                                "비밀번호 재설정",
+                                                style: TextStyle(fontSize: 14, color: colorGrey),
+                                              ),
+                                            ),
+                                            behavior: HitTestBehavior.translucent,
+                                            onTap: () {
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageResetPassword()));
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 20),
+                                      SizedBox(
+                                        height: 50,
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _isLoading = true;
+                                            });
+                                            _login();
+                                          },
+                                          child: const Text(
+                                            '로그인',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                              elevation: 0,
+                                              backgroundColor: colorSuccess),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 35,
+                                        width: 100,
+                                        child: GestureDetector(
+                                          child: Center(
                                             child: Text(
-                                              "비밀번호 재설정",
-                                              style: TextStyle(fontSize: 14, color: colorGrey),
+                                              "회원가입",
+                                              style: TextStyle(
+                                                  fontSize: 15, color: colorGrey),
                                             ),
                                           ),
                                           behavior: HitTestBehavior.translucent,
                                           onTap: () {
-                                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageResetPassword()));
+                                            Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                    builder: (cont) =>
+                                                        const SignUpPage()));
                                           },
                                         ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 20),
-                                    SizedBox(
-                                      height: 50,
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _isLoading = true;
-                                          });
-                                          _login();
-                                        },
-                                        child: const Text(
-                                          '로그인',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                            elevation: 0,
-                                            backgroundColor: colorSuccess),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 35,
-                                      width: 100,
-                                      child: GestureDetector(
-                                        child: Center(
-                                          child: Text(
-                                            "회원가입",
-                                            style: TextStyle(
-                                                fontSize: 15, color: colorGrey),
-                                          ),
-                                        ),
-                                        behavior: HitTestBehavior.translucent,
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (cont) =>
-                                                      const SignUpPage()));
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        secondChild: SizedBox(width: double.infinity),
-                        crossFadeState: !_splashScreenAnimated
-                            ? CrossFadeState.showSecond
-                            : CrossFadeState.showFirst,
-                        duration: Duration(milliseconds: 800),
-                        sizeCurve: Curves.easeOutCubic,
-                      ),
-                      curve: Curves.linear,
-                    ),
-                    // 관리자 로그인버튼
-                    AnimatedCrossFade(firstChild: SizedBox(width: double.infinity,),
-                        secondChild: Padding(
-                          padding: const EdgeInsets.only(left:40, right:40),
-                          child: SizedBox(
-                            height: 50,
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isLoading = true;
-                                });
-                                _login(manager: true);
-                              },
-                              child: const Text(
-                                '관리자 로그인',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: Colors.deepPurpleAccent),
+                              ],
                             ),
                           ),
+                          secondChild: SizedBox(width: double.infinity),
+                          crossFadeState: !_splashScreenAnimated
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          duration: Duration(milliseconds: 800),
+                          sizeCurve: Curves.easeOutCubic,
                         ),
-                        crossFadeState: _isManager ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                        duration: Duration(milliseconds: 500),
-                    sizeCurve: Curves.easeOutQuart,)
-                  ],
+                        curve: Curves.linear,
+                      ),
+                      // 관리자 로그인버튼
+                      AnimatedCrossFade(firstChild: SizedBox(width: double.infinity,),
+                          secondChild: Padding(
+                            padding: const EdgeInsets.only(left:40, right:40),
+                            child: SizedBox(
+                              height: 50,
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  _login(manager: true);
+                                },
+                                child: const Text(
+                                  '관리자 로그인',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                    backgroundColor: Colors.deepPurpleAccent),
+                              ),
+                            ),
+                          ),
+                          crossFadeState: _isManager ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                          duration: Duration(milliseconds: 500),
+                      sizeCurve: Curves.easeOutQuart,)
+                    ],
+                  ),
                 ),
-              ),
-              _isLoading ? buildContainerLoading() : SizedBox(),
-            ],
+                _isLoading ? buildContainerLoading() : SizedBox(),
+              ],
+            ),
           )),
     );
   }
