@@ -175,7 +175,6 @@ class _BoardPostPage extends State<BoardPostPage> {
         checkWriterId(postEntity!.getWriterId());
       });
     });
-    //postEntity!.makeTestingPost();
   }
 
 
@@ -205,44 +204,132 @@ class _BoardPostPage extends State<BoardPostPage> {
               ),
               child: Padding(
                   padding: EdgeInsets.all(13),
-                  child: buildPostMember(profileEntity!, context))),
+                  child : buildPostMember(profileEntity!, postEntity!, context))),
     );
   }
 }
 
-Column buildPostMember(EntityProfiles profiles, BuildContext context) {
+Column buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
   return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      drawProfile(profiles, context), // 프로필
-      const Padding(
-        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
-        child: Divider(
-          thickness: 1,
-        ),
+      Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: const SizedBox(
+              height: 30,
+              width: 30,
+              child: Icon(
+                Icons.close_rounded,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              "신청자 현황",
+              style: TextStyle(color: Colors.black, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(width: 30),
+        ],
       ),
-      drawApplyProfile(profiles, context),
-      const Padding(
-        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
-        child: Divider(
-          thickness: 1,
-        ),
+      showApplyUserList(post),
+      Divider(thickness: 1),
+      SizedBox(height: 5),
+      Text(
+        "참가자 현황",
+        style: TextStyle(color: Colors.black, fontSize: 16),
+        textAlign: TextAlign.center,
       ),
-      drawApplyProfile(profiles, context),
-      const Padding(
-        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
-        child: Divider(
-          thickness: 1,
+      SizedBox(height: 5),
+      showAcceptUserList(post),
+    ],
+  );
+}
+
+Widget showApplyUserList(EntityPost post){
+  bool hasApplicantsWithStatusZero = post?.user?.any((userMap) => userMap['status'] == 0) ?? false;
+  return hasApplicantsWithStatusZero ? ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: post!.user!.length,
+      itemBuilder: (context, index) {
+        Map<String, dynamic> userMap = post!.user![index];
+        final status = userMap['status'];
+        if (status == 0) {
+          String userId = userMap['id'];
+          return Column(
+            children: [
+              Divider(thickness: 1),
+              FutureBuilder<Widget>(
+                future: drawApplyProfile(EntityProfiles(userId)!, post.getPostId(), context),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return snapshot.data ?? SizedBox();
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
+            ],
+          );
+        } else {
+          // "status"가 0이 아닌 아이템은 표시하지 않음
+          return SizedBox();
+        }
+      },
+    ) : Column(
+      children: [
+        Divider(thickness: 1),
+        SizedBox(height: 20),
+        Text("신청자가 없습니다.",
+          style: TextStyle(color: Colors.grey, fontSize: 14)
         ),
+        SizedBox(height: 20),
+      ],
+    );
+}
+
+Widget showAcceptUserList(EntityPost post){
+  bool hasApplicantsWithStatusOne = post?.user?.any((userMap) => userMap['status'] == 1) ?? false;
+  return hasApplicantsWithStatusOne ? ListView.builder(
+    physics: NeverScrollableScrollPhysics(),
+    shrinkWrap: true,
+    itemCount: post!.user!.length,
+    itemBuilder: (context, index) {
+      Map<String, dynamic> userMap = post!.user![index];
+      final status = userMap['status'];
+      if (status == 1) {
+        String userId = userMap['id'];
+        return Column(
+          children: [
+            Divider(thickness: 1),
+            FutureBuilder<Widget>(
+              future: drawAcceptProfile(EntityProfiles(userId)!, post.getPostId(), context),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return snapshot.data ?? SizedBox();
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
+          ],
+        );
+      } else {
+        return SizedBox();
+      }
+    },
+  ) : Column(
+    children: [
+      Divider(thickness: 1),
+      SizedBox(height: 20),
+      Text("참가자가 없습니다.",
+          style: TextStyle(color: Colors.grey, fontSize: 14)
       ),
-      drawApplyProfile(profiles, context),
-      const Padding(
-        padding: EdgeInsets.fromLTRB(0, 4, 0, 12),
-        child: Divider(
-          thickness: 1,
-        ),
-      ),
-      drawApplyProfile(profiles, context),
+      SizedBox(height: 20),
     ],
   );
 }
@@ -420,12 +507,13 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   );
 }
 
-Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
+Future<Widget> drawApplyProfile(EntityProfiles profileEntity, int postId, BuildContext context) async{
+  await profileEntity!.loadProfile();
   final color = getColorForScore(profileEntity!.mannerGroup);
+  String status ='';
   return GestureDetector(
     onTap: () {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity!.profileId)));
-      print(profileEntity!.profileId);
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -458,33 +546,201 @@ Widget drawApplyProfile(EntityProfiles profileEntity, BuildContext context) {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF6ACA89),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              "매너 지수 ${profileEntity.mannerGroup}점",
+              style: const TextStyle(color: Color(0xFF777777), fontSize: 12),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+            ),
+            SizedBox(
+                height: 6,
+                width: 105,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: profileEntity.mannerGroup / 100,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                    backgroundColor: color.withOpacity(0.3),
                   ),
-                  child: Text('수락')
+                )
+            ),Padding(
+              padding: const EdgeInsets.only(right: 1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        status = 'accept';
+                        _showdialog(profileEntity!.name, profileEntity.profileId, status, postId, context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF6ACA89),
+                        minimumSize: Size(50,25),
+                      ),
+                      child: Text('수락')
+                  ),
+                  SizedBox(width: 4,),
+                  ElevatedButton(
+                      onPressed: () {
+                        status = 'reject';
+                        _showdialog(profileEntity!.name, profileEntity.profileId, status, postId, context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.grey,
+                        minimumSize: Size(50,25),
+                      ),
+                      child: Text('거절')
+                  )
+                ],
               ),
-              SizedBox(width: 4,),
-              ElevatedButton(
-                  onPressed: () {
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF6ACA89),
-                  ),
-                  child: Text('거절')
-              )
-            ],
-          ),
-        )
+            )
+          ],
+        ),
       ],
     ),
   );
+}
+
+Future<Widget> drawAcceptProfile(EntityProfiles profileEntity, int postId, BuildContext context) async{
+  await profileEntity!.loadProfile();
+  final color = getColorForScore(profileEntity!.mannerGroup);
+  String status ='';
+  return GestureDetector(
+    onTap: () {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity!.profileId)));
+    },
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Image.asset(
+              profileEntity!.profileImagePath,
+              width: 45,
+              height: 45,
+            ),
+            const Padding(padding: EdgeInsets.only(left: 10)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${profileEntity!.name}",
+                  style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                const Padding(padding: EdgeInsets.only(top: 4)),
+                Text(
+                  "${profileEntity!.major}, ${profileEntity!.age}세",
+                  style:
+                  const TextStyle(color: Color(0xFF777777), fontSize: 13),
+                )
+              ],
+            ),
+          ],
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              "매너 지수 ${profileEntity.mannerGroup}점",
+              style: const TextStyle(color: Color(0xFF777777), fontSize: 12),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+            ),
+            SizedBox(
+                height: 6,
+                width: 105,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: profileEntity.mannerGroup / 100,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                    backgroundColor: color.withOpacity(0.3),
+                  ),
+                )
+            )
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+Future<dynamic> _showdialog(String name, String profileId, String status, int postId, BuildContext context) {
+  return
+    showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      contentPadding: EdgeInsets.fromLTRB(30, 20, 20, 30), // 다이얼로그의 내용 패딩을 균일하게 조정
+      content: SizedBox(
+        width: 300,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 20),
+            Text(
+              status == 'accept'? '${name}님의 모임 참가를 수락하시겠습니까 ?' : '${name}님의 모임 참가를 거절하시겠습니까 ?',
+              style: TextStyle(fontSize: 16)
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if(status == 'accept'){ isAccepted(profileId, postId); }
+                    if(status == 'reject'){ isRejected(profileId, postId); }
+                    Navigator.of(context).pop();
+                    },
+                  child: Text('예'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey,
+                    minimumSize: Size(50, 30),
+                  ),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('아니오'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey,
+                    minimumSize: Size(50, 30),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+isAccepted(String profileId, int postId){
+  EntityPost? postEntity;
+  EntityProfiles? profileEntity;
+
+  postEntity = EntityPost(postId);
+  postEntity.acceptToPost(profileId);
+  profileEntity = EntityProfiles(profileId);
+  profileEntity.addGroupId(postId);
+}
+
+isRejected(String profileId, int postId){
+  EntityPost? postEntity;
+  postEntity = EntityPost(postId);
+  postEntity.rejectToPost(profileId);
+  // post 객체의 user에 해당 id의 status를 2로 변경
 }

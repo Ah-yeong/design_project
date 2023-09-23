@@ -1133,7 +1133,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'commute' : commute[_commuteIndex],
         'mannerGroup': 50,
         'post': FieldValue.arrayUnion([]),
-        'group': null,
+        'group': FieldValue.arrayUnion([]),
         'profileImagePath': _image,
         'addr1': selectedSiDo,
         'addr2': selectedSiGunGu,

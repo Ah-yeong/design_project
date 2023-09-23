@@ -43,7 +43,7 @@ class EntityProfiles {
           textInfo = ds.get("textInfo");
           mannerGroup = ds.get("mannerGroup");
           post = ds.get("post");
-          //group = ds.get("group");
+          group = ds.get("group");
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
         });
@@ -84,19 +84,11 @@ class EntityProfiles {
   }
 
   // 수락된 게시물 아이디 추가 (내가 속한 그룹)
-  Future<bool> addGroupId() async {
+  Future<bool> addGroupId(postId) async {
     try {
-      int? new_post_id;
-      DocumentReference<Map<String, dynamic>> ref =
-      await FirebaseFirestore.instance.collection("Post").doc("postData");
-      await ref.get().then((DocumentSnapshot ds) {
-        new_post_id = ds.get("last_id");
-        if (new_post_id == -1) return false; // 업로드 실패
-      });
       await FirebaseFirestore.instance.collection("UserProfile").doc(profileId.toString())
           .update({
-        "post": FieldValue.arrayUnion([new_post_id]),
-        //"post" : new_post_id,
+        "group": FieldValue.arrayUnion([postId]),
       });
       return true;
     } catch (e) {
