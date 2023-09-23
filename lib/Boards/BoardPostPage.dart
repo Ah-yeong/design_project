@@ -646,31 +646,6 @@ Future<Widget> drawAcceptProfile(EntityProfiles profileEntity, int postId, Build
             ),
           ],
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              "매너 지수 ${profileEntity.mannerGroup}점",
-              style: const TextStyle(color: Color(0xFF777777), fontSize: 12),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 2),
-            ),
-            SizedBox(
-                height: 6,
-                width: 105,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: profileEntity.mannerGroup / 100,
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                    backgroundColor: color.withOpacity(0.3),
-                  ),
-                )
-            )
-          ],
-        ),
       ],
     ),
   );
