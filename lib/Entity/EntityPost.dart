@@ -37,10 +37,44 @@ class EntityPost {
   Future<void> applyToPost(String userId) async {
     try {
       await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
-        "User": FieldValue.arrayUnion([{"id": userId, "status": 0}])
+        "user": FieldValue.arrayUnion([{"id": userId, "status": 0}])
       });
     } catch (e) {
       print("신청 실패: $e");
+    }
+  }
+
+  Future<void> acceptToPost(String userId) async {
+    try {
+      var postDoc = await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get();
+      var users = postDoc.data()?["user"] as List<dynamic>;
+      var index = users.indexWhere((user) => user["id"] == userId);
+
+      if (index != -1) {
+        users[index]["status"] = 1;
+        await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
+          "user": users,
+        });
+      }
+    } catch (e) {
+      print("수락 실패: $e");
+    }
+  }
+
+  Future<void> rejectToPost(String userId) async {
+    try {
+      var postDoc = await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get();
+      var users = postDoc.data()?["user"] as List<dynamic>;
+      var index = users.indexWhere((user) => user["id"] == userId);
+
+      if (index != -1) {
+        users[index]["status"] = 2;
+        await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
+          "user": users,
+        });
+      }
+    } catch (e) {
+      print("거절 실패: $e");
     }
   }
 
@@ -60,7 +94,7 @@ class EntityPost {
       _upTime = ds.get("upTime");
       _category = ds.get("category");
       viewCount = ds.get("viewCount");
-      //user = ds.get("User");
+      user = ds.get("user");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
   }
@@ -160,7 +194,8 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "writer_nick" : writerNick,
       "maxAge" : maxAge,
       "upTime" : upTime,
-      "viewCount" : 1
+      "viewCount" : 1,
+      "user": FieldValue.arrayUnion([]),
     });
     return true;
   } catch (e) {
