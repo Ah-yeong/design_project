@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Meeting/models/MeetingManager.dart';
 
 class EntityProfiles {
   var profileId;
@@ -29,7 +28,7 @@ class EntityProfiles {
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
           birth = ds.get("birth");
-          age = ds.get("age");
+          age = 23;
           profileImagePath = "assets/images/userImage.png";
           commute = ds.get("commute");
           commuteIndex = ds.get("commuteIndex");
@@ -43,6 +42,7 @@ class EntityProfiles {
           textInfo = ds.get("textInfo");
           mannerGroup = ds.get("mannerGroup");
           post = ds.get("post");
+          //group = ds.get("group");
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
         });

@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
-import 'package:design_project/Meeting/models/MeetingManager.dart';
-import 'package:design_project/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -198,39 +196,20 @@ class EntityPost {
 
   // Getter, (ReadOnly)
   int getPostId() => _postId;
-
   String getWriterId() => _writerId;
-
   String getPostHead() => _head;
-
   String getPostBody() => _body;
-
   int getPostGender() => _gender;
-
   int getPostMaxPerson() => _maxPerson;
-
   int getPostCurrentPerson() => _currentPerson;
-
   String getWriterNick() => _writerNick;
-
   String getTime() => _time;
-
-  bool isVoluntary() => _isVoluntary;
-
   String getCategory() => _category;
-
   String getUpTime() => _upTime;
-
   LLName getLLName() => _llName;
-
   int getMinAge() => _minAge;
-
   int getMaxAge() => _maxAge;
-
-  int getViewCount() => _viewCount;
-
   bool isLoad() => _isLoaded;
-
   List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
