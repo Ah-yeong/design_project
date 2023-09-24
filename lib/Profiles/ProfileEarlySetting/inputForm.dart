@@ -173,7 +173,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   }
 
   void _showYearPicker() {
-    int selectedYear = DateTime.now().year;
+    int selectedYear = DateTime.now().year - 30;
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -216,7 +216,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   }
 
   void _showMonthPicker() async {
-    int selectedMonth = DateTime.now().month;
+    int selectedMonth = 1;
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -258,7 +258,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   }
 
   void _showDayPicker() async {
-    int selectedDay = DateTime.now().day;
+    int selectedDay = 1;
     final daysInMonth = DateTime(year, month + 1, 0).day;
     showModalBottomSheet(
       context: context,
@@ -332,7 +332,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(selectedSiDo==''){selectedSiDo = siDoList[0];}
+                    if(sido==''){selectedSiDo = siDoList[0];}
                     else{selectedSiDo = sido;}
                     selectedSiGunGu = null;
                     selectedDong = null;
@@ -382,7 +382,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(selectedSiGunGu==''){selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];}
+                    if(siGunGu==''){selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];}
                     else{selectedSiGunGu = siGunGu;}
                     selectedDong = null;
                   });
@@ -431,7 +431,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(selectedDong == ''){selectedDong = dongMap[selectedSiGunGu!]![0];}
+                    if(dong == ''){selectedDong = dongMap[selectedSiGunGu!]![0];}
                     else{selectedDong = dong;}
                   });
                   Navigator.of(context).pop();
@@ -512,7 +512,6 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                     if (pageIndex == 4) {
                       _createProfile();
                       Get.off(() => const BoardPageMainHub());
-                      // pageIndex가 3일 때 _createProfile 메소드 호출
                     } else {
                       setState(() {
                         pageIndex++;
@@ -920,7 +919,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         ),
         SizedBox(height: 6),
         Text(
-            '자세하게 입력할수록 본인의 개성을 드러내는 프로필 생성이 가능합니다.',
+            '지금부터의 항목은 모두 선택사항입니다. \n자세하게 입력할수록 본인의 개성을 드러내는 프로필 생성이 가능합니다.',
             style: TextStyle(
               fontSize: 14,
             )
@@ -1038,7 +1037,10 @@ class _NicknameFormState extends State<NameSignUpScreen> {
           ),
         ),
         ElevatedButton(
-          onPressed: _showSiGunGuPicker,
+          onPressed: () {
+            if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
+            else{_showSiGunGuPicker();};
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: selectedSiGunGu == null ? _unSelectedColor : _selectedColor,
             padding: EdgeInsets.only(left: 6.0),
@@ -1058,7 +1060,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
           ),
         ),
         ElevatedButton(
-          onPressed: _showDongPicker,
+          onPressed: () {
+            if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
+            else if(selectedSiGunGu == null){ showAlert("시/군/구 먼저 선택해주세요", context, colorError); }
+            else{ _showDongPicker(); }
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: selectedDong == null ? _unSelectedColor : _selectedColor,
             padding: EdgeInsets.only(left: 6.0),
@@ -1125,6 +1131,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'textInfo' : controllerText!.value.text,
         'gender' : gender,
         'birth' : '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
+        'age' : DateTime.now().year - year + 1,
         'mbtiIndex': _selectedMBTIIndex,
         'mbti': mbti[_selectedMBTIIndex],
         // 'hobbyIndex' hobbyIndex,
@@ -1137,6 +1144,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'profileImagePath': _image,
         'addr1': selectedSiDo,
         'addr2': selectedSiGunGu,
+        'addr3': selectedDong,
       });
       print('Profile data updated successfully.');
     } catch (e) {
