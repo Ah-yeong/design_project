@@ -4,7 +4,8 @@ class ChatDataModel {
   String text;
   Timestamp ts;
   String nickName;
-  ChatDataModel({required this.text, required this.ts, required this.nickName});
+  int? unreadCount;
+  ChatDataModel({required this.text, required this.ts, required this.nickName, this.unreadCount});
 
   ChatDataModel.fromJson(Map<String, dynamic> json) :
         text = json['text'] as String,
