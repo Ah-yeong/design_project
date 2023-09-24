@@ -152,6 +152,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
             toolbarHeight: 40,
           ),
           body: GestureDetector(
+            behavior: HitTestBehavior.translucent,
             onTap: () {
               FocusManager.instance.primaryFocus?.unfocus();
             },

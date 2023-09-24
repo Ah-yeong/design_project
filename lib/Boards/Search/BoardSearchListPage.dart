@@ -113,66 +113,70 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         ),
         body: _pageManager.isLoading
             ? buildLoadingProgress()
-            : Column(
-                children: [
-                  SizedBox(
-                      child: Padding(
-                          padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                buildSortingButton(
-                                    "${_sortingOptionList[_selectedSortingBy]}",
-                                    () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          _buildModalSheet(context, 0),
-                                      backgroundColor: Colors.transparent);
-                                }, true),
-                                Row(
-                                  children: _buildFilteringContents(),
-                                )
-                              ],
+            : GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+              child: Column(
+                  children: [
+                    SizedBox(
+                        child: Padding(
+                            padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  buildSortingButton(
+                                      "${_sortingOptionList[_selectedSortingBy]}",
+                                      () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            _buildModalSheet(context, 0),
+                                        backgroundColor: Colors.transparent);
+                                  }, true),
+                                  Row(
+                                    children: _buildFilteringContents(),
+                                  )
+                                ],
+                              ),
+                            ))),
+                    _pageManager.list.length != 0
+                        ? Expanded(
+                            child: ListView.builder(
+                            itemBuilder: (context, index) => GestureDetector(
+                              onTap: () {
+                                naviToPost(index);
+                              },
+                              child: Card(
+                                  child: Padding(
+                                      padding: const EdgeInsets.all(7),
+                                      child: buildFriendRow(
+                                          _pageManager.list[
+                                              _pageManager.list.length -
+                                                  index -
+                                                  1],
+                                          _pageManager
+                                              .list[_pageManager.list.length -
+                                                  index -
+                                                  1]
+                                              .distance))),
                             ),
-                          ))),
-                  _pageManager.list.length != 0
-                      ? Expanded(
-                          child: ListView.builder(
-                          itemBuilder: (context, index) => GestureDetector(
-                            onTap: () {
-                              naviToPost(index);
-                            },
-                            child: Card(
-                                child: Padding(
-                                    padding: const EdgeInsets.all(7),
-                                    child: buildFriendRow(
-                                        _pageManager.list[
-                                            _pageManager.list.length -
-                                                index -
-                                                1],
-                                        _pageManager
-                                            .list[_pageManager.list.length -
-                                                index -
-                                                1]
-                                            .distance))),
+                            itemCount: _pageManager.loadedCount,
+                          ))
+                        : Expanded(
+                            child: Center(
+                                child: Text(
+                              "검색된 모임이 없습니다",
+                              style: TextStyle(
+                                  color: colorGrey,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15),
+                            )),
                           ),
-                          itemCount: _pageManager.loadedCount,
-                        ))
-                      : Expanded(
-                          child: Center(
-                              child: Text(
-                            "검색된 모임이 없습니다",
-                            style: TextStyle(
-                                color: colorGrey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15),
-                          )),
-                        ),
-                  _pageManager.list.length == 0 ? SizedBox(width: double.infinity, height: 65,) : SizedBox()
-                ],
-              ));
+                    _pageManager.list.length == 0 ? SizedBox(width: double.infinity, height: 65,) : SizedBox()
+                  ],
+                ),
+            ));
   }
 
   Widget buildSortingButton(

@@ -73,6 +73,7 @@ class _StatePageResetPassword extends State<PageResetPassword> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Padding(
             padding: EdgeInsets.all(40),

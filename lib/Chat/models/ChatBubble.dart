@@ -23,96 +23,104 @@ class ChatBubble extends StatelessWidget {
     Color textColor = !isMe ? Colors.black : Colors.white;
     return !_isDayDivider
         ? Column(
-            crossAxisAlignment:
-                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              if (!isMe && !_longBubble)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    userName ?? 'Unknown',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[900],
-                    ),
-                  ),
-                ),
-              Row(
-                mainAxisAlignment:
-                    isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                    children: [
-                      if (isMe && !_invisibleTime)
-                        Text(
-                          time,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: bubbleColor,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            topLeft: Radius.circular(12),
-                            bottomRight:
-                                isMe ? Radius.circular(0) : Radius.circular(12),
-                            bottomLeft:
-                                isMe ? Radius.circular(12) : Radius.circular(0),
-                          ),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                        margin:
-                            EdgeInsets.fromLTRB(12, 3 , 12, _invisibleTime ? 0 : 5),
-                        child: Text(
-                          message,
-                          style: TextStyle(
-                            color: textColor,
-                          ),
-                        ),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 6.5 / 10,
-                        ),
-                      ),
-                      if (!isMe && !_invisibleTime)
-                        Text(
-                          time,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          )
-        : Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+      crossAxisAlignment:
+      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        if (!isMe && !_longBubble)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              userName ?? 'Unknown',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[900],
               ),
             ),
-          );
+          ),
+        Row(
+          mainAxisAlignment:
+          isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment:
+              isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [
+                if (isMe && !_invisibleTime)
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                    ),
+                  ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: bubbleColor,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      topLeft: Radius.circular(12),
+                      bottomRight:
+                      isMe ? Radius.circular(0) : Radius.circular(12),
+                      bottomLeft:
+                      isMe ? Radius.circular(12) : Radius.circular(0),
+                    ),
+                  ),
+                  padding:
+                  EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  margin:
+                  EdgeInsets.fromLTRB(12, 3, 12, _invisibleTime ? 0 : 5),
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      color: textColor,
+                    ),
+                  ),
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 6.5 / 10,
+                  ),
+                ),
+                if (!isMe && !_invisibleTime)
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    )
+        : Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Text(
+            time.replaceAll("Mon", "월요일")
+                .replaceAll("Tue", "화요일")
+                .replaceAll("Wed", "수요일")
+                .replaceAll("Thu", "목요일")
+                .replaceAll("Fri", "금요일")
+                .replaceAll("Sat", "토요일")
+                .replaceAll("Sun", "일요일"),
+            style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    ),);
   }
 }
 

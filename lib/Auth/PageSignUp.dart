@@ -33,6 +33,7 @@ class _SignUpPage extends State<SignUpPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Stack(
           children: [

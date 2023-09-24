@@ -47,7 +47,6 @@ class _ChatMessageState extends State<ChatMessage> {
 
   FocusNode? myFocus;
   late ChatStorage? _savedChat;
-
   @override
   void initState() {
     super.initState();
@@ -76,13 +75,14 @@ class _ChatMessageState extends State<ChatMessage> {
         ? postId.toString()
         : getNameChatRoom(sendUserId, recvUserId!);
     chatColName = isGroupChat ? "PostGroupChat" : "Chat";
-
     return;
   }
 
   // 메시지 전송 메서드
   Future<void> _sendMessage() async {
     // 1:1 채팅인 경우, 이름 순서가 바뀐 Document가 있는지 검사 후 해당 Document이름으로 chatDocName 변경.
+
+    DocumentReference ref = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName);
 
     if (isFirstChatted) {
       isFirstChatted = false;
@@ -105,45 +105,26 @@ class _ChatMessageState extends State<ChatMessage> {
     _savedChat!.savedChatList.add(ChatDataModel(
         text: message, ts: timestamp, nickName: myProfileEntity!.name));
     _savedChat!.save();
-    var documentSnapshots = await FirebaseFirestore.instance
-        .collection(chatColName)
-        .doc(chatDocName)
-        .get();
+    var documentSnapshots = await ref.get();
     if (!documentSnapshots.exists) {
       // document가 존재하지 않으면 members 초기화 후 삽입
-      await FirebaseFirestore.instance
-          .collection(chatColName)
-          .doc(chatDocName)
-          .set({
+      await ref.set({
         "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
-        "contents": [
-          {
-            "sender": sendUserId,
-            "readBy": [sendUserId],
-            "message": message,
-            "timestamp": timestamp,
-            "nickname": myProfileEntity!.name
-          }
-        ]
       });
-    } else {
-      // document가 이미 존재하면 메시지 추가
-      List<dynamic> contents = documentSnapshots.data()!["contents"];
-      contents.add({
+    }
+    CollectionReference colRef = ref.collection("messages");
+    await colRef.get().then((QuerySnapshot qs) {
+      colRef.doc(timestamp.millisecondsSinceEpoch.toString()).set({
         "sender": sendUserId,
         "readBy": [sendUserId],
         "message": message,
         "timestamp": timestamp,
         "nickname": myProfileEntity!.name
       });
-      await FirebaseFirestore.instance
-          .collection(chatColName)
-          .doc(chatDocName)
-          .update({"contents": contents});
-    }
+    });
 
     _chatController.clear();
-    FocusScope.of(context).requestFocus(myFocus);
+    myFocus!.requestFocus();
     if (isGroupChat) {
       for (String member in members!) updateChatList(member);
     } else {
@@ -157,40 +138,36 @@ class _ChatMessageState extends State<ChatMessage> {
 
   Future<void> _removeReadChat(
       List<ChatDataModel> removeList, List<ChatDataModel> readList) async {
-    List<dynamic> messageList;
-    await FirebaseFirestore.instance
+
+    CollectionReference _collection = FirebaseFirestore.instance
         .collection(chatColName)
         .doc(chatDocName)
-        .get()
-        .then((ds) {
-      if (ds.data() == null || !ds.data()!.containsKey("contents")) return;
-      messageList = ds.get("contents");
-      messageList.removeWhere((message) {
-        // 일단 삭제할 거 다 삭제
-        for (int i = 0; i < removeList.length; i++) {
-          if (removeList[i].text == message['message'] &&
-              removeList[i].ts == message['timestamp']) {
-            return true;
+        .collection("messages");
+
+    await _collection.get().then((QuerySnapshot qs) {
+      List<QueryDocumentSnapshot> chatDocList = qs.docs;
+      for (int i = 0; i < chatDocList.length; i++) {
+        bool isRemovedChat = false;
+        for (int j = 0; j < removeList.length; j++) {
+          if (removeList[j].text == chatDocList[i].get("message") &&
+              removeList[j].ts == chatDocList[i].get("timestamp")) {
+            _collection.doc(chatDocList[i].id).delete();
+            chatDocList.remove(i);
+            isRemovedChat = true;
+            break;
           }
         }
-        return false;
-      });
-      for (int i = 0; i < messageList.length; i++) {
-        // 삭제하고 남은 각 메시지에 대해서
+        if (isRemovedChat) continue;
         for (int j = 0; j < readList.length; j++) {
-          if (messageList[i]['message'] == readList[j].text &&
-              messageList[i]['timestamp'] == readList[j].ts) {
-            List<dynamic> list = messageList[i]['readBy'];
-            list.add(sendUserId); // 읽음 표시
-            messageList[i]['readBy'] = list;
+          if (readList[i].text == chatDocList[i].get("message") &&
+              readList[j].ts == chatDocList[i].get("timestamp")) {
+            List<dynamic> readBy = chatDocList[i].get("readBy");
+            readBy.add(sendUserId);
+            _collection.doc(chatDocList[i].id).update({"readBy" : readBy});
             break;
           }
         }
       }
-      FirebaseFirestore.instance
-          .collection(chatColName)
-          .doc(chatDocName)
-          .update({"contents": messageList});
     });
     return;
   }
@@ -218,10 +195,11 @@ class _ChatMessageState extends State<ChatMessage> {
                 height: 2,
               ),
               // 채팅 내용 (버블)
-              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>?>(
                 stream: FirebaseFirestore.instance
                     .collection(chatColName)
                     .doc(chatDocName)
+                    .collection("messages")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -229,13 +207,8 @@ class _ChatMessageState extends State<ChatMessage> {
                       child: buildLoadingProgress(),
                     );
                   }
-                  final List<dynamic> chatDocs = !snapshot.data!.exists
-                      ? []
-                      : snapshot.data!.get("contents");
-                  final List<dynamic> members = !snapshot.data!.exists
-                      ? []
-                      : snapshot.data!.get("members");
-                  final membersCount = members.length;
+                  List<QueryDocumentSnapshot> chatDocs = snapshot.data!.docs;
+                  final membersCount = isGroupChat ? members!.length : 2;
 
                   List<ChatBubble> bubbles = [];
                   DateTime? currentDate;
@@ -320,24 +293,19 @@ class _ChatMessageState extends State<ChatMessage> {
                       final chat = chatDocs[i];
                       final timestamp = chat['timestamp'] as Timestamp;
 
-                      if (!chat['readBy'].contains(user!.uid)) {
+                      List<dynamic> readBy = chat.get("readBy");
+                      String text = chat.get("message");
+                      String nick = chat.get("nickname");
+                      if (!readBy.contains(user!.uid)) {
                         final bool isReadedAll =
-                            chat['readBy'].length + 1 == membersCount;
+                            readBy.length + 1 == membersCount;
+                        ChatDataModel chatModel = ChatDataModel(text: text, ts: timestamp, nickName: nick);
                         if (isReadedAll) {
-                          _removeList.add(ChatDataModel(
-                              text: chat['message'],
-                              ts: timestamp,
-                              nickName: chat['nickname']));
+                          _removeList.add(chatModel);
                         } else {
-                          _readList.add(ChatDataModel(
-                              text: chat['message'],
-                              ts: timestamp,
-                              nickName: chat['nickname']));
+                          _readList.add(chatModel);
                         }
-                        _savedChat!.savedChatList.add(ChatDataModel(
-                            text: chat['message'],
-                            ts: timestamp,
-                            nickName: chat['nickname']));
+                        _savedChat!.savedChatList.add(chatModel);
                         _savedChat!.save();
                       } else {
                         continue;
@@ -366,41 +334,47 @@ class _ChatMessageState extends State<ChatMessage> {
                 height: 12,
               ),
               Container(
-                width: double.infinity,
-                height: 40,
-                margin: EdgeInsets.only(bottom: 16.0, right: 12, left: 12),
-                // 상단 및 양쪽 여백 조정
-                child: Theme(data: Theme.of(context).copyWith(primaryColor: Colors.red), child: TextField(
-                  focusNode: myFocus,
-                  controller: _chatController,
-                  onSubmitted: (value) {
-                    if (_chatController.text.length != 0)
-                      _sendMessage();
-                  },
-                  maxLength: 200,
-                  maxLengthEnforcement: MaxLengthEnforcement.none,
-                  maxLines: 1,
-                  cursorColor: colorGrey,
-                  decoration: InputDecoration(
-                    counterText: '',
-                    hintText: '',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                    suffixIcon: IconButton(
-                        onPressed: () {
-                          if (_chatController.text.length != 0)
-                            _sendMessage();
-                        },
-                        icon: Icon(Icons.arrow_upward_outlined), color: Colors.greenAccent),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(13.0),
+                  width: double.infinity,
+                  height: 40,
+                  margin: EdgeInsets.only(bottom: 16.0, right: 12, left: 12),
+                  // 상단 및 양쪽 여백 조정
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: Colors.red),
+                    child: TextField(
+                      focusNode: myFocus,
+                      controller: _chatController,
+                      onSubmitted: (value) {
+                        if (value.length != 0) {
+                          _sendMessage();
+                        }
+                      },
+                      maxLength: 200,
+                      maxLengthEnforcement: MaxLengthEnforcement.none,
+                      maxLines: 1,
+                      cursorColor: colorGrey,
+                      textInputAction: TextInputAction.send,
+                      decoration: InputDecoration(
+                        counterText: '',
+                        hintText: '',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        suffixIcon: IconButton(
+                            onPressed: () {
+                              if (_chatController.text.length != 0)
+                                _sendMessage();
+                            },
+                            icon: Icon(Icons.arrow_upward_outlined),
+                            color: Colors.greenAccent),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: colorGrey, width: 1.5),
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: colorGrey, width: 1.5),
-                      borderRadius: BorderRadius.circular(13.0),
-                    ),
-                  ),
-                ),)
-              ),
+                  )),
             ],
           ));
   }

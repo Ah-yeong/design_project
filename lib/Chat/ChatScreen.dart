@@ -78,7 +78,9 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         body: (_isLoaded == false || _chatLoaded == false) ? Center(
           child: CircularProgressIndicator(),
-        ) : GestureDetector(onTap: () {
+        ) : GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Container(child:
