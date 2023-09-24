@@ -40,11 +40,12 @@ with AutomaticKeepAliveClientMixin{
                     naviToPost(index);
                   },
                   child: Card(
+                    elevation: 0.5,
                       child: Padding(
                           padding: const EdgeInsets.all(7),
                           child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
                 ),
-                childCount: postManager.loadedCount))
+                childCount: postManager.loadedCount)),
       ],
     );
   }

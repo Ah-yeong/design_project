@@ -26,7 +26,8 @@ class BoardLocationPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardLocationPage();
 }
 
-class _BoardLocationPage extends State<BoardLocationPage> {
+class _BoardLocationPage extends State<BoardLocationPage> with
+AutomaticKeepAliveClientMixin{
   int markerid = 2;
 
   final Completer<GoogleMapController> _controller =
@@ -249,14 +250,6 @@ class _BoardLocationPage extends State<BoardLocationPage> {
           );
         } catch (e) {
           print(e);
-          _markers.add(
-            Marker(
-                markerId: MarkerId('1'),
-                position: LatLng(lat, lng),
-                onTap: () {},
-                draggable: true,
-                icon: _markerIcons[0]),
-          );
         }
       });
     });
@@ -276,6 +269,9 @@ class _BoardLocationPage extends State<BoardLocationPage> {
     super.initState();
     _loading();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 Future<Position> determinePosition() async {
