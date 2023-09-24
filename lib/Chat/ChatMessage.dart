@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:design_project/Resources/resources.dart';
@@ -47,6 +49,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   FocusNode? myFocus;
   late ChatStorage? _savedChat;
+
   @override
   void initState() {
     super.initState();
@@ -82,8 +85,6 @@ class _ChatMessageState extends State<ChatMessage> {
   Future<void> _sendMessage() async {
     // 1:1 채팅인 경우, 이름 순서가 바뀐 Document가 있는지 검사 후 해당 Document이름으로 chatDocName 변경.
 
-    DocumentReference ref = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName);
-
     if (isFirstChatted) {
       isFirstChatted = false;
       if (isGroupChat) {
@@ -102,27 +103,33 @@ class _ChatMessageState extends State<ChatMessage> {
 
     final message = _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
     final timestamp = Timestamp.now(); // 전송 시간
-    _savedChat!.savedChatList.add(ChatDataModel(
-        text: message, ts: timestamp, nickName: myProfileEntity!.name));
-    _savedChat!.save();
-    var documentSnapshots = await ref.get();
-    if (!documentSnapshots.exists) {
-      // document가 존재하지 않으면 members 초기화 후 삽입
-      await ref.set({
-        "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentReference ref = await FirebaseFirestore.instance
+            .collection(chatColName)
+            .doc(chatDocName);
+        var documentSnapshots = await transaction.get(ref);
+        if (!documentSnapshots.exists) {
+          // document가 존재하지 않으면 members 초기화 후 삽입
+          await ref.set({
+            "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
+          });
+        }
+        CollectionReference colRef = ref.collection("messages");
+        DocumentSnapshot snapshot = await transaction
+            .get(colRef.doc(timestamp.millisecondsSinceEpoch.toString()));
+        transaction.set(snapshot.reference, {
+          "sender": sendUserId,
+          "readBy": [sendUserId],
+          "savedBy": [],
+          "message": message,
+          "timestamp": timestamp,
+          "nickname": myProfileEntity!.name
+        });
       });
+    } catch (e) {
+      print("Error updating message: $e");
     }
-    CollectionReference colRef = ref.collection("messages");
-    await colRef.get().then((QuerySnapshot qs) {
-      colRef.doc(timestamp.millisecondsSinceEpoch.toString()).set({
-        "sender": sendUserId,
-        "readBy": [sendUserId],
-        "message": message,
-        "timestamp": timestamp,
-        "nickname": myProfileEntity!.name
-      });
-    });
-
     _chatController.clear();
     myFocus!.requestFocus();
     if (isGroupChat) {
@@ -136,40 +143,61 @@ class _ChatMessageState extends State<ChatMessage> {
     return;
   }
 
-  Future<void> _removeReadChat(
-      List<ChatDataModel> removeList, List<ChatDataModel> readList) async {
+  Future<void> _removeReadChat(List<ChatDataModel> removeList,
+      List<ChatDataModel> readList, List<ChatDataModel> saveList) async {
+    print("removeReadChat 호출 ");
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        CollectionReference _collection = FirebaseFirestore.instance
+            .collection(chatColName)
+            .doc(chatDocName)
+            .collection("messages");
 
-    CollectionReference _collection = FirebaseFirestore.instance
-        .collection(chatColName)
-        .doc(chatDocName)
-        .collection("messages");
-
-    await _collection.get().then((QuerySnapshot qs) {
-      List<QueryDocumentSnapshot> chatDocList = qs.docs;
-      for (int i = 0; i < chatDocList.length; i++) {
-        bool isRemovedChat = false;
-        for (int j = 0; j < removeList.length; j++) {
-          if (removeList[j].text == chatDocList[i].get("message") &&
-              removeList[j].ts == chatDocList[i].get("timestamp")) {
-            _collection.doc(chatDocList[i].id).delete();
-            chatDocList.remove(i);
-            isRemovedChat = true;
-            break;
+        await _collection.get().then((QuerySnapshot qs) async {
+          List<DocumentSnapshot> chatDocList = [];
+          for (QueryDocumentSnapshot queryDocumentSnapshot in qs.docs)
+            await transaction
+                .get(queryDocumentSnapshot.reference)
+                .then((value) => {chatDocList.add(value)});
+          for (int i = 0; i < chatDocList.length; i++) {
+            bool isRemovedChat = false;
+            for (int j = 0; j < removeList.length; j++) {
+              if (removeList[j].text == chatDocList[i].get("message") &&
+                  removeList[j].ts == chatDocList[i].get("timestamp")) {
+                transaction.delete(chatDocList[i].reference);
+                chatDocList.remove(i);
+                isRemovedChat = true;
+                break;
+              }
+            }
+            if (isRemovedChat) continue;
+            for (int j = 0; j < readList.length; j++) {
+              if (readList[j].text == chatDocList[i].get("message") &&
+                  readList[j].ts == chatDocList[i].get("timestamp")) {
+                List<dynamic> readBy = chatDocList[i].get("readBy");
+                readBy.add(sendUserId);
+                transaction
+                    .update(chatDocList[i].reference, {"readBy": readBy});
+                break;
+              }
+            }
+            for (int j = 0; j < saveList.length; j++) {
+              if (saveList[j].text == chatDocList[i].get("message") &&
+                  saveList[j].ts == chatDocList[i].get("timestamp")) {
+                List<dynamic> savedBy = chatDocList[i].get("savedBy");
+                savedBy.add(sendUserId);
+                transaction
+                    .update(chatDocList[i].reference, {"savedBy": savedBy});
+                break;
+              }
+            }
           }
-        }
-        if (isRemovedChat) continue;
-        for (int j = 0; j < readList.length; j++) {
-          if (readList[i].text == chatDocList[i].get("message") &&
-              readList[j].ts == chatDocList[i].get("timestamp")) {
-            List<dynamic> readBy = chatDocList[i].get("readBy");
-            readBy.add(sendUserId);
-            _collection.doc(chatDocList[i].id).update({"readBy" : readBy});
-            break;
-          }
-        }
-      }
-    });
-    return;
+        });
+      });
+      return;
+    } catch (e) {
+      print('Error updating message: $e');
+    }
   }
 
   @override
@@ -216,9 +244,93 @@ class _ChatMessageState extends State<ChatMessage> {
                   // // Timestamp 순으로 정렬하기 위해 Comparator 선언 후 정렬
                   // Comparator<dynamic> comparator = (a, b) => (b['timestamp'] as Timestamp).compareTo(a['timestamp']);
                   // chatDocs.sort(comparator);
+
+                  // 서버에서 채팅 불러오기
+                  List<ChatDataModel> tempBubbleStorage = [];
+                  List<ChatDataModel> localBubbleStorage = [];
+                  if (calculateChecker == false) {
+                    calculateChecker = true;
+                    List<ChatDataModel> _removeList =
+                        List.empty(growable: true);
+                    List<ChatDataModel> _readList = List.empty(growable: true);
+                    List<ChatDataModel> _saveList = List.empty(growable: true);
+                    for (int i = 0; i < chatDocs.length; i++) {
+                      final chat = chatDocs[i];
+                      final timestamp = chat['timestamp'] as Timestamp;
+
+                      List<dynamic> readBy = chat.get("readBy");
+                      List<dynamic> savedBy = chat.get("savedBy");
+                      String text = chat.get("message");
+                      String nick = chat.get("nickname");
+
+                      ChatDataModel chatModel = ChatDataModel(
+                          text: text, ts: timestamp, nickName: nick);
+                      // readBy에 내가 포함되어있지 않을 경우 (= SavedBy는 0개임)
+                      bool isLocalSave = false;
+                      bool addReadBy = false;
+                      if (!readBy.contains(user!.uid)) {
+                        final bool isReadedAll =
+                            readBy.length + 1 >= membersCount;
+                        if (isReadedAll) {
+                          // 다 읽었음 = 로컬에 저장
+                          final bool isSavedAll =
+                              savedBy.length + 1 >= membersCount;
+                          if (isSavedAll) {
+                            _removeList.add(chatModel);
+                          } else {
+                            _savedChat!.savedChatList.add(chatModel);
+                            _savedChat!.save();
+                            isLocalSave = true;
+                            _saveList.add(chatModel);
+                          }
+                        }
+                        addReadBy = true;
+                        _readList.add(chatModel);
+                      } else if (!savedBy.contains(user.uid)) {
+                        if (readBy.length == membersCount) {
+                          final bool isSavedAll =
+                              savedBy.length + 1 >= membersCount;
+                          if (isSavedAll) {
+                            _removeList.add(chatModel);
+                          }
+                          _savedChat!.savedChatList.add(chatModel);
+                          _savedChat!.save();
+                          isLocalSave = true;
+                          _saveList.add(chatModel);
+                        }
+                      } else {
+                        isLocalSave = true;
+                      }
+                      if (!isLocalSave) {
+                        tempBubbleStorage.add(ChatDataModel(
+                            text: text,
+                            ts: timestamp,
+                            nickName: nick,
+                            unreadCount: membersCount -
+                                readBy.length +
+                                (addReadBy ? 1 : 0)));
+                      }
+                    }
+                      if (_removeList.length +
+                              _readList.length +
+                              _saveList.length >
+                          0) {
+                        _removeReadChat(_removeList, _readList, _saveList)
+                            .then((value) {
+                          //-> 데이터베이스에서 삭제 및 읽음 표시
+                          _removeList.clear();
+                          _readList.clear();
+                          _saveList.clear();
+                          calculateChecker = false;
+                        });
+                      } else {
+                        calculateChecker = false;
+                      }
+                  }
+
+                  // 로컬에서 채팅 불러오기
                   for (int i = 0; i < _savedChat!.savedChatList.length; i++) {
                     final chat = _savedChat!.savedChatList[i];
-                    final isMe = chat.nickName == myProfileEntity!.name;
                     final timestamp = chat.ts;
                     final dateTime = timestamp.toDate();
                     final year = dateTime.year;
@@ -242,84 +354,64 @@ class _ChatMessageState extends State<ChatMessage> {
                         isDayDivider: true,
                       ));
                     }
-                    final formattedTime = DateFormat.jm().format(dateTime);
                     // 채팅 구분 표시 위젯
                     final userName = chat.nickName;
+                    localBubbleStorage.add(ChatDataModel(
+                        text: chat.text,
+                        ts: timestamp,
+                        nickName: userName,
+                        unreadCount: 0));
+                  }
+
+                  localBubbleStorage.addAll(tempBubbleStorage);
+                  for (int i = 0; i < localBubbleStorage.length; i++) {
+                    int unreadCount = localBubbleStorage[i].unreadCount!;
+                    bool isMe =
+                        localBubbleStorage[i].nickName == myProfileEntity!.name;
+                    String text = localBubbleStorage[i].text;
+                    String userName = localBubbleStorage[i].nickName;
+                    String formattedTime = DateFormat.jm()
+                        .format(localBubbleStorage[i].ts.toDate());
+
                     bool isFirst = i - 1 >= 0
-                        ? _savedChat!.savedChatList[i - 1].nickName != userName
+                        ? localBubbleStorage[i - 1].nickName !=
+                        localBubbleStorage[i].nickName
                             ? true
                             : false
                         : true;
-                    bool isLast = i + 1 < _savedChat!.savedChatList.length
-                        ? _savedChat!.savedChatList[i + 1].nickName != userName
+                    bool isLast = i + 1 < localBubbleStorage.length
+                        ? localBubbleStorage[i + 1].nickName !=
+                        localBubbleStorage[i].nickName
                             ? true
                             : false
                         : true;
                     if (isFirst && isLast) {
-                      bubbles.add(
-                          ChatBubble(chat.text, isMe, userName, formattedTime));
+                      bubbles.add(ChatBubble(
+                        text,
+                        isMe,
+                        userName,
+                        formattedTime,
+                        unreadUserCount: unreadCount,
+                      ));
                     } else if (isFirst) {
                       bubbles.add(ChatBubble(
-                        chat.text,
-                        isMe,
-                        userName,
-                        formattedTime,
-                        invisibleTime:
-                            _savedChat!.savedChatList[i + 1].ts == timestamp,
-                      ));
+                          text, isMe, userName, formattedTime,
+                          invisibleTime: localBubbleStorage[i + 1].ts !=
+                              localBubbleStorage[i].ts,
+                          unreadUserCount: unreadCount));
                     } else if (isLast) {
                       bubbles.add(ChatBubble(
-                        chat.text,
-                        isMe,
-                        userName,
-                        formattedTime,
-                        longBubble: true,
-                      ));
+                          text, isMe, userName, formattedTime,
+                          longBubble: true, unreadUserCount: unreadCount));
                     } else {
-                      final bool isEqualsTime = DateFormat.jm().format(
-                              _savedChat!.savedChatList[i + 1].ts.toDate()) ==
+                      final bool isEqualsTime = DateFormat.jm()
+                              .format(localBubbleStorage[i + 1].ts.toDate()) ==
                           formattedTime;
                       bubbles.add(ChatBubble(
-                          chat.text, isMe, userName, formattedTime,
-                          longBubble: true, invisibleTime: isEqualsTime));
-                    }
-                  }
-                  if (calculateChecker == false) {
-                    calculateChecker = true;
-                    List<ChatDataModel> _removeList =
-                        List.empty(growable: true);
-                    List<ChatDataModel> _readList = List.empty(growable: true);
-                    for (int i = 0; i < chatDocs.length; i++) {
-                      final chat = chatDocs[i];
-                      final timestamp = chat['timestamp'] as Timestamp;
-
-                      List<dynamic> readBy = chat.get("readBy");
-                      String text = chat.get("message");
-                      String nick = chat.get("nickname");
-                      if (!readBy.contains(user!.uid)) {
-                        final bool isReadedAll =
-                            readBy.length + 1 == membersCount;
-                        ChatDataModel chatModel = ChatDataModel(text: text, ts: timestamp, nickName: nick);
-                        if (isReadedAll) {
-                          _removeList.add(chatModel);
-                        } else {
-                          _readList.add(chatModel);
-                        }
-                        _savedChat!.savedChatList.add(chatModel);
-                        _savedChat!.save();
-                      } else {
-                        continue;
-                      }
-                    }
-                    if (_removeList.length + _readList.length > 0) {
-                      _removeReadChat(_removeList, _readList).then((value) {
-                        //-> 데이터베이스에서 삭제 및 읽음 표시
-                        _removeList.clear();
-                        _readList.clear();
-                        calculateChecker = false;
-                      });
-                    } else {
-                      calculateChecker = false;
+                          text, isMe, userName, formattedTime,
+                          longBubble: true,
+                          invisibleTime: isEqualsTime,
+                          unreadUserCount: unreadCount));
                     }
                   }
                   return Expanded(
