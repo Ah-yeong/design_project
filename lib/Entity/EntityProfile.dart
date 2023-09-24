@@ -28,7 +28,7 @@ class EntityProfiles {
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
           birth = ds.get("birth");
-          age = 23;
+          age = ds.get("age");
           profileImagePath = "assets/images/userImage.png";
           commute = ds.get("commute");
           commuteIndex = ds.get("commuteIndex");
