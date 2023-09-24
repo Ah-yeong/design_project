@@ -79,6 +79,7 @@ class _MyHomePage extends State<MyHomePage> {
           bottom: false,
           top: false,
           child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
             child: Stack(
               children: [
@@ -383,6 +384,7 @@ class _MyHomePage extends State<MyHomePage> {
           saveId(controllerId!.text);
         } else {
           Get.off(() => const PageEmailVerified());
+          saveId(controllerId!.text);
           _loadingCompleted();
           return;
         }

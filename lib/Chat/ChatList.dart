@@ -38,12 +38,14 @@ with AutomaticKeepAliveClientMixin{
     final String chatColName = isGroupChat ? "PostGroupChat" : "Chat";
     final String chatDocName = isGroupChat ? receiveId.toString() : receiveId;
     final ChatRoom room = ChatRoom(isGroupChat: isGroupChat, unreadCount: 0);
-    List<dynamic> chatDocs = List.empty(growable: true);
-    await FirebaseFirestore.instance
+    List<QueryDocumentSnapshot> chatDocs = List.empty(growable: true);
+    CollectionReference _collection = FirebaseFirestore.instance
         .collection(chatColName)
         .doc(chatDocName)
-        .get()
-        .then((ds) => chatDocs = ds.get("contents"));
+        .collection("messages");
+    await _collection.get().then((QuerySnapshot qs) {
+      chatDocs = qs.docs;
+    });
     if (isGroupChat) {
       room.postId = receiveId;
     } else {
@@ -57,8 +59,8 @@ with AutomaticKeepAliveClientMixin{
     if (chatDocs.length != 0) {
       // 읽은 메시지 카운트
       int checkCount = 0;
-      for (var readBy in chatDocs) {
-        List<dynamic> readByList = readBy['readBy'];
+      for (QueryDocumentSnapshot readBy in chatDocs) {
+        List<dynamic> readByList = readBy.get("readBy");
         if (!readByList.contains(myUuid)) {
           // 읽지 않은 index에 도착한다면 전체 길이에서 index 값을 뺀 만큼이 읽지 않은 메시지의 개수
           room.unreadCount = chatDocs.length - checkCount;
@@ -67,9 +69,9 @@ with AutomaticKeepAliveClientMixin{
         checkCount += 1;
       }
       // 메시지 및 타임스탬프 설정
-      room.lastChat = chatDocs.last['message'];
+      room.lastChat = chatDocs.last.get('message');
       await room
-          .getLastChatting(chatDocs.last['timestamp'])
+          .getLastChatting(chatDocs.last.get('timestamp'))
           .then((value) => room.lastTimeStampString = value.split("#")[0]);
     } else {
       // 새로 온 메시지가 없을 경우
@@ -78,7 +80,6 @@ with AutomaticKeepAliveClientMixin{
         room.lastChat = value.split("#")[1]; // 로컬 저장 마지막 채팅
       });
     }
-
     return room;
   }
 
