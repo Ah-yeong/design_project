@@ -15,8 +15,7 @@ class BoardSelectPositionPage extends StatefulWidget {
 }
 
 class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
-  final Completer<GoogleMapController> _controller =
-  Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
 
   String? nowPosition;
   List<Marker> _markers = [];
@@ -40,7 +39,9 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text(
-            "위치 지정", style: TextStyle(color: Colors.black, fontSize: 17),),
+            "위치 지정",
+            style: TextStyle(color: Colors.black, fontSize: 17),
+          ),
           backgroundColor: Colors.white,
           elevation: 1,
           toolbarHeight: 40,
@@ -51,10 +52,7 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
               height: double.infinity,
               width: double.infinity,
               child: GoogleMap(
-                gestureRecognizers: {
-                  Factory<OneSequenceGestureRecognizer>(
-                          () => EagerGestureRecognizer())
-                },
+                gestureRecognizers: {Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())},
                 markers: Set.from(_markers),
                 mapType: MapType.normal,
                 initialCameraPosition: _kSeoul,
@@ -94,25 +92,15 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
                 Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 30),
                   child: InkWell(
-                      onTap: () =>
-                          Navigator.pop(context, LLName(
-                              LatLng(lat, lng), nowPosition ?? "알 수 없음")),
+                      onTap: () => Navigator.pop(context, LLName(LatLng(lat, lng), nowPosition ?? "알 수 없음")),
                       child: SizedBox(
                         height: 50,
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width - 40,
+                        width: MediaQuery.of(context).size.width - 40,
                         child: Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               color: colorSuccess,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey,
-                                    offset: Offset(1, 1),
-                                    blurRadius: 4.5)
-                              ]),
+                              boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                           child: Center(
                             child: Text(
                               "위치 적용",
@@ -136,7 +124,7 @@ class _BoardSelectPositionPage extends State<BoardSelectPositionPage> {
       var value = jsonDecode(res.body)['results'][0]['address_components'];
       setState(() {
         nowPosition =
-        "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
+            "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
       });
     } catch (e) {
       nowPosition = "불러오는 중";

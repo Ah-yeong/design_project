@@ -26,12 +26,10 @@ class BoardLocationPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardLocationPage();
 }
 
-class _BoardLocationPage extends State<BoardLocationPage> with
-AutomaticKeepAliveClientMixin{
+class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliveClientMixin {
   int markerid = 2;
 
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   List<BitmapDescriptor> _markerIcons = List.empty(growable: true);
   String? nowPosition;
   List<Marker> _markers = [];
@@ -46,58 +44,52 @@ AutomaticKeepAliveClientMixin{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: postManager.isLoading ? buildLoadingProgress() :
-        SafeArea(
-            bottom: false,
-            child: Stack(
-              children: [
-                Column(
+        body: postManager.isLoading
+            ? buildLoadingProgress()
+            : SafeArea(
+                bottom: false,
+                child: Stack(
                   children: [
-                    Expanded(
-                        child: SizedBox(
-                      child: GoogleMap(
-                        mapToolbarEnabled: false,
-                        zoomControlsEnabled: false,
-                        zoomGesturesEnabled: false,
-                        myLocationButtonEnabled: false,
-                        compassEnabled: false,
-                        buildingsEnabled: false,
-                        gestureRecognizers: {
-                          Factory<OneSequenceGestureRecognizer>(
-                              () => EagerGestureRecognizer())
-                        },
-                        markers: Set.from(_markers),
-                        mapType: MapType.normal,
-                        initialCameraPosition: temp,
-                        onMapCreated: (GoogleMapController controller) {
-                          changeMapMode(controller);
-                          _controller.complete(controller);
-                        },
-                        onCameraMove: ((_position) =>
-                            _updatePosition(_position)),
-                        onCameraIdle: (() => _getPlaceAddress()),
+                    Column(
+                      children: [
+                        Expanded(
+                            child: SizedBox(
+                          child: GoogleMap(
+                            mapToolbarEnabled: false,
+                            zoomControlsEnabled: false,
+                            zoomGesturesEnabled: false,
+                            myLocationButtonEnabled: false,
+                            compassEnabled: false,
+                            buildingsEnabled: false,
+                            gestureRecognizers: {Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())},
+                            markers: Set.from(_markers),
+                            mapType: MapType.normal,
+                            initialCameraPosition: temp,
+                            onMapCreated: (GoogleMapController controller) {
+                              changeMapMode(controller);
+                              _controller.complete(controller);
+                            },
+                            onCameraMove: ((_position) => _updatePosition(_position)),
+                            onCameraIdle: (() => _getPlaceAddress()),
+                          ),
+                        ))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 50,
+                      child: Center(
+                        child: Text("${nowPosition ?? "불러오는 중"}"),
                       ),
-                    ))
+                    )
                   ],
-                ),
-                SizedBox(
-                  height: 50,
-                  child: Center(
-                    child: Text("${nowPosition ?? "불러오는 중"}"),
-                  ),
-                )
-              ],
-            )));
+                )));
   }
 
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
   }
 
   void _addCustomIcons() async {
@@ -116,8 +108,7 @@ AutomaticKeepAliveClientMixin{
 
   // 맵 스타일 변경
   void changeMapMode(GoogleMapController mapController) {
-    getJsonFile("assets/map_style.json")
-        .then((value) => mapController.setMapStyle(value));
+    getJsonFile("assets/map_style.json").then((value) => mapController.setMapStyle(value));
   }
 
   // Json 디코딩
@@ -142,47 +133,46 @@ AutomaticKeepAliveClientMixin{
             width: MediaQuery.of(context).size.width - 16,
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postEntity.getPostId())));
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postEntity.getPostId())));
               },
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Color(0xD7EEEEEE),),
+                  color: Color(0xD7EEEEEE),
+                ),
                 child: Center(
                     child: Stack(
-                      children: [
-                        Center(
-                          child: Text(
-                            "게시물 보기",
-                            style: TextStyle(color: Colors.black),
+                  children: [
+                    Center(
+                      child: Text(
+                        "게시물 보기",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.black,
                           ),
-                        ),
-                        Align(
-                            alignment: Alignment.centerRight,
-                            child: Padding(
-                              padding: EdgeInsets.only(right: 8),
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.black,
-                              ),
-                            )),
-                      ],
-                    )),
+                        )),
+                  ],
+                )),
               ),
             ),
           ),
-          SizedBox(
-            height: 5
-          ),
+          SizedBox(height: 5),
           Container(
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Padding(
-                  padding: EdgeInsets.all(13),
-                  child: buildPostContext(postEntity, profileEntity!, context))),
+              child:
+                  Padding(padding: EdgeInsets.all(13), child: buildPostContext(postEntity, profileEntity!, context))),
         ],
       ),
     );
@@ -200,8 +190,7 @@ AutomaticKeepAliveClientMixin{
               profileEntity!.makeTestingProfile();
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, i),
+                  builder: (BuildContext context) => _buildModalSheet(context, i),
                   backgroundColor: Colors.transparent);
               //postLoad(ep.getPostId());
             },
@@ -233,20 +222,14 @@ AutomaticKeepAliveClientMixin{
       setState(() {
         try {
           LatLng newLatLng = LatLng(pos.latitude, pos.longitude);
-          _controller.future.then((value) =>
-              value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          _controller.future.then((value) => value.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
                 // target: newLatLng
                 target: LatLng(lat, lng), // 애뮬레이터 테스트시 상명대학교 초기화
                 zoom: 16.3,
               ))));
           _getPlaceAddress();
           _markers.add(
-            Marker(
-                markerId: MarkerId('1'),
-                position: newLatLng,
-                onTap: () {},
-                draggable: true,
-                icon: _markerIcons[0]),
+            Marker(markerId: MarkerId('1'), position: newLatLng, onTap: () {}, draggable: true, icon: _markerIcons[0]),
           );
         } catch (e) {
           print(e);
@@ -293,8 +276,7 @@ Future<Position> determinePosition() async {
 
   if (permission == LocationPermission.deniedForever) {
     // Permissions are denied forever, handle appropriately.
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
+    return Future.error('Location permissions are permanently denied, we cannot request permissions.');
   }
 
   // When we reach here, permissions are granted and we can

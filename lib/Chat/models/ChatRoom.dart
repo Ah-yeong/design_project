@@ -31,8 +31,8 @@ class ChatRoom implements Comparable<ChatRoom> {
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId!.toString());
     await _savedChat.init().then((value) => _savedChat!.load());
     // 로컬 저장소에 저장된 내용이 없을 경우
-    if(_savedChat.savedChatList.length == 0) {
-      if(timestamp != null) {
+    if (_savedChat.savedChatList.length == 0) {
+      if (timestamp != null) {
         lastTimeStamp = timestamp;
         return getTimeBefore(timestamp.toFormattedString());
       } else {
@@ -42,7 +42,8 @@ class ChatRoom implements Comparable<ChatRoom> {
     }
     Timestamp? localStamp = _savedChat.savedChatList.last.ts;
     if (timestamp != null) {
-      if ( timestamp.compareTo(localStamp) == 1 ) { // 파라미터의 timestamp가 더 크다면 (최신이라면)
+      if (timestamp.compareTo(localStamp) == 1) {
+        // 파라미터의 timestamp가 더 크다면 (최신이라면)
         lastTimeStamp = timestamp;
         return getTimeBefore(timestamp.toFormattedString());
       } else {

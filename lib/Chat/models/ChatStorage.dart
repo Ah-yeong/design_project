@@ -11,7 +11,7 @@ class ChatStorage {
   List<ChatDataModel> savedChatList = List.empty(growable: true);
 
   ChatStorage(this.id);
-  
+
   Future<void> init() async {
     _storage = await SharedPreferences.getInstance();
     return;
@@ -41,4 +41,3 @@ class ChatStorage {
     return listdatas;
   }
 }
-

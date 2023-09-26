@@ -14,4 +14,3 @@ class QAPage extends StatelessWidget {
     );
   }
 }
-

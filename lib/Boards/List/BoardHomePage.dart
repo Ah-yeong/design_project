@@ -14,8 +14,7 @@ class BoardHomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardHomePage();
 }
 
-class _BoardHomePage extends State<BoardHomePage>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   int _page = 1;
   TabController? controller;
   ScrollController? scrollController;
@@ -30,63 +29,65 @@ class _BoardHomePage extends State<BoardHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-            child: DefaultTabController(
-                length: 2,
-                child: Stack(
-                  children: [
-                    NestedScrollView(
-                        controller: scrollController,
-                        headerSliverBuilder: (context, innerBoxIsScrolled) {
-                          return [
-                            SliverAppBar(
-                              toolbarHeight: 40,
-                              pinned: false,
-                              backgroundColor: Colors.white,
-                              title: const Text(
-                                "바로 모임",
-                                style: TextStyle(color: Colors.black, fontSize: 19),
-                              ),
-                              flexibleSpace: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  SizedBox(
-                                    width: 40,
-                                    height: 50,
-                                    child: GestureDetector(
-                                        onTap: () async {
-                                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardSearchPage()));
-                                        },
-                                        child: const Icon(Icons.search_rounded)),
-                                  ),
-                                  SizedBox(
-                                    width: 40,
-                                    height: 50,
-                                    child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageSettings()));
-                                        },
-                                        child: const Icon(Icons.settings)),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                    height: 50,
-                                  )
-                                ],
-                              ),
-                            ),
-                            const SliverPersistentHeader(
-                                pinned: true, delegate: TabBarDelegate()),
-                          ];
-                        },
-                        body: const TabBarView(
+      body: SafeArea(
+        child: DefaultTabController(
+          length: 2,
+          child: Stack(
+            children: [
+              NestedScrollView(
+                  controller: scrollController,
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        toolbarHeight: 40,
+                        pinned: false,
+                        backgroundColor: Colors.white,
+                        title: const Text(
+                          "바로 모임",
+                          style: TextStyle(color: Colors.black, fontSize: 19),
+                        ),
+                        flexibleSpace: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            BoardGroupListPage(),
-                            //BoardTaxiListPage(),
-                            BoardLocationPage(),
+                            SizedBox(
+                              width: 40,
+                              height: 50,
+                              child: GestureDetector(
+                                  onTap: () async {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(builder: (context) => BoardSearchPage()));
+                                  },
+                                  child: const Icon(Icons.search_rounded)),
+                            ),
+                            SizedBox(
+                              width: 40,
+                              height: 50,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageSettings()));
+                                  },
+                                  child: const Icon(Icons.settings)),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                              height: 50,
+                            )
                           ],
-                        )),
-                    isScrollTop ? const SizedBox() : Positioned(
+                        ),
+                      ),
+                      const SliverPersistentHeader(pinned: true, delegate: TabBarDelegate()),
+                    ];
+                  },
+                  body: const TabBarView(
+                    children: [
+                      BoardGroupListPage(),
+                      //BoardTaxiListPage(),
+                      BoardLocationPage(),
+                    ],
+                  )),
+              isScrollTop
+                  ? const SizedBox()
+                  : Positioned(
                       bottom: 16,
                       right: 16,
                       child: SizedBox(
@@ -114,11 +115,12 @@ class _BoardHomePage extends State<BoardHomePage>
                           ),
                         ),
                       ),
-
                     )
-                  ],
-                )
-            )));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -128,8 +130,7 @@ class _BoardHomePage extends State<BoardHomePage>
     scrollController = ScrollController();
     scrollController!.addListener(() {
       setState(() {
-        if (scrollController!.offset ==
-            scrollController!.position.maxScrollExtent &&
+        if (scrollController!.offset == scrollController!.position.maxScrollExtent &&
             !scrollController!.position.outOfRange) {
           isScrollTop = false;
         } else {
@@ -147,8 +148,7 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
   const TabBarDelegate();
 
   @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.white,
       child: TabBar(
@@ -160,11 +160,12 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(CupertinoIcons.text_justify, size: 20,),
+                    Icon(
+                      CupertinoIcons.text_justify,
+                      size: 20,
+                    ),
                     Padding(padding: EdgeInsets.only(left: 7)),
-                    Text(
-                        "모임 찾기",
-                        style: TextStyle(fontSize: 13)),
+                    Text("모임 찾기", style: TextStyle(fontSize: 13)),
                   ],
                 )),
           ),
@@ -190,11 +191,12 @@ class TabBarDelegate extends SliverPersistentHeaderDelegate {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(CupertinoIcons.location_solid,size: 20,),
+                    Icon(
+                      CupertinoIcons.location_solid,
+                      size: 20,
+                    ),
                     Padding(padding: EdgeInsets.only(left: 5)),
-                    Text(
-                        "위치로 찾기",
-                        style: TextStyle(fontSize: 13)),
+                    Text("위치로 찾기", style: TextStyle(fontSize: 13)),
                   ],
                 )),
           ),

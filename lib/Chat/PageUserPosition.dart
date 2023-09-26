@@ -23,7 +23,10 @@ class GoogleMapPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        title: Text('위치 공유', style: TextStyle(color: Colors.black, fontSize: 19),),
+        title: Text(
+          '위치 공유',
+          style: TextStyle(color: Colors.black, fontSize: 19),
+        ),
         backgroundColor: Colors.white,
         leading: BackButton(
           color: Colors.black,
@@ -59,7 +62,6 @@ class GoogleMapPage extends StatelessWidget {
                 // 지도 컨트롤러
               },
             ),
-
           ),
         ],
       ),

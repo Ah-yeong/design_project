@@ -23,7 +23,7 @@ class _StatePageResetPassword extends State<PageResetPassword> {
 
   TextEditingController _emailController = TextEditingController();
   String? _infoText;
-  
+
   DateTime? _storageTime;
   SharedPreferences? _localStorage;
 
@@ -32,7 +32,7 @@ class _StatePageResetPassword extends State<PageResetPassword> {
     _loadStorage();
 
     _argIsValid = (_argEmail != null && _argEmail != "없음");
-    if ( _argIsValid! ) {
+    if (_argIsValid!) {
       _emailController.text = "$_argEmail";
       _infoText = "$_argEmail@sangmyung.kr";
     } else {
@@ -40,19 +40,19 @@ class _StatePageResetPassword extends State<PageResetPassword> {
     }
     super.initState();
   }
-  
+
   _loadStorage() async {
     _localStorage = await SharedPreferences.getInstance();
   }
 
   _sendResetMail(String email) async {
-    if ( _localStorage!.getString(STORAGE_NAME) != null ) {
+    if (_localStorage!.getString(STORAGE_NAME) != null) {
       _storageTime = DateTime.parse(_localStorage!.getString(STORAGE_NAME)!);
     }
-    if ( _storageTime != null ) {
+    if (_storageTime != null) {
       DateTime _nowTime = DateTime.now();
       int remainSecond = 300 - _nowTime.difference(_storageTime!).inSeconds;
-      if ( remainSecond > 0 ) {
+      if (remainSecond > 0) {
         showAlert("$remainSecond초 뒤에 재전송이 가능해요!", context, colorSuccess);
         return;
       }
@@ -62,7 +62,7 @@ class _StatePageResetPassword extends State<PageResetPassword> {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       showAlert("성공! 메일을 확인해주세요!", context, colorSuccess);
       _localStorage!.setString(STORAGE_NAME, DateTime.now().toString());
-    } catch(e) {
+    } catch (e) {
       showAlert("이런! 계정을 찾을 수 없어요!", context, colorError);
     }
   }
@@ -86,53 +86,50 @@ class _StatePageResetPassword extends State<PageResetPassword> {
                     Text(_infoText!,
                         style: TextStyle(
                             fontSize: 14,
-                            color: _emailController.text == ""
-                                ? colorGrey
-                                : Colors.black,
-                            decoration: _emailController.text == ""
-                                ? TextDecoration.none
-                                : TextDecoration.underline)),
+                            color: _emailController.text == "" ? colorGrey : Colors.black,
+                            decoration: _emailController.text == "" ? TextDecoration.none : TextDecoration.underline)),
                     SizedBox(
                       height: 7,
                     ),
-                    Text("위 이메일로 재설정 이메일이 전송돼요!",
-                        style: TextStyle(fontSize: 14, color: colorGrey))
+                    Text("위 이메일로 재설정 이메일이 전송돼요!", style: TextStyle(fontSize: 14, color: colorGrey))
                   ],
                 ),
                 SizedBox(
                   height: 20,
                 ),
-                !_argIsValid! ? Container(
-                  height: 50,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFE8E8E8),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    child: TextFormField(
-                      onChanged: (value) {
-                        setState(() {
-                          if (value == "")
-                            _infoText = "< >";
-                          else
-                            _infoText = "$value@sangmyung.kr";
-                        });
-                      },
-                      controller: _emailController,
-                      style: TextStyle(fontSize: 15),
-                      maxLength: 9,
-                      decoration: InputDecoration(
-                        alignLabelWithHint: true,
-                        hintText: "학번",
-                        hintStyle: TextStyle(fontSize: 15),
-                        border: InputBorder.none,
-                        counterText: "",
-                      ),
-                    ),
-                  ),
-                ) : SizedBox(),
+                !_argIsValid!
+                    ? Container(
+                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8E8E8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                if (value == "")
+                                  _infoText = "< >";
+                                else
+                                  _infoText = "$value@sangmyung.kr";
+                              });
+                            },
+                            controller: _emailController,
+                            style: TextStyle(fontSize: 15),
+                            maxLength: 9,
+                            decoration: InputDecoration(
+                              alignLabelWithHint: true,
+                              hintText: "학번",
+                              hintStyle: TextStyle(fontSize: 15),
+                              border: InputBorder.none,
+                              counterText: "",
+                            ),
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
                 SizedBox(
                   height: 10,
                 ),
@@ -151,8 +148,7 @@ class _StatePageResetPassword extends State<PageResetPassword> {
                       '재설정 메일 보내기',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    style: ElevatedButton.styleFrom(
-                        elevation: 0, backgroundColor: colorSuccess),
+                    style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                   ),
                 ),
                 Center(
@@ -162,15 +158,15 @@ class _StatePageResetPassword extends State<PageResetPassword> {
                     child: GestureDetector(
                       child: Center(
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.arrow_back, size: 14, color: colorGrey),
-                              Text(
-                                " 이전으로",
-                                style: TextStyle(fontSize: 15, color: colorGrey),
-                              ),
-                            ],
-                          )),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_back, size: 14, color: colorGrey),
+                          Text(
+                            " 이전으로",
+                            style: TextStyle(fontSize: 15, color: colorGrey),
+                          ),
+                        ],
+                      )),
                       behavior: HitTestBehavior.translucent,
                       onTap: () {
                         Navigator.of(context).pop();

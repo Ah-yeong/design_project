@@ -19,7 +19,7 @@ class _SplashScreenPage extends State<SplashScreenPage> {
     return WillPopScope(
       onWillPop: () async => false,
       child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor:1.0),
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: Scaffold(
           backgroundColor: const Color(0xFF6F22D2),
           body: Column(
@@ -35,10 +35,13 @@ class _SplashScreenPage extends State<SplashScreenPage> {
               Align(
                 child: Text("쉽게 만나자, 사람 끼리",
                     style: TextStyle(
-                      fontSize: screenWidth*( 14/360), color: Color.fromRGBO(255, 255, 255, 0.6),)
-                ),
+                      fontSize: screenWidth * (14 / 360),
+                      color: Color.fromRGBO(255, 255, 255, 0.6),
+                    )),
               ),
-              SizedBox( height: MediaQuery.of(context).size.height*0.0625,),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.0625,
+              ),
             ],
           ),
         ),
@@ -49,10 +52,7 @@ class _SplashScreenPage extends State<SplashScreenPage> {
   @override
   void initState() {
     Timer(Duration(milliseconds: 1500), () {
-      Navigator.push(context, MaterialPageRoute(
-          builder: (context) => const MyHomePage()
-      )
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const MyHomePage()));
     });
   }
 }
