@@ -23,6 +23,7 @@ class EntityPost {
   double _distance = 0.0;
 
   double get distance => _distance;
+
   set distance(double value) => _distance = value;
 
   set llName(value) => _llName = value;
@@ -37,7 +38,9 @@ class EntityPost {
   Future<void> applyToPost(String userId) async {
     try {
       await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
-        "user": FieldValue.arrayUnion([{"id": userId, "status": 0}])
+        "user": FieldValue.arrayUnion([
+          {"id": userId, "status": 0}
+        ])
       });
     } catch (e) {
       print("신청 실패: $e");
@@ -119,20 +122,35 @@ class EntityPost {
 
   // Getter, (ReadOnly)
   int getPostId() => _postId;
+
   String getWriterId() => _writerId;
+
   String getPostHead() => _head;
+
   String getPostBody() => _body;
+
   int getPostGender() => _gender;
+
   int getPostMaxPerson() => _maxPerson;
+
   int getPostCurrentPerson() => _currentPerson;
+
   String getWriterNick() => _writerNick;
+
   String getTime() => _time;
+
   String getCategory() => _category;
+
   String getUpTime() => _upTime;
+
   LLName getLLName() => _llName;
+
   int getMinAge() => _minAge;
+
   int getMaxAge() => _maxAge;
+
   bool isLoad() => _isLoaded;
+
   List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
@@ -140,17 +158,15 @@ class EntityPost {
     DateTime upTime = DateTime.parse(_upTime);
     return "${upTime.month}월 ${upTime.day}일${hour ? " ${upTime.hour}시" : ""} ${minute ? " ${upTime.minute}분" : ""}";
   }
-
-
-
 }
+
 String getTimeBefore(String upTime) {
   DateTime currentTime = DateTime.now();
   currentTime = currentTime.toUtc(); // 한국 시간
   DateTime beforeTime = DateTime.parse(upTime);
   Duration timeGap = currentTime.difference(beforeTime);
 
-  if(timeGap.inDays > 365) {
+  if (timeGap.inDays > 365) {
     return "${timeGap.inDays ~/ 365}년 전";
   } else if (timeGap.inDays >= 30) {
     return "${timeGap.inDays ~/ 30}개월 전";
@@ -165,36 +181,35 @@ String getTimeBefore(String upTime) {
   }
 }
 
-Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime, String category, int minAge, int maxAge, String writerNick) async {
+Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime,
+    String category, int minAge, int maxAge, String writerNick) async {
   try {
     int? new_post_id;
-    DocumentReference<Map<String, dynamic>> ref =
-    await FirebaseFirestore.instance.collection("Post").doc("postData");
+    DocumentReference<Map<String, dynamic>> ref = await FirebaseFirestore.instance.collection("Post").doc("postData");
     await ref.get().then((DocumentSnapshot ds) {
       new_post_id = ds.get("last_id") + 1;
       if (new_post_id == -1) return false; // 업로드 실패
     });
-    await ref.update({"last_id" : new_post_id});
+    await ref.update({"last_id": new_post_id});
     String uuid = await FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString())
-        .set({
-      "post_id" : new_post_id,
-      "writer_id" : uuid,
-      "head" : head,
-      "body" : body,
-      "gender" : gender,
-      "maxPerson" : maxPerson,
-      "time" : time,
-      "lat" : llName.latLng.latitude,
-      "lng" : llName.latLng.longitude,
-      "name" : llName.AddressName,
-      "currentPerson" : 1,
-      "category" : category,
-      "minAge" : minAge,
-      "writer_nick" : writerNick,
-      "maxAge" : maxAge,
-      "upTime" : upTime,
-      "viewCount" : 1,
+    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
+      "post_id": new_post_id,
+      "writer_id": uuid,
+      "head": head,
+      "body": body,
+      "gender": gender,
+      "maxPerson": maxPerson,
+      "time": time,
+      "lat": llName.latLng.latitude,
+      "lng": llName.latLng.longitude,
+      "name": llName.AddressName,
+      "currentPerson": 1,
+      "category": category,
+      "minAge": minAge,
+      "writer_nick": writerNick,
+      "maxAge": maxAge,
+      "upTime": upTime,
+      "viewCount": 1,
       "user": FieldValue.arrayUnion([]),
     });
     return true;

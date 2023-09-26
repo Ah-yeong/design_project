@@ -32,9 +32,9 @@ class PostPageManager {
     // FirebaseFirestore.instance.collection("Post").orderBy("post_id", descending: false).get(); => 정렬로 가져오기
     // descending : false 시 post_id에 대하여 내림차순 정렬 로드
 
-    for(DocumentSnapshot ds in qs.docs) {
+    for (DocumentSnapshot ds in qs.docs) {
       // 한 번에 로드될 게시물의 개수 넘어가면 로드 정지
-      if(_maxCount <= _loadedCount) {
+      if (_maxCount <= _loadedCount) {
         isLoading = false;
         return;
       }
@@ -45,7 +45,8 @@ class PostPageManager {
       // FirebaseQuery에서 where문 wildcard를 지원하지 않기 때문에 모든 게시물을 불러와서 직접 걸러줘야 함.
       // 검색어에 대한 제목 + 내용 검색.
       if (search_value != "") {
-        bool isContainValue = ds.get("head").toString().contains(search_value) || ds.get("body").toString().contains(search_value);
+        bool isContainValue =
+            ds.get("head").toString().contains(search_value) || ds.get("body").toString().contains(search_value);
         if (!isContainValue) continue;
       }
 
@@ -67,7 +68,10 @@ class PostPageManager {
   }
 
   int get maxCount => _maxCount;
+
   int get loadedCount => _loadedCount;
+
   int get lastLoaded => _lastLoaded;
+
   int get scrollCount => _scrollCount;
 }

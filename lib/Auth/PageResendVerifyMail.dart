@@ -32,7 +32,7 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
     _loadStorage();
 
     _argIsValid = (_argEmail != null && _argEmail != "없음");
-    if ( _argIsValid! ) {
+    if (_argIsValid!) {
       _infoText = "$_argEmail@sangmyung.kr";
     }
     super.initState();
@@ -43,13 +43,13 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
   }
 
   _sendVerifyMail() async {
-    if ( _localStorage!.getString(STORAGE_NAME) != null ) {
+    if (_localStorage!.getString(STORAGE_NAME) != null) {
       _storageTime = DateTime.parse(_localStorage!.getString(STORAGE_NAME)!);
     }
-    if ( _storageTime != null ) {
+    if (_storageTime != null) {
       DateTime _nowTime = DateTime.now();
       int remainSecond = 300 - _nowTime.difference(_storageTime!).inSeconds;
-      if ( remainSecond > 0 ) {
+      if (remainSecond > 0) {
         showAlert("$remainSecond초 뒤에 재전송이 가능해요!", context, colorSuccess);
         return;
       }
@@ -59,7 +59,7 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
       _user!.sendEmailVerification();
       showAlert("성공! 메일을 확인해주세요!", context, colorSuccess);
       _localStorage!.setString(STORAGE_NAME, DateTime.now().toString());
-    } catch(e) {
+    } catch (e) {
       showAlert("이런! 계정을 찾을 수 없어요!", context, colorError);
     }
   }
@@ -78,15 +78,11 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
               Column(
                 children: [
                   Text(_infoText!,
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          decoration: TextDecoration.underline)),
+                      style: TextStyle(fontSize: 14, color: Colors.black, decoration: TextDecoration.underline)),
                   SizedBox(
                     height: 7,
                   ),
-                  Text("위 이메일로 인증 메일이 전송돼요!",
-                      style: TextStyle(fontSize: 14, color: colorGrey))
+                  Text("위 이메일로 인증 메일이 전송돼요!", style: TextStyle(fontSize: 14, color: colorGrey))
                 ],
               ),
               SizedBox(
@@ -103,8 +99,7 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
                     '인증 메일 재전송',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  style: ElevatedButton.styleFrom(
-                      elevation: 0, backgroundColor: colorSuccess),
+                  style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                 ),
               ),
               Center(
@@ -114,15 +109,15 @@ class _StatePageResendVerifyMail extends State<PageResendVerifyMail> {
                   child: GestureDetector(
                     child: Center(
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.arrow_back, size: 14, color: colorGrey),
-                            Text(
-                              " 이전으로",
-                              style: TextStyle(fontSize: 15, color: colorGrey),
-                            ),
-                          ],
-                        )),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.arrow_back, size: 14, color: colorGrey),
+                        Text(
+                          " 이전으로",
+                          style: TextStyle(fontSize: 15, color: colorGrey),
+                        ),
+                      ],
+                    )),
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       Navigator.of(context).pop();

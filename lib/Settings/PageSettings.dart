@@ -11,6 +11,7 @@ import 'PageServiceAgreement.dart';
 
 class PageSettings extends StatelessWidget {
   final FirebaseFirestore _database = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +30,10 @@ class PageSettings extends StatelessWidget {
           ListTile(
             title: Text('콜렉션 생성'),
             onTap: () {
-              _database.collection("TestCollection").doc(DateTime.now().millisecondsSinceEpoch.toString()).set({"a" : true});
+              _database
+                  .collection("TestCollection")
+                  .doc(DateTime.now().millisecondsSinceEpoch.toString())
+                  .set({"a": true});
               _database.collection("TestCollection").get().then((d) {
                 for (DocumentSnapshot ds in d.docs) {
                   print(ds.id);
@@ -59,7 +63,6 @@ class PageSettings extends StatelessWidget {
                   print("${ds.id} is deleted!");
                 }
               });
-
             },
           ),
           Divider(
@@ -72,10 +75,10 @@ class PageSettings extends StatelessWidget {
           ListTile(
             title: Text('For 테스트'),
             onTap: () {
-              List<int> list = [1,2,3,4,5];
-              for(int i = 0; i < list.length; i++) {
+              List<int> list = [1, 2, 3, 4, 5];
+              for (int i = 0; i < list.length; i++) {
                 print(list[i]);
-                if(i==2) list.remove(i);
+                if (i == 2) list.remove(i);
               }
             },
           ),
@@ -91,11 +94,11 @@ class PageSettings extends StatelessWidget {
             onTap: () async {
               SharedPreferences _shared = await SharedPreferences.getInstance();
               int count = 0;
-              for ( String key in _shared.getKeys() ) {
-                if(key.contains("ChatData") && key.contains(myUuid!)) {
+              for (String key in _shared.getKeys()) {
+                if (key.contains("ChatData") && key.contains(myUuid!)) {
                   print("remove $key");
                   await _shared.remove(key);
-                  count ++;
+                  count++;
                 }
               }
               print("$count개 데이터 삭제 완료");
@@ -113,11 +116,11 @@ class PageSettings extends StatelessWidget {
             onTap: () async {
               SharedPreferences _shared = await SharedPreferences.getInstance();
               int count = 0;
-              for ( String key in _shared.getKeys() ) {
-                if(key.contains("ChatData")) {
+              for (String key in _shared.getKeys()) {
+                if (key.contains("ChatData")) {
                   print("remove $key");
                   await _shared.remove(key);
-                  count ++;
+                  count++;
                 }
               }
               print("$count개 데이터 삭제 완료");

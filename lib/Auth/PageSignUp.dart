@@ -16,8 +16,7 @@ class SignUpPage extends StatefulWidget {
   State<StatefulWidget> createState() => _SignUpPage();
 }
 
-class _SignUpPage extends State<SignUpPage>
-    with SingleTickerProviderStateMixin {
+class _SignUpPage extends State<SignUpPage> with SingleTickerProviderStateMixin {
   TextEditingController? _controllerId;
   TextEditingController? _controllerPw;
   TextEditingController? _controllerPwConfirm;
@@ -37,10 +36,11 @@ class _SignUpPage extends State<SignUpPage>
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Stack(
           children: [
-            Padding(padding: EdgeInsets.all(40),
-            child: Form(
-              key: _formKey,
-              child: SafeArea(
+            Padding(
+              padding: EdgeInsets.all(40),
+              child: Form(
+                key: _formKey,
+                child: SafeArea(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,8 +147,7 @@ class _SignUpPage extends State<SignUpPage>
                                     color: _infoTextHighlight! ? colorError : colorGrey),
                               )
                             ],
-                          )
-                      ),
+                          )),
                       const SizedBox(
                         height: 30,
                       ),
@@ -164,11 +163,9 @@ class _SignUpPage extends State<SignUpPage>
                           },
                           child: const Text(
                             "가입하기",
-                            style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
-                          style: ElevatedButton.styleFrom(
-                              elevation: 0, backgroundColor: colorSuccess),
+                          style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                         ),
                       ),
                       Center(
@@ -178,15 +175,15 @@ class _SignUpPage extends State<SignUpPage>
                           child: GestureDetector(
                             child: Center(
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.arrow_back, size: 14, color: colorGrey),
-                                    Text(
-                                      " 이전으로",
-                                      style: TextStyle(fontSize: 15, color: colorGrey),
-                                    ),
-                                  ],
-                                )),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.arrow_back, size: 14, color: colorGrey),
+                                Text(
+                                  " 이전으로",
+                                  style: TextStyle(fontSize: 15, color: colorGrey),
+                                ),
+                              ],
+                            )),
                             behavior: HitTestBehavior.translucent,
                             onTap: () {
                               Navigator.of(context).pop();
@@ -195,8 +192,10 @@ class _SignUpPage extends State<SignUpPage>
                         ),
                       ),
                     ],
-                  )),
-            ),),
+                  ),
+                ),
+              ),
+            ),
             _isLoading ? buildContainerLoading() : SizedBox()
           ],
         ),
@@ -208,7 +207,6 @@ class _SignUpPage extends State<SignUpPage>
     setState(() {
       _isLoading = false;
     });
-
   }
 
   _signup() async {
@@ -223,8 +221,7 @@ class _SignUpPage extends State<SignUpPage>
       _formKey.currentState!.save();
       try {
         final credential = await _auth.createUserWithEmailAndPassword(
-            email: "${_controllerId!.value.text}@sangmyung.kr",
-            password: _controllerPw!.value.text);
+            email: "${_controllerId!.value.text}@sangmyung.kr", password: _controllerPw!.value.text);
         credential.user!.sendEmailVerification();
         if (credential.user != null) {
           showAlert("이메일로 인증 주소가 발급되었습니다!", context, colorSuccess);

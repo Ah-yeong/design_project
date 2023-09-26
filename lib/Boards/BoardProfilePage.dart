@@ -1,3 +1,4 @@
+import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
@@ -6,6 +7,7 @@ import '../Resources/resources.dart';
 
 class BoardProfilePage extends StatefulWidget {
   final String profileId;
+
   const BoardProfilePage({super.key, required this.profileId});
 
   @override
@@ -41,91 +43,86 @@ class _BoardProfilePage extends State<BoardProfilePage> {
         elevation: 1,
       ),
       backgroundColor: Colors.white,
-      body:
-      // body: profileEntity!.isLoading ? Center(
-      //     child: SizedBox(
-      //         height: 65,
-      //         width: 65,
-      //         child: CircularProgressIndicator(
-      //           strokeWidth: 4,
-      //           color: colorSuccess,
-      //         ))) :
-      SingleChildScrollView(
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(15),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+      body: profileEntity!.isLoading
+          ? buildLoadingProgress()
+          : SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    SizedBox(width: 10),
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(
-                          'https://picsum.photos/id/237/200/300'),
-                    ),
-                    SizedBox(width: 25),
-                    Expanded(
-                      child:Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(height: 6),
-                          Text(
-                            "${profileEntity!.name}",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold
-                            ),
+                          SizedBox(width: 10),
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage('https://picsum.photos/id/237/200/300'),
                           ),
-                          SizedBox(height: 6),
-                          Text(
-                            "${profileEntity!.major}, ${profileEntity!.age}세",
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            "${profileEntity!.textInfo}",
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 7),
+                          SizedBox(width: 25),
+                          Expanded(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text("매너 지수 ${profileEntity!.mannerGroup}점", style: const TextStyle(color: Colors.black, fontSize: 12),),
-                                const Padding(padding: EdgeInsets.only(top:2),),
-                                SizedBox(
-                                    height: 6,
-                                    //width: 200,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(4),
-                                      child: LinearProgressIndicator(
-                                        value: profileEntity!.mannerGroup / 100,
-                                        valueColor: AlwaysStoppedAnimation<Color>(_getColorForScore(profileEntity!.mannerGroup)),
-                                        backgroundColor: Color(0xFFBFBFBF).withOpacity(0.3),
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                SizedBox(height: 6),
+                                Text(
+                                  "${profileEntity!.name}",
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "${profileEntity!.major}, ${profileEntity!.age}세",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "${profileEntity!.textInfo}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 7),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "매너 지수 ${profileEntity!.mannerGroup}점",
+                                        style: const TextStyle(color: Colors.black, fontSize: 12),
                                       ),
-                                    )
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 2),
+                                      ),
+                                      SizedBox(
+                                          height: 6,
+                                          //width: 200,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(4),
+                                            child: LinearProgressIndicator(
+                                              value: (profileEntity!.mannerGroup / 100),
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                  _getColorForScore(profileEntity!.mannerGroup)),
+                                              backgroundColor: Color(0xFFBFBFBF).withOpacity(0.3),
+                                            ),
+                                          ))
+                                    ],
+                                  ),
                                 )
                               ],
                             ),
                           )
                         ],
                       ),
-                    )
-                  ],
-                ),
-              ),
-              // Divider(thickness: 1, height: 1),
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 10, 20, 5),
-                // padding: EdgeInsets.all(20),
-                child: Container(
+                    ),
+                    // Divider(thickness: 1, height: 1),
+                    Container(
+                        padding: EdgeInsets.fromLTRB(20, 10, 20, 5),
+                        // padding: EdgeInsets.all(20),
+                        child: Container(
                           // padding:  EdgeInsets.all(15),
                           // decoration: BoxDecoration(
                           //   borderRadius: BorderRadius.circular(10),
@@ -136,28 +133,44 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                           // ),
                           child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    '취미',
+                              Row(children: [
+                                Text(
+                                  '취미',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    '${profileEntity!.hobby?.join(', ')}',
+                                    textAlign: TextAlign.right,
                                     style: TextStyle(
                                       fontSize: 14,
-                                        fontWeight: FontWeight.bold
                                     ),
+                                    maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
+                                    overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
                                   ),
-                                  Expanded(
+                                )
+                              ]),
+                              SizedBox(
+                                height: 14,
+                              ),
+                              // Divider(thickness: 1, height: 1),
+                              // SizedBox(
+                              //   height: 7,
+                              // ),
+                              Row(children: [
+                                Text(
+                                  'MBTI',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                                Expanded(
                                     child: Text(
-                                      '${profileEntity!.hobby?.join(', ')}',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
-                                      overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
-                                    ),
-                                  )
-                                ]
-                              ),
+                                  textAlign: TextAlign.right,
+                                  "${profileEntity!.mbti}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ))
+                              ]),
                               SizedBox(
                                 height: 14,
                               ),
@@ -165,53 +178,20 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                               // SizedBox(
                               //   height: 7,
                               // ),
-                              Row(
-                                  children: [
-                                    Text(
-                                      'MBTI',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                          fontWeight:FontWeight.bold
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: Text(
-                                          textAlign: TextAlign.right,
-                                          "${profileEntity!.mbti}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        )
-                                    )
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 14,
-                              ),
-                              // Divider(thickness: 1, height: 1),
-                              // SizedBox(
-                              //   height: 7,
-                              // ),
-                              Row(
-                                  children: [
-                                    Text(
-                                      '통학여부',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: Text(
-                                          textAlign: TextAlign.right,
-                                          "${profileEntity!.commute}",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        )
-                                    )
-                                  ]
-                              ),
+                              Row(children: [
+                                Text(
+                                  '통학여부',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                                Expanded(
+                                    child: Text(
+                                  textAlign: TextAlign.right,
+                                  "${profileEntity!.commute}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ))
+                              ]),
                               SizedBox(
                                 height: 14,
                               ),
@@ -236,27 +216,23 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                               borderRadius: BorderRadius.circular(4),
                                               color: colorSuccess,
                                               boxShadow: [
-                                                BoxShadow(
-                                                    color: Colors.grey,
-                                                    offset: Offset(1, 1),
-                                                    blurRadius: 4.5)
+                                                BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)
                                               ]),
                                           child: Center(
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.chat_outlined,
-                                                    color: Colors.white,
-                                                    size: 17,
-                                                  ),
-                                                  Text(
-                                                    " ${profileEntity!.name} 님에게 연락하기",
-                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-
-                                                ],
-                                              )),
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.chat_outlined,
+                                                color: Colors.white,
+                                                size: 17,
+                                              ),
+                                              Text(
+                                                " ${profileEntity!.name} 님에게 연락하기",
+                                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                              ),
+                                            ],
+                                          )),
                                         ),
                                       )),
                                 ),
@@ -337,13 +313,12 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                           //       ),
                           //     ]
                           // )
-                      )
-              )
-              // 추가적인 프로필 정보를 이곳에 추가할 수 있습니다.
-            ],
-          ),
-        ),
-      ),
+                        ))
+                    // 추가적인 프로필 정보를 이곳에 추가할 수 있습니다.
+                  ],
+                ),
+              ),
+            ),
     );
   }
 

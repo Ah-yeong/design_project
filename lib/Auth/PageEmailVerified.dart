@@ -65,10 +65,8 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
               ),
               Column(
                 children: [
-                  Text(" 인증 메일을 확인해주세요!",
-                      style: TextStyle(fontSize: 14, color: colorGrey)),
-                  Text(
-                      "현재 로그인된 학번 : ${_user == null ? "없음" : _user!.email!.split("@")[0]}",
+                  Text(" 인증 메일을 확인해주세요!", style: TextStyle(fontSize: 14, color: colorGrey)),
+                  Text("현재 로그인된 학번 : ${_user == null ? "없음" : _user!.email!.split("@")[0]}",
                       style: TextStyle(fontSize: 14, color: colorGrey))
                 ],
               ),
@@ -86,8 +84,7 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
                     '이메일 인증 확인',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  style: ElevatedButton.styleFrom(
-                      elevation: 0, backgroundColor: colorSuccess),
+                  style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                 ),
               ),
               SizedBox(
@@ -99,8 +96,7 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     child: Container(
-                      decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: colorGrey))),
+                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
                       child: Row(
                         children: [
                           Icon(
@@ -108,25 +104,21 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
                             size: 13,
                             color: colorGrey,
                           ),
-                          Text(" 인증 메일 재전송",
-                              style: TextStyle(fontSize: 14, color: colorGrey)),
+                          Text(" 인증 메일 재전송", style: TextStyle(fontSize: 14, color: colorGrey)),
                         ],
                       ),
                     ),
                     onTap: () {
                       Get.to(() => PageResendVerifyMail(),
-                          arguments:
-                              "${_user == null ? "없음" : _user!.email!.split("@")[0]}");
+                          arguments: "${_user == null ? "없음" : _user!.email!.split("@")[0]}");
                     },
                   ),
-                  Text("  또는  ",
-                      style: TextStyle(fontSize: 14, color: colorGrey)),
+                  Text("  또는  ", style: TextStyle(fontSize: 14, color: colorGrey)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     child: Container(
                       height: 18,
-                      decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: colorGrey))),
+                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
                       child: Row(
                         children: [
                           Icon(
@@ -134,8 +126,7 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
                             size: 13,
                             color: colorGrey,
                           ),
-                          Text(" 처음으로 돌아가기 ",
-                              style: TextStyle(fontSize: 14, color: colorGrey)),
+                          Text(" 처음으로 돌아가기 ", style: TextStyle(fontSize: 14, color: colorGrey)),
                         ],
                       ),
                     ),

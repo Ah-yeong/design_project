@@ -9,7 +9,7 @@ class _NotificationPageState extends State<NotificationPage> {
   bool _commentsSwitchValue = true; //댓글
   bool _popularSwitchValue = true; //인기글
   bool _chatSwitchValue = false; //채팅
-  bool _scheduleBriefingSwitchValue = true;   //일정 브리핑
+  bool _scheduleBriefingSwitchValue = true; //일정 브리핑
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,6 @@ class _NotificationPageState extends State<NotificationPage> {
             indent: 10,
             endIndent: 10,
           ),
-
           ListTile(
             title: Text('일정 브리핑'),
             trailing: Switch(

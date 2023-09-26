@@ -11,10 +11,20 @@ const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
 const Color colorLightGrey = const Color(0xFFCCCCCC);
 var CategoryList = List.of([
-  "술", "밥", "영화", "산책",
-  "공부", "취미", "운동", "기타",
-  "음악", "게임", "공예", "공연",
-  "여행", "쇼핑",
+  "술",
+  "밥",
+  "영화",
+  "산책",
+  "공부",
+  "취미",
+  "운동",
+  "기타",
+  "음악",
+  "게임",
+  "공예",
+  "공연",
+  "여행",
+  "쇼핑",
 ]);
 
 Color getColorForScore(int score) {
@@ -33,8 +43,7 @@ Color getColorForScore(int score) {
 
 void updateChatList(String uuid) {
   Random rd = Random();
-  FirebaseFirestore.instance.collection("UserChatData").doc(uuid).update(
-      {"streamIO" : rd.nextInt(100000000).toInt()});
+  FirebaseFirestore.instance.collection("UserChatData").doc(uuid).update({"streamIO": rd.nextInt(100000000).toInt()});
 }
 
 void showAlert(String message, BuildContext cont, Color color) {

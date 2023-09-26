@@ -3,11 +3,7 @@ import 'package:chat_bubbles/chat_bubbles.dart';
 
 class ChatBubble extends StatelessWidget {
   const ChatBubble(this.message, this.isMe, this.userName, this.time,
-      {Key? key,
-      this.longBubble,
-      this.isDayDivider,
-      this.invisibleTime,
-      this.unreadUserCount})
+      {Key? key, this.longBubble, this.isDayDivider, this.invisibleTime, this.unreadUserCount})
       : super(key: key);
 
   final int? unreadUserCount;
@@ -29,8 +25,7 @@ class ChatBubble extends StatelessWidget {
     Color textColor = !isMe ? Colors.black : Colors.white;
     return !_isDayDivider
         ? Column(
-            crossAxisAlignment:
-                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               if (!isMe && !_longBubble)
                 Padding(
@@ -45,12 +40,10 @@ class ChatBubble extends StatelessWidget {
                   ),
                 ),
               Row(
-                mainAxisAlignment:
-                    isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment:
-                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Column(
@@ -61,10 +54,7 @@ class ChatBubble extends StatelessWidget {
                           if (isMe && _unreadUserCount != 0)
                             Text(
                               _unreadUserCount.toString(),
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.amber,
-                                  fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
                             ),
                           if (isMe && !_invisibleTime)
                             Padding(
@@ -85,16 +75,12 @@ class ChatBubble extends StatelessWidget {
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(12),
                             topLeft: Radius.circular(12),
-                            bottomRight:
-                                isMe ? Radius.circular(0) : Radius.circular(12),
-                            bottomLeft:
-                                isMe ? Radius.circular(12) : Radius.circular(0),
+                            bottomRight: isMe ? Radius.circular(0) : Radius.circular(12),
+                            bottomLeft: isMe ? Radius.circular(12) : Radius.circular(0),
                           ),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                        margin: EdgeInsets.fromLTRB(
-                            8, 3, 8, _invisibleTime ? 0 : 5),
+                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                        margin: EdgeInsets.fromLTRB(8, 3, 8, _invisibleTime ? 0 : 5),
                         child: Text(
                           message,
                           style: TextStyle(
@@ -102,8 +88,7 @@ class ChatBubble extends StatelessWidget {
                           ),
                         ),
                         constraints: BoxConstraints(
-                          maxWidth:
-                              MediaQuery.of(context).size.width * 6.5 / 10,
+                          maxWidth: MediaQuery.of(context).size.width * 6.5 / 10,
                         ),
                       ),
                       Column(
@@ -114,10 +99,7 @@ class ChatBubble extends StatelessWidget {
                           if (!isMe && _unreadUserCount != 0)
                             Text(
                               _unreadUserCount.toString(),
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.amber,
-                                  fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
                             ),
                           if (!isMe && !_invisibleTime)
                             Padding(

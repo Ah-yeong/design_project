@@ -30,8 +30,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS가 다크모드일 때도 상단 글자 검은색으로 고정
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return GetMaterialApp(
       title: 'Capstone design',
       localizationsDelegates: [
@@ -93,11 +92,11 @@ class _MyHomePage extends State<MyHomePage> {
                         duration: Duration(milliseconds: 500),
                         child: Center(
                             child: GestureDetector(
-                              onDoubleTap: () {
-                                setState(() {
-                                  _isManager = !_isManager;
-                                });
-                              },
+                          onDoubleTap: () {
+                            setState(() {
+                              _isManager = !_isManager;
+                            });
+                          },
                           child: Text(
                             "마음 맞는, 사람끼리",
                             style: TextStyle(
@@ -130,8 +129,7 @@ class _MyHomePage extends State<MyHomePage> {
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 20),
+                                          padding: const EdgeInsets.only(left: 20),
                                           child: TextFormField(
                                               controller: controllerId,
                                               style: TextStyle(fontSize: 15),
@@ -139,10 +137,9 @@ class _MyHomePage extends State<MyHomePage> {
                                               textInputAction: TextInputAction.next,
                                               decoration: InputDecoration(
                                                   hintText: "아이디 (학번)",
-                                                  hintStyle:
-                                                      TextStyle(fontSize: 15),
+                                                  hintStyle: TextStyle(fontSize: 15),
                                                   border: InputBorder.none,
-                                              counterText: '')),
+                                                  counterText: '')),
                                         ),
                                       ),
                                       SizedBox(height: 8),
@@ -151,28 +148,24 @@ class _MyHomePage extends State<MyHomePage> {
                                           width: double.infinity,
                                           decoration: BoxDecoration(
                                             color: Color(0xFFE8E8E8),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 20),
+                                            padding: const EdgeInsets.only(left: 20),
                                             child: TextFormField(
                                                 controller: controllerPw,
                                                 obscureText: true,
                                                 style: TextStyle(fontSize: 15),
                                                 decoration: InputDecoration(
                                                   hintText: "비밀번호",
-                                                  hintStyle:
-                                                      TextStyle(fontSize: 15),
+                                                  hintStyle: TextStyle(fontSize: 15),
                                                   border: InputBorder.none,
                                                   counterText: "",
                                                 )),
                                           )),
                                       SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           GestureDetector(
                                             child: Row(
@@ -187,8 +180,7 @@ class _MyHomePage extends State<MyHomePage> {
                                                         onChanged: (_val) {
                                                           setState(() {
                                                             _isRememberId = _val!;
-                                                            saveOption(
-                                                                _isRememberId);
+                                                            saveOption(_isRememberId);
                                                           });
                                                         },
                                                         activeColor: colorSuccess,
@@ -211,13 +203,8 @@ class _MyHomePage extends State<MyHomePage> {
                                           GestureDetector(
                                             child: Container(
                                               height: 18,
-                                              decoration: BoxDecoration(
-                                                border: Border(
-                                                  bottom: BorderSide(
-                                                    color: colorGrey
-                                                  )
-                                                )
-                                              ),
+                                              decoration:
+                                                  BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
                                               child: Text(
                                                 "비밀번호 재설정",
                                                 style: TextStyle(fontSize: 14, color: colorGrey),
@@ -225,7 +212,8 @@ class _MyHomePage extends State<MyHomePage> {
                                             ),
                                             behavior: HitTestBehavior.translucent,
                                             onTap: () {
-                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageResetPassword()));
+                                              Navigator.of(context)
+                                                  .push(MaterialPageRoute(builder: (context) => PageResetPassword()));
                                             },
                                           ),
                                         ],
@@ -243,13 +231,9 @@ class _MyHomePage extends State<MyHomePage> {
                                           },
                                           child: const Text(
                                             '로그인',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16),
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                           ),
-                                          style: ElevatedButton.styleFrom(
-                                              elevation: 0,
-                                              backgroundColor: colorSuccess),
+                                          style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess),
                                         ),
                                       ),
                                       SizedBox(
@@ -259,16 +243,13 @@ class _MyHomePage extends State<MyHomePage> {
                                           child: Center(
                                             child: Text(
                                               "회원가입",
-                                              style: TextStyle(
-                                                  fontSize: 15, color: colorGrey),
+                                              style: TextStyle(fontSize: 15, color: colorGrey),
                                             ),
                                           ),
                                           behavior: HitTestBehavior.translucent,
                                           onTap: () {
-                                            Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (cont) =>
-                                                        const SignUpPage()));
+                                            Navigator.of(context)
+                                                .push(MaterialPageRoute(builder: (cont) => const SignUpPage()));
                                           },
                                         ),
                                       ),
@@ -279,43 +260,41 @@ class _MyHomePage extends State<MyHomePage> {
                             ),
                           ),
                           secondChild: SizedBox(width: double.infinity),
-                          crossFadeState: !_splashScreenAnimated
-                              ? CrossFadeState.showSecond
-                              : CrossFadeState.showFirst,
+                          crossFadeState: !_splashScreenAnimated ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                           duration: Duration(milliseconds: 800),
                           sizeCurve: Curves.easeOutCubic,
                         ),
                         curve: Curves.linear,
                       ),
                       // 관리자 로그인버튼
-                      AnimatedCrossFade(firstChild: SizedBox(width: double.infinity,),
-                          secondChild: Padding(
-                            padding: const EdgeInsets.only(left:40, right:40),
-                            child: SizedBox(
-                              height: 50,
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-                                  _login(manager: true);
-                                },
-                                child: const Text(
-                                  '관리자 로그인',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    backgroundColor: Colors.deepPurpleAccent),
+                      AnimatedCrossFade(
+                        firstChild: SizedBox(
+                          width: double.infinity,
+                        ),
+                        secondChild: Padding(
+                          padding: const EdgeInsets.only(left: 40, right: 40),
+                          child: SizedBox(
+                            height: 50,
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                _login(manager: true);
+                              },
+                              child: const Text(
+                                '관리자 로그인',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                               ),
+                              style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: Colors.deepPurpleAccent),
                             ),
                           ),
-                          crossFadeState: _isManager ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                          duration: Duration(milliseconds: 500),
-                      sizeCurve: Curves.easeOutQuart,)
+                        ),
+                        crossFadeState: _isManager ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                        duration: Duration(milliseconds: 500),
+                        sizeCurve: Curves.easeOutQuart,
+                      )
                     ],
                   ),
                 ),

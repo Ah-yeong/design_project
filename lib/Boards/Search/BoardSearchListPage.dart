@@ -18,8 +18,7 @@ class BoardSearchListPage extends StatefulWidget {
   final String search_value;
   final String? category;
 
-  const BoardSearchListPage(
-      {super.key, required this.search_value, this.category});
+  const BoardSearchListPage({super.key, required this.search_value, this.category});
 
   @override
   State<StatefulWidget> createState() => _BoardSearchListPage();
@@ -43,8 +42,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   double _lng = 127.178419;
 
   List<String> _sortingOptionList = List.of(["최신순", "거리 가까운 순", "모임 시간 빠른 순"]);
-  List<String> _timeOptionList =
-      List.of(["제한 없음", "1시간 이내", "6시간 이내", "1일 이내", "7일 이내", "직접 입력"]);
+  List<String> _timeOptionList = List.of(["제한 없음", "1시간 이내", "6시간 이내", "1일 이내", "7일 이내", "직접 입력"]);
   List<String> _genderOptionList = List.of(["제한 없음", "남자만", "여자만"]);
   List<String> _categoryList = CategoryList;
   int _minPeople = 2;
@@ -114,9 +112,9 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         body: _pageManager.isLoading
             ? buildLoadingProgress()
             : GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
-              child: Column(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => FocusManager.instance.primaryFocus!.unfocus(),
+                child: Column(
                   children: [
                     SizedBox(
                         child: Padding(
@@ -125,13 +123,10 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
-                                  buildSortingButton(
-                                      "${_sortingOptionList[_selectedSortingBy]}",
-                                      () {
+                                  buildSortingButton("${_sortingOptionList[_selectedSortingBy]}", () {
                                     showModalBottomSheet(
                                         context: context,
-                                        builder: (BuildContext context) =>
-                                            _buildModalSheet(context, 0),
+                                        builder: (BuildContext context) => _buildModalSheet(context, 0),
                                         backgroundColor: Colors.transparent);
                                   }, true),
                                   Row(
@@ -150,16 +145,8 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                               child: Card(
                                   child: Padding(
                                       padding: const EdgeInsets.all(7),
-                                      child: buildFriendRow(
-                                          _pageManager.list[
-                                              _pageManager.list.length -
-                                                  index -
-                                                  1],
-                                          _pageManager
-                                              .list[_pageManager.list.length -
-                                                  index -
-                                                  1]
-                                              .distance))),
+                                      child: buildFriendRow(_pageManager.list[_pageManager.list.length - index - 1],
+                                          _pageManager.list[_pageManager.list.length - index - 1].distance))),
                             ),
                             itemCount: _pageManager.loadedCount,
                           ))
@@ -167,37 +154,34 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                             child: Center(
                                 child: Text(
                               "검색된 모임이 없습니다",
-                              style: TextStyle(
-                                  color: colorGrey,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15),
+                              style: TextStyle(color: colorGrey, fontWeight: FontWeight.bold, fontSize: 15),
                             )),
                           ),
-                    _pageManager.list.length == 0 ? SizedBox(width: double.infinity, height: 65,) : SizedBox()
+                    _pageManager.list.length == 0
+                        ? SizedBox(
+                            width: double.infinity,
+                            height: 65,
+                          )
+                        : SizedBox()
                   ],
                 ),
-            ));
+              ));
   }
 
-  Widget buildSortingButton(
-      String nameText, void Function() onTap, bool isEnabled) {
+  Widget buildSortingButton(String nameText, void Function() onTap, bool isEnabled) {
     return GestureDetector(
       child: Padding(
         padding: EdgeInsets.all(5),
         child: Container(
             decoration: _buildBoxDecoration(
-                isEnabled ? Color(0xFFFFFFFF) : Color(0xFFFFFFFF),
-                isEnabled ? colorGrey : Color(0xFFEAEAEA)),
+                isEnabled ? Color(0xFFFFFFFF) : Color(0xFFFFFFFF), isEnabled ? colorGrey : Color(0xFFEAEAEA)),
             child: Padding(
-                padding: const EdgeInsets.only(
-                    right: 10, left: 10, top: 7, bottom: 7),
+                padding: const EdgeInsets.only(right: 10, left: 10, top: 7, bottom: 7),
                 child: Row(
                   children: [
                     Text("$nameText ",
                         style: TextStyle(
-                            color: isEnabled ? Colors.black : colorGrey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal)),
+                            color: isEnabled ? Colors.black : colorGrey, fontSize: 14, fontWeight: FontWeight.normal)),
                     RotatedBox(
                       quarterTurns: 1,
                       child: Icon(
@@ -226,12 +210,10 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
     _applyFiltering();
     _scrollController.addListener(() {
       setState(() {
-        if (_scrollController.offset + 100 <
-                _scrollController.position.minScrollExtent &&
+        if (_scrollController.offset + 100 < _scrollController.position.minScrollExtent &&
             _scrollController.position.outOfRange &&
             _pageManager.isLoading) {
-          _pageManager.reloadPages(_search_value!).then((value) => setState(() {
-              }));
+          _pageManager.reloadPages(_search_value!).then((value) => setState(() {}));
         }
       });
     });
@@ -240,11 +222,8 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
     textEditingController.text = _search_value!;
     loadStorage().then((value) => {
           setState(() {
-            _searchHistory =
-                _storage!.getStringList("${myUuid}_search_history") ?? _searchHistory;
-            _searchHistoryEnabled =
-                _storage!.getBool("${myUuid}_search_history_enabled") ??
-                    _searchHistoryEnabled;
+            _searchHistory = _storage!.getStringList("${myUuid}_search_history") ?? _searchHistory;
+            _searchHistoryEnabled = _storage!.getBool("${myUuid}_search_history_enabled") ?? _searchHistoryEnabled;
           })
         });
   }
@@ -285,9 +264,8 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
 
   naviToPost(int index) {
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => BoardPostPage(
-            postId: _pageManager.list[_pageManager.list.length - index - 1]
-                .getPostId())));
+        builder: (context) =>
+            BoardPostPage(postId: _pageManager.list[_pageManager.list.length - index - 1].getPostId())));
   }
 
   OutlineInputBorder _buildOutlineInputBorder() {
@@ -298,8 +276,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   }
 
   Widget _buildModalSheet(BuildContext context, int pageIdx) {
-    return StatefulBuilder(
-        builder: (BuildContext context, StateSetter myState) {
+    return StatefulBuilder(builder: (BuildContext context, StateSetter myState) {
       Widget modalChildWidget = _buildSortingSheet(myState);
       switch (pageIdx) {
         // 0. 정렬 기준
@@ -340,10 +317,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("정렬 기준",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 textAlign: TextAlign.left),
             SizedBox(
               height: 20,
@@ -369,10 +343,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         Text(
                           _sortingOptionList[index],
                           style: _selectedSortingByTemp == index
-                              ? TextStyle(
-                                  color: colorSuccess,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)
+                              ? TextStyle(color: colorSuccess, fontWeight: FontWeight.bold, fontSize: 16)
                               : TextStyle(color: Colors.black, fontSize: 15),
                         ),
                         _selectedSortingByTemp == index
@@ -423,22 +394,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
+                            boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                         child: Center(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
                             ),
                           ],
                         )),
@@ -457,10 +420,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("모임 시간",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 textAlign: TextAlign.left),
             SizedBox(
               height: 20,
@@ -486,10 +446,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         Text(
                           _timeOptionList[index],
                           style: _selectedTimeTemp == index
-                              ? TextStyle(
-                                  color: colorSuccess,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)
+                              ? TextStyle(color: colorSuccess, fontWeight: FontWeight.bold, fontSize: 16)
                               : TextStyle(color: Colors.black, fontSize: 15),
                         ),
                         _selectedTimeTemp == index
@@ -529,22 +486,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
+                            boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                         child: Center(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
                             ),
                           ],
                         )),
@@ -563,10 +512,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("최대 인원",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 textAlign: TextAlign.left),
             SizedBox(
               height: 20,
@@ -587,17 +533,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                             activeTrackColor: colorGrey,
                             activeTickMarkColor: colorGrey,
                             overlayColor: const Color(0x00000000),
-                            rangeValueIndicatorShape:
-                                PaddleRangeSliderValueIndicatorShape(),
+                            rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
                             valueIndicatorColor: Colors.black),
                         child: RangeSlider(
                           min: 2,
                           max: 9,
                           divisions: 7,
-                          values: RangeValues(
-                              _minPeople.toDouble(), _maxPeople.toDouble()),
-                          labels: RangeLabels(
-                              _minPeople == 9 ? "무제한" : _minPeople.toString(),
+                          values: RangeValues(_minPeople.toDouble(), _maxPeople.toDouble()),
+                          labels: RangeLabels(_minPeople == 9 ? "무제한" : _minPeople.toString(),
                               _maxPeople == 9 ? "무제한" : _maxPeople.toString()),
                           onChanged: (changeValue) {
                             _minPeople = changeValue.start.round().toInt();
@@ -612,15 +555,13 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                                     _peopleText = " 모임 인원이 무제한인 게시글을 검색합니다.";
                                     _peopleFilterText = "인원 무제한";
                                   } else {
-                                    _peopleText =
-                                        " 모임 인원이 $_maxPeople명인 게시글을 검색합니다.";
+                                    _peopleText = " 모임 인원이 $_maxPeople명인 게시글을 검색합니다.";
                                     _peopleFilterText = "$_maxPeople명";
                                   }
                                 } else {
                                   _peopleText =
                                       " 모임 인원이 $_minPeople ~ ${_maxPeople == 9 ? "" : "$_maxPeople"}명인 게시글을 검색합니다.";
-                                  _peopleFilterText =
-                                      "$_minPeople~${_maxPeople == 9 ? "" : "$_maxPeople"}명";
+                                  _peopleFilterText = "$_minPeople~${_maxPeople == 9 ? "" : "$_maxPeople"}명";
                                 }
                               });
                             });
@@ -646,8 +587,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                 child: InkWell(
                     onTap: () {
                       setState(() {
-                        _filteringPeople =
-                            !(_minPeople == 2 && _maxPeople == 9);
+                        _filteringPeople = !(_minPeople == 2 && _maxPeople == 9);
                         _applyFiltering();
                       });
                       Navigator.pop(context);
@@ -659,22 +599,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
+                            boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                         child: Center(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
                             ),
                           ],
                         )),
@@ -693,10 +625,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("거리",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 textAlign: TextAlign.left),
             SizedBox(
               height: 20,
@@ -717,16 +646,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                             activeTrackColor: colorGrey,
                             activeTickMarkColor: colorGrey,
                             overlayColor: const Color(0x00000000),
-                            valueIndicatorShape:
-                                PaddleSliderValueIndicatorShape(),
+                            valueIndicatorShape: PaddleSliderValueIndicatorShape(),
                             valueIndicatorColor: Colors.black),
                         child: Slider(
                           min: 0,
                           max: 50,
                           divisions: 50,
                           value: _distanceValue.toDouble(),
-                          label:
-                              "${_distanceValue == 50 ? "무제한" : "${(_distanceValue + 1) * 100}m"}",
+                          label: "${_distanceValue == 50 ? "무제한" : "${(_distanceValue + 1) * 100}m"}",
                           onChanged: (changeValue) {
                             stateSetter(() {
                               setState(() {
@@ -768,22 +695,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
+                            boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                         child: Center(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
                             ),
                           ],
                         )),
@@ -802,10 +721,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("카테고리 선택",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 textAlign: TextAlign.left),
             SizedBox(
               height: 20,
@@ -837,22 +753,15 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.only(
-                                    right: 10, left: 10, top: 7, bottom: 7),
+                                padding: const EdgeInsets.only(right: 10, left: 10, top: 7, bottom: 7),
                                 decoration: BoxDecoration(
-                                  color: _selectedCategory.contains(e)
-                                      ? colorGrey
-                                      : Color(0xFFEAEAEA),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
+                                  color: _selectedCategory.contains(e) ? colorGrey : Color(0xFFEAEAEA),
+                                  borderRadius: BorderRadius.all(Radius.circular(12)),
                                 ),
                                 child: Text(
                                   '$e',
                                   style: TextStyle(
-                                      color: _selectedCategory.contains(e)
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 14),
+                                      color: _selectedCategory.contains(e) ? Colors.white : Colors.black, fontSize: 14),
                                 ),
                               ),
                             ))
@@ -878,22 +787,14 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
                             color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
+                            boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
                         child: Center(
                             child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
                             ),
                           ],
                         )),
@@ -907,107 +808,96 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
 
   Widget _buildGenderSheet(StateSetter stateSetter) {
     return Padding(
-        padding: EdgeInsets.all(7),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("성별 제한",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-                textAlign: TextAlign.left),
-            SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              height: 150,
-              width: double.infinity,
-              child: ListView.builder(
-                itemBuilder: (context, index) => GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    stateSetter(() {
-                      setState(() {
-                        _selectedGenderTemp = index;
-                      });
+      padding: EdgeInsets.all(7),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("성별 제한",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+              textAlign: TextAlign.left),
+          SizedBox(
+            height: 20,
+          ),
+          SizedBox(
+            height: 150,
+            width: double.infinity,
+            child: ListView.builder(
+              itemBuilder: (context, index) => GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  stateSetter(() {
+                    setState(() {
+                      _selectedGenderTemp = index;
                     });
-                  },
-                  child: SizedBox(
-                    height: 40,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _genderOptionList[index],
-                          style: _selectedGenderTemp == index
-                              ? TextStyle(
-                                  color: colorSuccess,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)
-                              : TextStyle(color: Colors.black, fontSize: 15),
-                        ),
-                        _selectedGenderTemp == index
-                            ? Icon(
-                                Icons.check_rounded,
-                                color: colorSuccess,
-                                size: 22,
-                              )
-                            : SizedBox()
-                      ],
+                  });
+                },
+                child: SizedBox(
+                  height: 40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _genderOptionList[index],
+                        style: _selectedGenderTemp == index
+                            ? TextStyle(color: colorSuccess, fontWeight: FontWeight.bold, fontSize: 16)
+                            : TextStyle(color: Colors.black, fontSize: 15),
+                      ),
+                      _selectedGenderTemp == index
+                          ? Icon(
+                              Icons.check_rounded,
+                              color: colorSuccess,
+                              size: 22,
+                            )
+                          : SizedBox()
+                    ],
+                  ),
+                ),
+              ),
+              itemCount: 3,
+              scrollDirection: Axis.vertical,
+              physics: NeverScrollableScrollPhysics(),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 15, 0, 10),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 18),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedGender = _selectedGenderTemp;
+                    _filteringGender = _selectedGender == 0 ? false : true;
+                    _applyFiltering();
+                  });
+                  Navigator.pop(context);
+                },
+                child: SizedBox(
+                  height: 50,
+                  width: double.infinity,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: colorSuccess,
+                        boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "적용하기",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                itemCount: 3,
-                scrollDirection: Axis.vertical,
-                physics: NeverScrollableScrollPhysics(),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0, 15, 0, 10),
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 18),
-                child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedGender = _selectedGenderTemp;
-                        _filteringGender = _selectedGender == 0 ? false : true;
-                        _applyFiltering();
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: SizedBox(
-                      height: 50,
-                      width: double.infinity,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: colorSuccess,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 4.5)
-                            ]),
-                        child: Center(
-                            child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "적용하기",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17),
-                            ),
-                          ],
-                        )),
-                      ),
-                    )),
-              ),
-            ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 
   double getDistance(double lat, double lng) {
@@ -1027,22 +917,19 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
       LLName temp = post.getLLName();
       post.distance = getDistance(temp.latLng.latitude, temp.latLng.longitude);
     }
-    Comparator<EntityPost> entityComparator =
-        (a, b) => b.distance.compareTo(a.distance);
+    Comparator<EntityPost> entityComparator = (a, b) => b.distance.compareTo(a.distance);
     _pageManager.list.sort(entityComparator);
   }
 
   void _sortingByRecently() {
     for (EntityPost post in _pageManager.list) post.distance = 0.0;
-    Comparator<EntityPost> entityComparator =
-        (a, b) => a.getPostId().compareTo(b.getPostId());
+    Comparator<EntityPost> entityComparator = (a, b) => a.getPostId().compareTo(b.getPostId());
     _pageManager.list.sort(entityComparator);
   }
 
   void _sortingByTime() {
     for (EntityPost post in _pageManager.list) post.distance = 0.0;
-    Comparator<EntityPost> entityComparator =
-        (a, b) => a.getTime().compareTo(b.getTime());
+    Comparator<EntityPost> entityComparator = (a, b) => a.getTime().compareTo(b.getTime());
     _pageManager.list.sort(entityComparator);
   }
 
@@ -1066,8 +953,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
               // RangeSlider의 우측 범위가 맨 오른쪽이 아니면 삭제
               removeFlag = true;
             }
-          } else if (_minPeople > post.getPostMaxPerson() ||
-              _maxPeople < post.getPostMaxPerson()) {
+          } else if (_minPeople > post.getPostMaxPerson() || _maxPeople < post.getPostMaxPerson()) {
             removeFlag = true;
           }
         }
@@ -1075,8 +961,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
         // 거리 필터
         if (_filteringDistance) {
           LLName temp = post.getLLName();
-          double dist =
-              getDistance(temp.latLng.latitude, temp.latLng.longitude);
+          double dist = getDistance(temp.latLng.latitude, temp.latLng.longitude);
           post.distance = dist;
           if (dist > (_distanceValue + 1) * 100) removeFlag = true;
         }
@@ -1116,7 +1001,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
           }
           if (timeGap.inHours > 0) {
             removeFlag = true;
-          } else if (-1 * timeGap.inHours > _sTime ) {
+          } else if (-1 * timeGap.inHours > _sTime) {
             removeFlag = true;
           }
         }
@@ -1145,35 +1030,28 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   List<Widget> _buildFilteringContents() {
     return <Widget>[
       _filteringTime
-          ? buildSortingButton(
-              _filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
+          ? buildSortingButton(_filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 1),
+                  builder: (BuildContext context) => _buildModalSheet(context, 1),
                   backgroundColor: Colors.transparent);
             }, _filteringTime)
           : SizedBox(),
 
       _filteringPeople
-          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원",
-              () {
+          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 2),
+                  builder: (BuildContext context) => _buildModalSheet(context, 2),
                   backgroundColor: Colors.transparent);
             }, _filteringPeople)
           : SizedBox(),
 
       _filteringDistance
-          ? buildSortingButton(
-              _filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리",
-              () {
+          ? buildSortingButton(_filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 3),
+                  builder: (BuildContext context) => _buildModalSheet(context, 3),
                   backgroundColor: Colors.transparent);
             }, _filteringDistance)
           : SizedBox(),
@@ -1187,56 +1065,44 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                   : "카테고리", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 4),
+                  builder: (BuildContext context) => _buildModalSheet(context, 4),
                   backgroundColor: Colors.transparent);
             }, _filteringCategory)
           : SizedBox(),
 
       _filteringGender
-          ? buildSortingButton(
-              _filteringGender
-                  ? getGenderTextForInteger(_selectedGender)
-                  : "성별", () {
+          ? buildSortingButton(_filteringGender ? getGenderTextForInteger(_selectedGender) : "성별", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 5),
+                  builder: (BuildContext context) => _buildModalSheet(context, 5),
                   backgroundColor: Colors.transparent);
             }, _filteringGender)
           : SizedBox(),
 
       // --------------------- 후순위 --------------------- //
       !_filteringTime
-          ? buildSortingButton(
-              _filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
+          ? buildSortingButton(_filteringTime ? _timeOptionList[_selectedTime] : "모임 시간", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 1),
+                  builder: (BuildContext context) => _buildModalSheet(context, 1),
                   backgroundColor: Colors.transparent);
             }, _filteringTime)
           : SizedBox(),
 
       !_filteringPeople
-          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원",
-              () {
+          ? buildSortingButton(_filteringPeople ? _peopleFilterText : "최대 인원", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 2),
+                  builder: (BuildContext context) => _buildModalSheet(context, 2),
                   backgroundColor: Colors.transparent);
             }, _filteringPeople)
           : SizedBox(),
 
       !_filteringDistance
-          ? buildSortingButton(
-              _filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리",
-              () {
+          ? buildSortingButton(_filteringDistance ? "${(_distanceValue + 1) * 100}m 이내" : "거리", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 3),
+                  builder: (BuildContext context) => _buildModalSheet(context, 3),
                   backgroundColor: Colors.transparent);
             }, _filteringDistance)
           : SizedBox(),
@@ -1250,21 +1116,16 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
                   : "카테고리", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 4),
+                  builder: (BuildContext context) => _buildModalSheet(context, 4),
                   backgroundColor: Colors.transparent);
             }, _filteringCategory)
           : SizedBox(),
 
       !_filteringGender
-          ? buildSortingButton(
-              _filteringGender
-                  ? getGenderTextForInteger(_selectedGender)
-                  : "성별", () {
+          ? buildSortingButton(_filteringGender ? getGenderTextForInteger(_selectedGender) : "성별", () {
               showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) =>
-                      _buildModalSheet(context, 5),
+                  builder: (BuildContext context) => _buildModalSheet(context, 5),
                   backgroundColor: Colors.transparent);
             }, _filteringGender)
           : SizedBox(),

@@ -19,17 +19,7 @@ import '../../Resources/resources.dart';
 
 final key = GlobalKey<CustomRadioButtonState>();
 
-const List<String> _peopleCounts = <String>[
-  '선택',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '무제한'
-];
+const List<String> _peopleCounts = <String>['선택', '2', '3', '4', '5', '6', '7', '8', '무제한'];
 
 class BoardWritingPage extends StatefulWidget {
   @override
@@ -52,8 +42,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                 onPrimary: Colors.white,
                 onSurface: Colors.black,
               ),
-              textButtonTheme: TextButtonThemeData(
-                  style: TextButton.styleFrom(primary: colorSuccess))),
+              textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: colorSuccess))),
           child: child!,
         );
       },
@@ -169,408 +158,323 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                             child: Expanded(
                               child: SingleChildScrollView(
                                 controller: _scrollController,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                  TextField(
+                                    maxLines: 1,
+                                    maxLength: 20,
+                                    controller: _head,
+                                    cursorColor: Colors.black,
+                                    decoration: const InputDecoration(
+                                        hintText: "글 제목 (최대 20자)",
+                                        counterText: "",
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(color: Colors.black12),
+                                        ),
+                                        focusedBorder:
+                                            UnderlineInputBorder(borderSide: BorderSide(color: Colors.black54))),
+                                  ),
+                                  TextField(
+                                    maxLines: 5,
+                                    maxLength: 500,
+                                    maxLengthEnforcement: MaxLengthEnforcement.none,
+                                    controller: _body,
+                                    cursorColor: Colors.black,
+                                    decoration: const InputDecoration(
+                                        hintText: "내용 작성 (최대 500자)",
+                                        counterText: "",
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(color: Colors.black12),
+                                        ),
+                                        focusedBorder:
+                                            UnderlineInputBorder(borderSide: BorderSide(color: Colors.black54))),
+                                  ),
+                                  SizedBox(height: 28.0),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      TextField(
-                                        maxLines: 1,
-                                        maxLength: 20,
-                                        controller: _head,
-                                        cursorColor: Colors.black,
-                                        decoration: const InputDecoration(
-                                            hintText: "글 제목 (최대 20자)",
-                                            counterText: "",
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.black12),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black54))),
-                                      ),
-                                      TextField(
-                                        maxLines: 5,
-                                        maxLength: 500,
-                                        maxLengthEnforcement:
-                                            MaxLengthEnforcement.none,
-                                        controller: _body,
-                                        cursorColor: Colors.black,
-                                        decoration: const InputDecoration(
-                                            hintText: "내용 작성 (최대 500자)",
-                                            counterText: "",
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.black12),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.black54))),
-                                      ),
-                                      SizedBox(height: 28.0),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                      Text('모임 날짜 및 시간', style: TextStyle(fontSize: 16, color: colorGrey)),
+                                      Row(
                                         children: [
-                                          Text('모임 날짜 및 시간',
-                                              style: TextStyle(
+                                          ElevatedButton(
+                                            onPressed: () => _selectDate(context),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: colorSuccess,
+                                            ),
+                                            child: Text('${dateFormatter.format(_selectedDate)}',
+                                                style: TextStyle(
                                                   fontSize: 16,
-                                                  color: colorGrey)),
-                                          Row(
-                                            children: [
-                                              ElevatedButton(
-                                                onPressed: () =>
-                                                    _selectDate(context),
-                                                style: ElevatedButton.styleFrom(
-                                                  primary: colorSuccess,
-                                                ),
-                                                child: Text(
-                                                    '${dateFormatter.format(_selectedDate)}',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    )),
-                                              ),
-                                              SizedBox(
-                                                width: 15,
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: () =>
-                                                    _selectTime(context),
-                                                style: ElevatedButton.styleFrom(
-                                                  primary: colorSuccess,
-                                                ),
-                                                child: Text(
-                                                    '${_selectedTime.format(context)}',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    )),
-                                              ),
-                                            ],
+                                                )),
+                                          ),
+                                          SizedBox(
+                                            width: 15,
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () => _selectTime(context),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: colorSuccess,
+                                            ),
+                                            child: Text('${_selectedTime.format(context)}',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                )),
                                           ),
                                         ],
                                       ),
-                                      SizedBox(
-                                        height: 35,
-                                      ),
-                                      GestureDetector(
-                                          behavior: HitTestBehavior.translucent,
-                                          onTap: () {
-                                            setState(() {
-                                              _tappedCategory =
-                                                  !_tappedCategory;
-                                            });
-                                          },
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                  ),
+                                  GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () {
+                                        setState(() {
+                                          _tappedCategory = !_tappedCategory;
+                                        });
+                                      },
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
+                                              Text(
+                                                '카테고리',
+                                                style: TextStyle(color: colorGrey, fontSize: 16),
+                                              ),
                                               Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    '카테고리',
-                                                    style: TextStyle(
-                                                        color: colorGrey,
-                                                        fontSize: 16),
+                                                    _selectedCategory,
+                                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                                   ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        _selectedCategory,
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                      AnimatedRotation(
-                                                        turns: _tappedCategory
-                                                            ? 1 / 4
-                                                            : 0,
-                                                        duration: Duration(
-                                                            milliseconds: 500),
-                                                        curve:
-                                                            Curves.decelerate,
-                                                        child: Icon(
-                                                          Icons
-                                                              .arrow_forward_ios,
-                                                          size: 20,
-                                                        ),
-                                                      )
-                                                    ],
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  AnimatedRotation(
+                                                    turns: _tappedCategory ? 1 / 4 : 0,
+                                                    duration: Duration(milliseconds: 500),
+                                                    curve: Curves.decelerate,
+                                                    child: Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 20,
+                                                    ),
                                                   )
                                                 ],
-                                              ),
+                                              )
                                             ],
-                                          )),
-                                      AnimatedCrossFade(
-                                        firstChild: SizedBox(
-                                          width: double.infinity,
-                                        ),
-                                        secondChild: SizedBox(
-                                          width: double.infinity,
-                                          child: Padding(
-                                            padding: EdgeInsets.fromLTRB(
-                                                0, 10, 0, 0),
-                                            child: Wrap(
-                                                direction: Axis.horizontal,
-                                                // 나열 방향
-                                                alignment: WrapAlignment.start,
-                                                // 정렬 방식
-                                                spacing: 7,
-                                                // 좌우 간격
-                                                runSpacing: 7,
-                                                // 상하 간격
-                                                children: _categories
-                                                    .map((e) => GestureDetector(
-                                                          behavior:
-                                                              HitTestBehavior
-                                                                  .translucent,
-                                                          onTap: () {
-                                                            setState(() {
-                                                              _selectedCategory =
-                                                                  e;
-                                                              _tappedCategory =
-                                                                  false;
-                                                            });
-                                                          },
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    right: 10,
-                                                                    left: 10,
-                                                                    top: 7,
-                                                                    bottom: 7),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: _selectedCategory ==
-                                                                      e
-                                                                  ? colorGrey
-                                                                  : Color(
-                                                                      0xFFEAEAEA),
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
-                                                                          12)),
-                                                            ),
-                                                            child: Text(
-                                                              '$e',
-                                                              style: TextStyle(
-                                                                  color: _selectedCategory ==
-                                                                          e
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black,
-                                                                  fontSize: 14),
-                                                            ),
-                                                          ),
-                                                        ))
-                                                    .toList()),
                                           ),
-                                        ),
-                                        crossFadeState: _tappedCategory
-                                            ? CrossFadeState.showSecond
-                                            : CrossFadeState.showFirst,
-                                        duration: Duration(milliseconds: 500),
-                                        sizeCurve: Curves.decelerate,
+                                        ],
+                                      )),
+                                  AnimatedCrossFade(
+                                    firstChild: SizedBox(
+                                      width: double.infinity,
+                                    ),
+                                    secondChild: SizedBox(
+                                      width: double.infinity,
+                                      child: Padding(
+                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                        child: Wrap(
+                                            direction: Axis.horizontal,
+                                            // 나열 방향
+                                            alignment: WrapAlignment.start,
+                                            // 정렬 방식
+                                            spacing: 7,
+                                            // 좌우 간격
+                                            runSpacing: 7,
+                                            // 상하 간격
+                                            children: _categories
+                                                .map((e) => GestureDetector(
+                                                      behavior: HitTestBehavior.translucent,
+                                                      onTap: () {
+                                                        setState(() {
+                                                          _selectedCategory = e;
+                                                          _tappedCategory = false;
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        padding: const EdgeInsets.only(
+                                                            right: 10, left: 10, top: 7, bottom: 7),
+                                                        decoration: BoxDecoration(
+                                                          color: _selectedCategory == e ? colorGrey : Color(0xFFEAEAEA),
+                                                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                        ),
+                                                        child: Text(
+                                                          '$e',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  _selectedCategory == e ? Colors.white : Colors.black,
+                                                              fontSize: 14),
+                                                        ),
+                                                      ),
+                                                    ))
+                                                .toList()),
                                       ),
-                                      SizedBox(height: 35),
-                                      GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onTap: () async {
-                                          var modify = await Navigator.of(
-                                                  context)
-                                              .push(MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      BoardSelectPositionPage()));
-                                          setState(() {
-                                            _llName = modify ?? _llName;
+                                    ),
+                                    crossFadeState:
+                                        _tappedCategory ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                    duration: Duration(milliseconds: 500),
+                                    sizeCurve: Curves.decelerate,
+                                  ),
+                                  SizedBox(height: 35),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () async {
+                                      var modify = await Navigator.of(context)
+                                          .push(MaterialPageRoute(builder: (context) => BoardSelectPositionPage()));
+                                      setState(() {
+                                        _llName = modify ?? _llName;
+                                      });
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('모임 장소 ', style: TextStyle(fontSize: 16, color: colorGrey)),
+                                        Row(
+                                          children: [
+                                            Text(_llName == null ? '미지정' : _llName!.AddressName,
+                                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                            SizedBox(width: 10),
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 20,
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 35),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      showCupertinoModalPopup<void>(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return _buildBottomPicker(_buildPersonNumberPicker());
                                           });
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('인원 수', style: TextStyle(fontSize: 16, color: colorGrey)),
+                                        Row(
                                           children: [
-                                            Text('모임 장소 ',
+                                            Text('${_selectedPerson}',
                                                 style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: colorGrey)),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                    _llName == null
-                                                        ? '미지정'
-                                                        : _llName!.AddressName,
-                                                    style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                SizedBox(width: 10),
-                                                Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 20,
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 35),
-                                      GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onTap: () {
-                                          showCupertinoModalPopup<void>(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return _buildBottomPicker(
-                                                    _buildPersonNumberPicker());
-                                              });
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text('인원 수',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: colorGrey)),
-                                            Row(
-                                              children: [
-                                                Text('${_selectedPerson}',
-                                                    style: TextStyle(
-                                                        fontSize: 16,
-                                                        color: Colors.black,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 20,
-                                                )
-                                              ],
-                                            )
-                                            // DropdownButton(
-                                            //   value: _selectedPerson,
-                                            //   items: List.generate(
-                                            //     9,
-                                            //         (index) => DropdownMenuItem(
-                                            //       value: index + 2,
-                                            //       child: Text("${index + 2}"),
-                                            //     ),
-                                            //   ),
-                                            //   onChanged: (value) {
-                                            //     setState(() {
-                                            //       _selectedPerson = value;
-                                            //     });
-                                            //   },
-                                            // ), // DropdownButton
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(height: 35),
-                                      GestureDetector(
-                                        onTap: () {
-                                          showCupertinoModalPopup<void>(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return _buildBottomDoublePicker(
-                                                    _buildRangeOfAgePicker(
-                                                        true),
-                                                    _buildRangeOfAgePicker(
-                                                        false));
-                                              });
-                                        },
-                                        behavior: HitTestBehavior.translucent,
-                                        child: _buildAgeSelect(),
-                                      ),
-                                      SizedBox(height: 25),
-                                      // Row(
-                                      //   children: [
-                                      //     DropdownButton(
-                                      //       value: _minAge,
-                                      //       onChanged: (value) {
-                                      //         setState(() {
-                                      //           _minAge = value as int;
-                                      //         });
-                                      //       },
-                                      //       items: _buildDropdownItems(18, 99),
-                                      //     ),
-                                      //     Text('  ~  ',
-                                      //         style: TextStyle(
-                                      //             fontSize: 16, color: colorGrey)),
-                                      //     DropdownButton(
-                                      //       value: _maxAge,
-                                      //       onChanged: (value) {
-                                      //         setState(() {
-                                      //           _maxAge = value as int;
-                                      //         });
-                                      //       },
-                                      //       items: _buildDropdownItems(_minAge, 99),
-                                      //     ),
-                                      //     Text('세',
-                                      //         style: TextStyle(
-                                      //             fontSize: 16, color: colorGrey)),
-                                      //   ],
-                                      // )
-                                      AnimatedPadding(
-                                        padding: _selectedGender == 0
-                                            ? EdgeInsets.only(
-                                                top: 15, bottom: 0)
-                                            : EdgeInsets.only(
-                                                top: 15, bottom: 10),
-                                        duration: Duration(milliseconds: 200),
-                                        child: Row(
-                                          children: [
-                                            const Text(
-                                              "성별 ",
-                                              style: TextStyle(
-                                                  color: colorGrey,
-                                                  fontSize: 16),
+                                                    fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
+                                            SizedBox(
+                                              width: 10,
                                             ),
-                                            Expanded(
-                                                child: CustomRadioButton(
-                                              buttonLables: const [
-                                                "무관",
-                                                "남자만",
-                                                "여자만",
-                                              ],
-                                              buttonValues: const [
-                                                "any",
-                                                "man",
-                                                "woman",
-                                              ],
-                                              radioButtonValue: (value) {
-                                                selectGender(value);
-                                              },
-                                              unSelectedColor: Colors.white,
-                                              selectedColor: colorSuccess,
-                                              elevation: 1,
-                                              selectedBorderColor: colorGrey,
-                                              unSelectedBorderColor: colorGrey,
-                                              defaultSelected: "any",
-                                            ))
+                                            Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 20,
+                                            )
                                           ],
+                                        )
+                                        // DropdownButton(
+                                        //   value: _selectedPerson,
+                                        //   items: List.generate(
+                                        //     9,
+                                        //         (index) => DropdownMenuItem(
+                                        //       value: index + 2,
+                                        //       child: Text("${index + 2}"),
+                                        //     ),
+                                        //   ),
+                                        //   onChanged: (value) {
+                                        //     setState(() {
+                                        //       _selectedPerson = value;
+                                        //     });
+                                        //   },
+                                        // ), // DropdownButton
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 35),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showCupertinoModalPopup<void>(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return _buildBottomDoublePicker(
+                                                _buildRangeOfAgePicker(true), _buildRangeOfAgePicker(false));
+                                          });
+                                    },
+                                    behavior: HitTestBehavior.translucent,
+                                    child: _buildAgeSelect(),
+                                  ),
+                                  SizedBox(height: 25),
+                                  // Row(
+                                  //   children: [
+                                  //     DropdownButton(
+                                  //       value: _minAge,
+                                  //       onChanged: (value) {
+                                  //         setState(() {
+                                  //           _minAge = value as int;
+                                  //         });
+                                  //       },
+                                  //       items: _buildDropdownItems(18, 99),
+                                  //     ),
+                                  //     Text('  ~  ',
+                                  //         style: TextStyle(
+                                  //             fontSize: 16, color: colorGrey)),
+                                  //     DropdownButton(
+                                  //       value: _maxAge,
+                                  //       onChanged: (value) {
+                                  //         setState(() {
+                                  //           _maxAge = value as int;
+                                  //         });
+                                  //       },
+                                  //       items: _buildDropdownItems(_minAge, 99),
+                                  //     ),
+                                  //     Text('세',
+                                  //         style: TextStyle(
+                                  //             fontSize: 16, color: colorGrey)),
+                                  //   ],
+                                  // )
+                                  AnimatedPadding(
+                                    padding: _selectedGender == 0
+                                        ? EdgeInsets.only(top: 15, bottom: 0)
+                                        : EdgeInsets.only(top: 15, bottom: 10),
+                                    duration: Duration(milliseconds: 200),
+                                    child: Row(
+                                      children: [
+                                        const Text(
+                                          "성별 ",
+                                          style: TextStyle(color: colorGrey, fontSize: 16),
                                         ),
-                                      ),
-                                      (_selectedGender! != 0
-                                          ? Center(
-                                              child: Text(
-                                                  "해당 성별(${_selectedGender! == 1 ? "남성" : "여성"})에게만 게시글이 나타나게 됩니다!",
-                                                  style: TextStyle(
-                                                      color:
-                                                          Color(0xAAAA0000))))
-                                          : const Text('')),
-                                      SizedBox(height: 55),
-                                    ]),
+                                        Expanded(
+                                            child: CustomRadioButton(
+                                          buttonLables: const [
+                                            "무관",
+                                            "남자만",
+                                            "여자만",
+                                          ],
+                                          buttonValues: const [
+                                            "any",
+                                            "man",
+                                            "woman",
+                                          ],
+                                          radioButtonValue: (value) {
+                                            selectGender(value);
+                                          },
+                                          unSelectedColor: Colors.white,
+                                          selectedColor: colorSuccess,
+                                          elevation: 1,
+                                          selectedBorderColor: colorGrey,
+                                          unSelectedBorderColor: colorGrey,
+                                          defaultSelected: "any",
+                                        ))
+                                      ],
+                                    ),
+                                  ),
+                                  (_selectedGender! != 0
+                                      ? Center(
+                                          child: Text("해당 성별(${_selectedGender! == 1 ? "남성" : "여성"})에게만 게시글이 나타나게 됩니다!",
+                                              style: TextStyle(color: Color(0xAAAA0000))))
+                                      : const Text('')),
+                                  SizedBox(height: 55),
+                                ]),
                               ),
                             )),
                       ],
@@ -600,19 +504,10 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                       _tryUploadPost().then((value) {
                                         success = value;
                                         if (success) {
-                                          postManager
-                                              .reloadPages("")
-                                              .then((value) {
-                                            setState(
-                                                () => _isUploading = false);
-                                            showAlert(
-                                                success
-                                                    ? "글 작성 완료!"
-                                                    : "글 작성에 실패했습니다!",
-                                                context,
-                                                success
-                                                    ? colorSuccess
-                                                    : colorError);
+                                          postManager.reloadPages("").then((value) {
+                                            setState(() => _isUploading = false);
+                                            showAlert(success ? "글 작성 완료!" : "글 작성에 실패했습니다!", context,
+                                                success ? colorSuccess : colorError);
                                             Navigator.pop(context);
                                           });
                                         }
@@ -620,28 +515,21 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                     },
                                     child: SizedBox(
                                       height: 50,
-                                      width: MediaQuery.of(context).size.width -
-                                          40,
+                                      width: MediaQuery.of(context).size.width - 40,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(4),
                                             color: colorSuccess,
                                             boxShadow: [
-                                              BoxShadow(
-                                                  color: Colors.grey,
-                                                  offset: Offset(1, 1),
-                                                  blurRadius: 4.5)
+                                              BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)
                                             ]),
                                         child: Center(
                                             child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
                                               "글쓰기 ",
-                                              style: TextStyle(
-                                                  color: Colors.white),
+                                              style: TextStyle(color: Colors.white),
                                             ),
                                             Icon(
                                               Icons.edit,
@@ -739,14 +627,10 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         setState(() {
           if (isLeft) {
             _minAgeIdx = selectedItem;
-            _minAge = (_minAgeItems![selectedItem] == "상관 없음"
-                ? -1
-                : int.parse(_minAgeItems![selectedItem]));
+            _minAge = (_minAgeItems![selectedItem] == "상관 없음" ? -1 : int.parse(_minAgeItems![selectedItem]));
           } else {
             _maxAgeIdx = selectedItem;
-            _maxAge = (_maxAgeItems![selectedItem] == "상관 없음"
-                ? -1
-                : int.parse(_maxAgeItems![selectedItem]));
+            _maxAge = (_maxAgeItems![selectedItem] == "상관 없음" ? -1 : int.parse(_maxAgeItems![selectedItem]));
           }
         });
       },
@@ -903,8 +787,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
       msg = "모임 인원을 선택해주세요!";
     } else if (_minAge != -1 && _maxAge != -1 && _maxAge - _minAge < 0) {
       msg = "연령대 범위가 잘못되었습니다!";
-    } else if (selectTime - nowTime < 30 &&
-        _selectedDate.day - DateTime.now().day == 0) {
+    } else if (selectTime - nowTime < 30 && _selectedDate.day - DateTime.now().day == 0) {
       msg = "모임 시간은 최소 30분 이후입니다!";
     }
     return msg;

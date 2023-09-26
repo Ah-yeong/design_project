@@ -20,12 +20,10 @@ class ChatMessage extends StatefulWidget {
   final String? recvUser;
   final List<String>? members;
 
-  const ChatMessage({Key? key, this.postId, this.recvUser, this.members})
-      : super(key: key);
+  const ChatMessage({Key? key, this.postId, this.recvUser, this.members}) : super(key: key);
 
   @override
-  _ChatMessageState createState() =>
-      _ChatMessageState(postId, recvUser, members);
+  _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members);
 }
 
 class _ChatMessageState extends State<ChatMessage> {
@@ -74,9 +72,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
     // 보내는 유저 이름에 대하여 채팅 Collection, Document 이름 설정
     sendUserId = FirebaseAuth.instance.currentUser!.uid;
-    chatDocName = isGroupChat
-        ? postId.toString()
-        : getNameChatRoom(sendUserId, recvUserId!);
+    chatDocName = isGroupChat ? postId.toString() : getNameChatRoom(sendUserId, recvUserId!);
     chatColName = isGroupChat ? "PostGroupChat" : "Chat";
     return;
   }
@@ -90,14 +86,8 @@ class _ChatMessageState extends State<ChatMessage> {
       if (isGroupChat) {
         addChatDataList(true, postId: postId, members: members);
       } else {
-        addChatDataList(
-            uid: FirebaseAuth.instance.currentUser!.uid,
-            false,
-            recvUserId: recvUserId!);
-        addChatDataList(
-            uid: recvUserId!,
-            false,
-            recvUserId: FirebaseAuth.instance.currentUser!.uid);
+        addChatDataList(uid: FirebaseAuth.instance.currentUser!.uid, false, recvUserId: recvUserId!);
+        addChatDataList(uid: recvUserId!, false, recvUserId: FirebaseAuth.instance.currentUser!.uid);
       }
     }
 
@@ -105,9 +95,7 @@ class _ChatMessageState extends State<ChatMessage> {
     final timestamp = Timestamp.now(); // 전송 시간
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentReference ref = await FirebaseFirestore.instance
-            .collection(chatColName)
-            .doc(chatDocName);
+        DocumentReference ref = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName);
         var documentSnapshots = await transaction.get(ref);
         if (!documentSnapshots.exists) {
           // document가 존재하지 않으면 members 초기화 후 삽입
@@ -116,8 +104,7 @@ class _ChatMessageState extends State<ChatMessage> {
           });
         }
         CollectionReference colRef = ref.collection("messages");
-        DocumentSnapshot snapshot = await transaction
-            .get(colRef.doc(timestamp.millisecondsSinceEpoch.toString()));
+        DocumentSnapshot snapshot = await transaction.get(colRef.doc(timestamp.millisecondsSinceEpoch.toString()));
         transaction.set(snapshot.reference, {
           "sender": sendUserId,
           "readBy": [sendUserId],
@@ -143,22 +130,18 @@ class _ChatMessageState extends State<ChatMessage> {
     return;
   }
 
-  Future<void> _removeReadChat(List<ChatDataModel> removeList,
-      List<ChatDataModel> readList, List<ChatDataModel> saveList) async {
+  Future<void> _removeReadChat(
+      List<ChatDataModel> removeList, List<ChatDataModel> readList, List<ChatDataModel> saveList) async {
     print("removeReadChat 호출 ");
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        CollectionReference _collection = FirebaseFirestore.instance
-            .collection(chatColName)
-            .doc(chatDocName)
-            .collection("messages");
+        CollectionReference _collection =
+            FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).collection("messages");
 
         await _collection.get().then((QuerySnapshot qs) async {
           List<DocumentSnapshot> chatDocList = [];
           for (QueryDocumentSnapshot queryDocumentSnapshot in qs.docs)
-            await transaction
-                .get(queryDocumentSnapshot.reference)
-                .then((value) => {chatDocList.add(value)});
+            await transaction.get(queryDocumentSnapshot.reference).then((value) => {chatDocList.add(value)});
           for (int i = 0; i < chatDocList.length; i++) {
             bool isRemovedChat = false;
             for (int j = 0; j < removeList.length; j++) {
@@ -176,8 +159,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   readList[j].ts == chatDocList[i].get("timestamp")) {
                 List<dynamic> readBy = chatDocList[i].get("readBy");
                 readBy.add(sendUserId);
-                transaction
-                    .update(chatDocList[i].reference, {"readBy": readBy});
+                transaction.update(chatDocList[i].reference, {"readBy": readBy});
                 break;
               }
             }
@@ -186,8 +168,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   saveList[j].ts == chatDocList[i].get("timestamp")) {
                 List<dynamic> savedBy = chatDocList[i].get("savedBy");
                 savedBy.add(sendUserId);
-                transaction
-                    .update(chatDocList[i].reference, {"savedBy": savedBy});
+                transaction.update(chatDocList[i].reference, {"savedBy": savedBy});
                 break;
               }
             }
@@ -250,8 +231,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   List<ChatDataModel> localBubbleStorage = [];
                   if (calculateChecker == false) {
                     calculateChecker = true;
-                    List<ChatDataModel> _removeList =
-                        List.empty(growable: true);
+                    List<ChatDataModel> _removeList = List.empty(growable: true);
                     List<ChatDataModel> _readList = List.empty(growable: true);
                     List<ChatDataModel> _saveList = List.empty(growable: true);
                     for (int i = 0; i < chatDocs.length; i++) {
@@ -263,18 +243,15 @@ class _ChatMessageState extends State<ChatMessage> {
                       String text = chat.get("message");
                       String nick = chat.get("nickname");
 
-                      ChatDataModel chatModel = ChatDataModel(
-                          text: text, ts: timestamp, nickName: nick);
+                      ChatDataModel chatModel = ChatDataModel(text: text, ts: timestamp, nickName: nick);
                       // readBy에 내가 포함되어있지 않을 경우 (= SavedBy는 0개임)
                       bool isLocalSave = false;
                       bool addReadBy = false;
                       if (!readBy.contains(user!.uid)) {
-                        final bool isReadedAll =
-                            readBy.length + 1 >= membersCount;
+                        final bool isReadedAll = readBy.length + 1 >= membersCount;
                         if (isReadedAll) {
                           // 다 읽었음 = 로컬에 저장
-                          final bool isSavedAll =
-                              savedBy.length + 1 >= membersCount;
+                          final bool isSavedAll = savedBy.length + 1 >= membersCount;
                           if (isSavedAll) {
                             _removeList.add(chatModel);
                           } else {
@@ -288,8 +265,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         _readList.add(chatModel);
                       } else if (!savedBy.contains(user.uid)) {
                         if (readBy.length == membersCount) {
-                          final bool isSavedAll =
-                              savedBy.length + 1 >= membersCount;
+                          final bool isSavedAll = savedBy.length + 1 >= membersCount;
                           if (isSavedAll) {
                             _removeList.add(chatModel);
                           }
@@ -306,26 +282,20 @@ class _ChatMessageState extends State<ChatMessage> {
                             text: text,
                             ts: timestamp,
                             nickName: nick,
-                            unreadCount: membersCount -
-                                readBy.length +
-                                (addReadBy ? 1 : 0)));
+                            unreadCount: membersCount - readBy.length + (addReadBy ? 1 : 0)));
                       }
                     }
-                      if (_removeList.length +
-                              _readList.length +
-                              _saveList.length >
-                          0) {
-                        _removeReadChat(_removeList, _readList, _saveList)
-                            .then((value) {
-                          //-> 데이터베이스에서 삭제 및 읽음 표시
-                          _removeList.clear();
-                          _readList.clear();
-                          _saveList.clear();
-                          calculateChecker = false;
-                        });
-                      } else {
+                    if (_removeList.length + _readList.length + _saveList.length > 0) {
+                      _removeReadChat(_removeList, _readList, _saveList).then((value) {
+                        //-> 데이터베이스에서 삭제 및 읽음 표시
+                        _removeList.clear();
+                        _readList.clear();
+                        _saveList.clear();
                         calculateChecker = false;
-                      }
+                      });
+                    } else {
+                      calculateChecker = false;
+                    }
                   }
 
                   // 로컬에서 채팅 불러오기
@@ -343,8 +313,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         currentDate.month != month ||
                         currentDate.day != day) {
                       currentDate = DateTime(year, month, day);
-                      final formattedDate =
-                          DateFormat('yyyy-MM-dd E').format(currentDate);
+                      final formattedDate = DateFormat('yyyy-MM-dd E').format(currentDate);
                       // 날짜구부 표시 위젯
                       bubbles.add(ChatBubble(
                         "",
@@ -356,32 +325,25 @@ class _ChatMessageState extends State<ChatMessage> {
                     }
                     // 채팅 구분 표시 위젯
                     final userName = chat.nickName;
-                    localBubbleStorage.add(ChatDataModel(
-                        text: chat.text,
-                        ts: timestamp,
-                        nickName: userName,
-                        unreadCount: 0));
+                    localBubbleStorage
+                        .add(ChatDataModel(text: chat.text, ts: timestamp, nickName: userName, unreadCount: 0));
                   }
 
                   localBubbleStorage.addAll(tempBubbleStorage);
                   for (int i = 0; i < localBubbleStorage.length; i++) {
                     int unreadCount = localBubbleStorage[i].unreadCount!;
-                    bool isMe =
-                        localBubbleStorage[i].nickName == myProfileEntity!.name;
+                    bool isMe = localBubbleStorage[i].nickName == myProfileEntity!.name;
                     String text = localBubbleStorage[i].text;
                     String userName = localBubbleStorage[i].nickName;
-                    String formattedTime = DateFormat.jm()
-                        .format(localBubbleStorage[i].ts.toDate());
+                    String formattedTime = DateFormat.jm().format(localBubbleStorage[i].ts.toDate());
 
                     bool isFirst = i - 1 >= 0
-                        ? localBubbleStorage[i - 1].nickName !=
-                        localBubbleStorage[i].nickName
+                        ? localBubbleStorage[i - 1].nickName != localBubbleStorage[i].nickName
                             ? true
                             : false
                         : true;
                     bool isLast = i + 1 < localBubbleStorage.length
-                        ? localBubbleStorage[i + 1].nickName !=
-                        localBubbleStorage[i].nickName
+                        ? localBubbleStorage[i + 1].nickName != localBubbleStorage[i].nickName
                             ? true
                             : false
                         : true;
@@ -394,24 +356,17 @@ class _ChatMessageState extends State<ChatMessage> {
                         unreadUserCount: unreadCount,
                       ));
                     } else if (isFirst) {
-                      bubbles.add(ChatBubble(
-                          text, isMe, userName, formattedTime,
-                          invisibleTime: localBubbleStorage[i + 1].ts !=
-                              localBubbleStorage[i].ts,
+                      bubbles.add(ChatBubble(text, isMe, userName, formattedTime,
+                          invisibleTime: localBubbleStorage[i + 1].ts != localBubbleStorage[i].ts,
                           unreadUserCount: unreadCount));
                     } else if (isLast) {
-                      bubbles.add(ChatBubble(
-                          text, isMe, userName, formattedTime,
+                      bubbles.add(ChatBubble(text, isMe, userName, formattedTime,
                           longBubble: true, unreadUserCount: unreadCount));
                     } else {
-                      final bool isEqualsTime = DateFormat.jm()
-                              .format(localBubbleStorage[i + 1].ts.toDate()) ==
-                          formattedTime;
-                      bubbles.add(ChatBubble(
-                          text, isMe, userName, formattedTime,
-                          longBubble: true,
-                          invisibleTime: isEqualsTime,
-                          unreadUserCount: unreadCount));
+                      final bool isEqualsTime =
+                          DateFormat.jm().format(localBubbleStorage[i + 1].ts.toDate()) == formattedTime;
+                      bubbles.add(ChatBubble(text, isMe, userName, formattedTime,
+                          longBubble: true, invisibleTime: isEqualsTime, unreadUserCount: unreadCount));
                     }
                   }
                   return Expanded(
@@ -451,8 +406,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         suffixIcon: IconButton(
                             onPressed: () {
-                              if (_chatController.text.length != 0)
-                                _sendMessage();
+                              if (_chatController.text.length != 0) _sendMessage();
                             },
                             icon: Icon(Icons.arrow_upward_outlined),
                             color: Colors.greenAccent),
@@ -460,8 +414,7 @@ class _ChatMessageState extends State<ChatMessage> {
                           borderRadius: BorderRadius.circular(13.0),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: colorGrey, width: 1.5),
+                          borderSide: const BorderSide(color: colorGrey, width: 1.5),
                           borderRadius: BorderRadius.circular(13.0),
                         ),
                       ),

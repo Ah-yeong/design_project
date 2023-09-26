@@ -15,39 +15,39 @@ class BoardGroupListPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
 
-class _BoardGroupListPage extends State<BoardGroupListPage>
-with AutomaticKeepAliveClientMixin{
+class _BoardGroupListPage extends State<BoardGroupListPage> with AutomaticKeepAliveClientMixin {
   var count = 10;
 
   ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    return postManager.isLoading ? buildLoadingProgress()
-      : CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        /*SliverToBoxAdapter(
+    return postManager.isLoading
+        ? buildLoadingProgress()
+        : CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              /*SliverToBoxAdapter(
           child: Container(
             height: 400,
             color: Colors.grey,
           ),
         ),*/
-        SliverList(
-            delegate: SliverChildBuilderDelegate(
-                (context, index) => GestureDetector(
-                  onTap: () {
-                    naviToPost(index);
-                  },
-                  child: Card(
-                    elevation: 0.5,
-                      child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
-                ),
-                childCount: postManager.loadedCount)),
-      ],
-    );
+              SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                      (context, index) => GestureDetector(
+                            onTap: () {
+                              naviToPost(index);
+                            },
+                            child: Card(
+                                elevation: 0.5,
+                                child: Padding(
+                                    padding: const EdgeInsets.all(7),
+                                    child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
+                          ),
+                      childCount: postManager.loadedCount)),
+            ],
+          );
   }
 
   @override
@@ -56,9 +56,9 @@ with AutomaticKeepAliveClientMixin{
     postManager.loadPages("").then((value) => setState(() {}));
     _scrollController.addListener(() {
       setState(() {
-        if (_scrollController.offset + 100<
-            _scrollController.position.minScrollExtent &&
-            _scrollController.position.outOfRange && !postManager.isLoading ) {
+        if (_scrollController.offset + 100 < _scrollController.position.minScrollExtent &&
+            _scrollController.position.outOfRange &&
+            !postManager.isLoading) {
           postManager.reloadPages("").then((value) => setState(() {}));
         }
       });
@@ -66,8 +66,11 @@ with AutomaticKeepAliveClientMixin{
   }
 
   naviToPost(int index) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())));
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())));
   }
+
   @override
   bool get wantKeepAlive => true;
 }
@@ -84,8 +87,8 @@ Widget buildFriendRow(EntityPost entity, double distance) {
       Icon(entity.getPostCurrentPerson() == 1
           ? Icons.person
           : entity.getPostCurrentPerson() == 2
-          ? CupertinoIcons.person_2_fill
-          : CupertinoIcons.person_3_fill),
+              ? CupertinoIcons.person_2_fill
+              : CupertinoIcons.person_3_fill),
       const SizedBox(
         width: 25,
         height: 10,
@@ -103,52 +106,70 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                   children: [
                     Text(
                       '${entity.getPostHead()}', // 글 제목
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.start,
                     ),
                     Padding(
                         padding: const EdgeInsets.only(right: 5),
                         child: Text(
                           '${entity.getWriterNick()}', // 글 작성자 닉네임
-                          style: const TextStyle(
-                              fontSize: 10, color: Color(0xFF858585)),
+                          style: const TextStyle(fontSize: 10, color: Color(0xFF858585)),
                         ))
                   ],
                 )),
             const Padding(
               padding: EdgeInsets.only(bottom: 18),
             ),
-            distance != 0.0 ? Row(
-              children: [
-                const Icon(Icons.gps_fixed_sharp, color: colorSuccess, size: 13,),
-                Text(
-                  " ${getDistanceString(entity.distance)}",
-                  style: TextStyle(fontSize: 11, color: colorSuccess, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ) : SizedBox(),
-            SizedBox(height: distance == "" ? 0 : 1,),
+            distance != 0.0
+                ? Row(
+                    children: [
+                      const Icon(
+                        Icons.gps_fixed_sharp,
+                        color: colorSuccess,
+                        size: 13,
+                      ),
+                      Text(
+                        " ${getDistanceString(entity.distance)}",
+                        style: TextStyle(fontSize: 11, color: colorSuccess, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )
+                : SizedBox(),
+            SizedBox(
+              height: distance == "" ? 0 : 1,
+            ),
             Row(
               children: [
-                const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),
+                const Icon(
+                  Icons.location_on_outlined,
+                  color: colorGrey,
+                  size: 13,
+                ),
                 Text(
                   " ${entity.getLLName().AddressName}",
                   style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                 ),
               ],
             ),
-            SizedBox(height: 1,),
+            SizedBox(
+              height: 1,
+            ),
             Row(
               children: [
-                const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
+                const Icon(
+                  Icons.timer_outlined,
+                  color: colorGrey,
+                  size: 13,
+                ),
                 Text(
                   getMeetTimeText(entity),
                   style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                 ),
               ],
             ),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,16 +180,12 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: const Color(0xFFBFBFBF)),
+                        decoration:
+                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
                         child: Center(
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                right: 5, left: 5),
-                            child: Text(entity.getCategory(),
-                                style:
-                                TextStyle(color: Colors.white, fontSize: 10)),
+                            padding: EdgeInsets.only(right: 5, left: 5),
+                            child: Text(entity.getCategory(), style: TextStyle(color: Colors.white, fontSize: 10)),
                           ),
                         ),
                       ),
@@ -179,16 +196,12 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: const Color(0xFFBFBFBF)),
+                        decoration:
+                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
                         child: Center(
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                right: 5, left: 5),
-                            child: Text(getAgeText(entity),
-                                style:
-                                TextStyle(color: Colors.white, fontSize: 10)),
+                            padding: EdgeInsets.only(right: 5, left: 5),
+                            child: Text(getAgeText(entity), style: TextStyle(color: Colors.white, fontSize: 10)),
                           ),
                         ),
                       ),
@@ -199,16 +212,12 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: const Color(0xFFBFBFBF)),
+                        decoration:
+                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
                         child: Center(
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                right: 5, left: 5),
-                            child: Text(getGenderText(entity),
-                                style:
-                                TextStyle(color: Colors.white, fontSize: 10)),
+                            padding: EdgeInsets.only(right: 5, left: 5),
+                            child: Text(getGenderText(entity), style: TextStyle(color: Colors.white, fontSize: 10)),
                           ),
                         ),
                       ),
@@ -228,15 +237,16 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         padding: const EdgeInsets.all(5),
                         child: Center(
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.emoji_people, color: Colors.white, size: 14,),
-                                Text(getMaxPersonText(entity),
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 10)),
-                              ],
-                            )
-                        ),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.emoji_people,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.white, fontSize: 10)),
+                          ],
+                        )),
                       ),
                     ))
               ],
@@ -249,12 +259,12 @@ Widget buildFriendRow(EntityPost entity, double distance) {
 }
 
 String getMaxPersonText(EntityPost post) {
-  if(post.getPostMaxPerson() == -1) return " ${post.getPostCurrentPerson()}";
+  if (post.getPostMaxPerson() == -1) return " ${post.getPostCurrentPerson()}";
   return " ${post.getPostCurrentPerson()}/${post.getPostMaxPerson()}";
 }
 
 String getGenderText(EntityPost post) {
-  if(post.getPostGender() == 0) {
+  if (post.getPostGender() == 0) {
     return "성별 무관";
   } else if (post.getPostGender() == 1) {
     return "남자만";
@@ -280,7 +290,7 @@ String getMeetTimeText(EntityPost post) {
   bool isNegative = timeGap.isNegative;
   timeGap = timeGap.abs();
   String val;
-  if(timeGap.inDays > 365) {
+  if (timeGap.inDays > 365) {
     val = "${timeGap.inDays ~/ 365}년";
   } else if (timeGap.inDays >= 30) {
     val = "${timeGap.inDays ~/ 30}개월";

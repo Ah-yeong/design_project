@@ -14,10 +14,7 @@ class PageAlert extends StatelessWidget {
         elevation: 1,
         title: Text(
           '알림목록',
-          style: TextStyle(
-              fontSize: 18,
-              color: Colors.black
-          ),
+          style: TextStyle(fontSize: 18, color: Colors.black),
         ),
         backgroundColor: Colors.white,
       ),
@@ -32,32 +29,31 @@ class PageAlert extends StatelessWidget {
                 });
               } else if (index == 1) {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        ChatScreen(
-                          recvUserId: "EM4L1plnXrOJDvRkfkX9k1DJRX32",)));
+                    builder: (context) => ChatScreen(
+                          recvUserId: "EM4L1plnXrOJDvRkfkX9k1DJRX32",
+                        )));
               } else if (index == 2) {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        ChatScreen(
-                          recvUserId: "dBfF9GPpQqVvxY3SxNmWpdT1er43",)));
+                    builder: (context) => ChatScreen(
+                          recvUserId: "dBfF9GPpQqVvxY3SxNmWpdT1er43",
+                        )));
               } else if (index == 3) {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        ChatScreen(
-                          recvUserId: "ki654uiWotZTum8GetnSC7HTgIk2",)));
+                    builder: (context) => ChatScreen(
+                          recvUserId: "ki654uiWotZTum8GetnSC7HTgIk2",
+                        )));
               } else if (index == 4) {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        ChatScreen(
+                    builder: (context) => ChatScreen(
                           postId: 1,
                           members: [
                             "EM4L1plnXrOJDvRkfkX9k1DJRX32",
                             "dBfF9GPpQqVvxY3SxNmWpdT1er43",
                             "ki654uiWotZTum8GetnSC7HTgIk2"
-                          ],)));
+                          ],
+                        )));
               } else if (index == 5) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => NameSignUpScreen()));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => NameSignUpScreen()));
               }
             },
             child: Card(
@@ -66,38 +62,46 @@ class PageAlert extends StatelessWidget {
                     title: Text(customAlertText(index)),
                     subtitle: Text(customAlertComment(index)),
                     trailing: Text('10시간 전') // 알림 발생 시각
-                )
-            ),
+                    )),
           );
         },
       ),
     );
   }
-  
+
   String customAlertText(int index) {
     switch (index) {
-      case 0: return "로그아웃";
-      case 1: return "부계정과 대화하기";
-      case 2: return "본계정과 대화하기";
-      case 3: return "세번째 계정과 대화하기";
-      case 4: return "그룹채팅 대화하기 (본,부1,부2)";
-      case 5: return "프로필 재설정";
-
+      case 0:
+        return "로그아웃";
+      case 1:
+        return "부계정과 대화하기";
+      case 2:
+        return "본계정과 대화하기";
+      case 3:
+        return "세번째 계정과 대화하기";
+      case 4:
+        return "그룹채팅 대화하기 (본,부1,부2)";
+      case 5:
+        return "프로필 재설정";
     }
     return "알림 제목 $index";
   }
-  
+
   String customAlertComment(int index) {
     switch (index) {
-      case 0: return "제곧내";
-      case 1: return "현재 : ${myUuid}";
-      case 2: return "현재 : ${myUuid}}";
-      case 3: return "현재 : ${myUuid}}";
-      case 4: return "limkg999, jongwon1019, gitlimjw";
-      case 5: return "처음 계정 생성 시 설정 필요";
-
+      case 0:
+        return "제곧내";
+      case 1:
+        return "현재 : ${myUuid}";
+      case 2:
+        return "현재 : ${myUuid}}";
+      case 3:
+        return "현재 : ${myUuid}}";
+      case 4:
+        return "limkg999, jongwon1019, gitlimjw";
+      case 5:
+        return "처음 계정 생성 시 설정 필요";
     }
     return "알림 내용 $index";
   }
 }
-
