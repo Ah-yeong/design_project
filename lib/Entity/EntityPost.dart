@@ -63,14 +63,17 @@ class EntityPost {
 
   Future<void> acceptToPost(String userId) async {
     try {
-      var postDoc = await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get();
-      var users = postDoc.data()?["user"] as List<dynamic>;
+      DocumentReference reference = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
+      var postDoc = await reference.get();
+      var users = postDoc.get("user") as List<dynamic>;
       var index = users.indexWhere((user) => user["id"] == userId);
 
       if (index != -1) {
         users[index]["status"] = 1;
-        await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
+        reference.update({
           "user": users,
+        }).then((value) async {
+          reference.update({"currentPerson" : FieldValue.increment(1)});
         });
       }
     } catch (e) {
@@ -114,6 +117,21 @@ class EntityPost {
       user = ds.get("user");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
+  }
+
+  int getNewRequest() {
+    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String,dynamic>).toList();
+    return userList.where((element) => element["status"] == 0).length;
+  }
+
+  String getRequestState(String uuid) {
+    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String,dynamic>).toList();
+    userList.retainWhere((element) => element["id"] == uuid);
+    if ( userList.length == 0 ) {
+      return "none";
+    }
+    Map<String, dynamic> userStatus = userList.first;
+    return userStatus["status"] == 0 ? "wait" : userStatus["status"] == 1 ? "accept" : "reject";
   }
 
   makeTestingPost() {
