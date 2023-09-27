@@ -11,6 +11,10 @@ class PostPageManager {
 
   PostPageManager() {}
 
+  int getIndexByPostId(int postId) {
+    return list.indexWhere((element) => element.getPostId() == postId);
+  }
+
   Future<void> continuePage() async {
     isLoading = true;
     _maxCount += 100;
