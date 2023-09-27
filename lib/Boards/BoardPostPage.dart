@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:design_project/Boards/List/BoardPostListPage.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,7 +10,7 @@ import '../Boards/BoardProfilePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BoardPostPage extends StatefulWidget {
-  final int postId;
+  final int? postId;
 
   const BoardPostPage({super.key, required this.postId});
 
@@ -79,9 +77,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   @override
   Widget build(BuildContext context) {
     mediaSize = MediaQuery.of(context).size;
-    return isRequestLoading
-        ? buildContainerLoading()
-        : !isLoaded
+    return !isLoaded
             ? buildLoadingProgress()
             : Scaffold(
                 appBar: AppBar(
@@ -152,8 +148,14 @@ class _BoardPostPage extends State<BoardPostPage> {
                                     builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
                                     backgroundColor: Colors.transparent);
                               } else {
-                                postEntity!.applyToPost(userID);
-                                showAlert("신청이 완료되었습니다!", context, Colors.grey);
+                                postEntity!.applyToPost(userID).then((requestSuccess) {
+                                  if (requestSuccess) {
+                                    showAlert("신청이 완료되었습니다!", context, colorSuccess);
+                                  } else {
+                                    showAlert("이미 신청한 적이 있는 게시글입니다!", context, colorError);
+                                  }
+                                });
+
                               }
                             },
                             child: SizedBox(
@@ -185,6 +187,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                       ),
                     ),
                   ),
+                  isRequestLoading ? buildContainerLoading(30) : SizedBox(),
                 ]),
               );
   }
@@ -198,18 +201,18 @@ class _BoardPostPage extends State<BoardPostPage> {
   }
 
   Future<void> _loadPost({bool? isReload}) async {
-    await postEntity!.loadPost().then((value) {
+    await postEntity!.loadPost().then((value) async {
       profileEntity = EntityProfiles(postEntity!.getWriterId());
-      profileEntity!.loadProfile().then((value) {
+      await profileEntity!.loadProfile().then((value) {
         if (isReload != true) {
           _markers.add(Marker(
               markerId: const MarkerId('1'),
               draggable: true,
-              onTap: () => print("marker tap"),
+              onTap: () {},
               position: postEntity!.getLLName().latLng));
           _checkWriterId(postEntity!.getWriterId());
+          loadPostTime();
         }
-        loadPostTime();
       });
     });
     List<String> profileList = [];
@@ -247,7 +250,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     );
   }
 
-  Widget _showApplyUserList(EntityPost post) {
+  Widget _showApplyUserList(EntityPost post, StateSetter modalStateSetter) {
     bool hasApplicantsWithStatusZero = post.user?.any((userMap) => userMap['status'] == 0) ?? false;
     return hasApplicantsWithStatusZero
         ? FutureBuilder(
@@ -330,7 +333,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                   children: [
                                     ElevatedButton(
                                         onPressed: () {
-                                          _showDialog(userProfile.name, userProfile.profileId, 'accept', postId);
+                                          _showDialog(userProfile.name, userProfile.profileId, 'accept', postId, modalStateSetter);
                                         },
                                         style: ElevatedButton.styleFrom(
                                             elevation: 0, backgroundColor: colorSuccess, minimumSize: Size(0, 25)),
@@ -340,7 +343,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                     ),
                                     ElevatedButton(
                                         onPressed: () {
-                                          _showDialog(userProfile.name, userProfile.profileId, 'reject', postId);
+                                          _showDialog(userProfile.name, userProfile.profileId, 'reject', postId, modalStateSetter);
                                         },
                                         style: ElevatedButton.styleFrom(
                                             elevation: 0, backgroundColor: Colors.grey, minimumSize: Size(0, 25)),
@@ -435,7 +438,7 @@ class _BoardPostPage extends State<BoardPostPage> {
           );
   }
 
-  _showDialog(String name, String profileId, String status, int postId) {
+  _showDialog(String name, String profileId, String status, int postId, StateSetter modalStateSetter) {
     return showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -461,11 +464,12 @@ class _BoardPostPage extends State<BoardPostPage> {
                       if (status == 'reject') {
                         await _rejectRequest(profileId, postId);
                       }
-                      setState(() {
-                        isRequestLoading = true;
+                      await _loadPost(isReload: true).then((value) {
+                        modalStateSetter(() {
+                          isRequestLoading = false;
+                        });
                       });
-                      await _loadPost(isReload: true).then((value) => setState(() => isRequestLoading = false));
-                      //Navigator.of(context).pop();
+                      Navigator.of(context).pop();
                     },
                     child: Text('예'),
                     style: ElevatedButton.styleFrom(
@@ -514,44 +518,48 @@ class _BoardPostPage extends State<BoardPostPage> {
     // post 객체의 user에 해당 id의 status를 2로 변경
   }
 
-  Column buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
-    return Column(
-      children: [
-        Row(
+  StatefulBuilder buildPostMember(EntityProfiles profiles, EntityPost post, BuildContext context) {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter modalState) {
+        return Column(
           children: [
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const SizedBox(
-                height: 30,
-                width: 30,
-                child: Icon(
-                  Icons.close_rounded,
-                  color: Colors.black,
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: Text(
+                    "신청자 현황",
+                    style: TextStyle(color: Colors.black, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(width: 30),
+              ],
             ),
-            Expanded(
+            _showApplyUserList(post, modalState),
+            Divider(thickness: 1),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
               child: Text(
-                "신청자 현황",
+                "참가자 현황",
                 style: TextStyle(color: Colors.black, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(width: 30),
+            _showAcceptUserList(post),
           ],
-        ),
-        _showApplyUserList(post),
-        Divider(thickness: 1),
-        Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Text(
-            "참가자 현황",
-            style: TextStyle(color: Colors.black, fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        _showAcceptUserList(post),
-      ],
+        );
+      }
     );
   }
 }
@@ -562,7 +570,6 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
     onTap: () {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
-      print(profileEntity.profileId);
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

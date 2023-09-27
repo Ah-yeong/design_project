@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -35,16 +37,28 @@ class EntityPost {
 
   EntityPost(int this._postId) {}
 
-  Future<void> applyToPost(String userId) async {
+  Future<bool> applyToPost(String userId) async {
+    bool requestSuccess = true;
+    DocumentReference ref = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     try {
-      await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
-        "user": FieldValue.arrayUnion([
-          {"id": userId, "status": 0}
-        ])
+      await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((DocumentSnapshot ds) async {
+
+        List<Map<String, dynamic>> userList = (ds.get("user") as List).map((e) => e as Map<String, dynamic>).toList();
+        if (userList.where((element) => element["id"] == userId).length != 0) {
+          // 이미 신청을 했던 적이 있는 유저일 경우
+          requestSuccess = false;
+        } else {
+          await ref.update({"user": FieldValue.arrayUnion([{"id" : userId, "status" : 0}])});
+        }
       });
-    } catch (e) {
-      print("신청 실패: $e");
+    } catch (error) {
+      if ( error.toString().contains("field does not exist within the DocumentSnapshotPlatform")) {
+        await ref.update({"user": FieldValue.arrayUnion([{"id" : userId, "status" : 0}])});
+      } else {
+        print("[신청하기 오류] : $error");
+      }
     }
+    return requestSuccess;
   }
 
   Future<void> acceptToPost(String userId) async {

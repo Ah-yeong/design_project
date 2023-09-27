@@ -298,7 +298,7 @@ class _MyHomePage extends State<MyHomePage> {
                     ],
                   ),
                 ),
-                _isLoading ? buildContainerLoading() : SizedBox(),
+                _isLoading ? buildContainerLoading(135) : SizedBox(),
               ],
             ),
           )),

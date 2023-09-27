@@ -196,7 +196,7 @@ class _SignUpPage extends State<SignUpPage> with SingleTickerProviderStateMixin 
                 ),
               ),
             ),
-            _isLoading ? buildContainerLoading() : SizedBox()
+            _isLoading ? buildContainerLoading(135) : SizedBox()
           ],
         ),
       ),
