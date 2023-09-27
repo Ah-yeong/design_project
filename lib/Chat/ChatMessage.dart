@@ -132,7 +132,6 @@ class _ChatMessageState extends State<ChatMessage> {
 
   Future<void> _removeReadChat(
       List<ChatDataModel> removeList, List<ChatDataModel> readList, List<ChatDataModel> saveList) async {
-    print("removeReadChat 호출 ");
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         CollectionReference _collection =
@@ -302,10 +301,25 @@ class _ChatMessageState extends State<ChatMessage> {
                   for (int i = 0; i < _savedChat!.savedChatList.length; i++) {
                     final chat = _savedChat!.savedChatList[i];
                     final timestamp = chat.ts;
+                    // 채팅 구분 표시 위젯
+                    final userName = chat.nickName;
+                    localBubbleStorage
+                        .add(ChatDataModel(text: chat.text, ts: timestamp, nickName: userName, unreadCount: 0));
+                  }
+
+                  localBubbleStorage.addAll(tempBubbleStorage);
+                  for (int i = 0; i < localBubbleStorage.length; i++) {
+                    ChatDataModel chat = localBubbleStorage[i];
+                    int unreadCount = chat.unreadCount!;
+                    bool isMe = chat.nickName == myProfileEntity!.name;
+                    final String text = chat.text;
+                    final String userName = chat.nickName;
+                    final timestamp = chat.ts;
                     final dateTime = timestamp.toDate();
                     final year = dateTime.year;
                     final month = dateTime.month;
                     final day = dateTime.day;
+                    final String formattedTime = DateFormat.jm().format(dateTime);
 
                     // 날짜가 바뀌면 날짜를 표시
                     if (currentDate == null ||
@@ -323,19 +337,6 @@ class _ChatMessageState extends State<ChatMessage> {
                         isDayDivider: true,
                       ));
                     }
-                    // 채팅 구분 표시 위젯
-                    final userName = chat.nickName;
-                    localBubbleStorage
-                        .add(ChatDataModel(text: chat.text, ts: timestamp, nickName: userName, unreadCount: 0));
-                  }
-
-                  localBubbleStorage.addAll(tempBubbleStorage);
-                  for (int i = 0; i < localBubbleStorage.length; i++) {
-                    int unreadCount = localBubbleStorage[i].unreadCount!;
-                    bool isMe = localBubbleStorage[i].nickName == myProfileEntity!.name;
-                    String text = localBubbleStorage[i].text;
-                    String userName = localBubbleStorage[i].nickName;
-                    String formattedTime = DateFormat.jm().format(localBubbleStorage[i].ts.toDate());
 
                     bool isFirst = i - 1 >= 0
                         ? localBubbleStorage[i - 1].nickName != localBubbleStorage[i].nickName

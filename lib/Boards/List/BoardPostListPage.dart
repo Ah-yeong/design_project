@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../../Resources/resources.dart';
 
-class BoardGroupListPage extends StatefulWidget {
-  const BoardGroupListPage({super.key});
+class BoardPostListPage extends StatefulWidget {
+  const BoardPostListPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
 
-class _BoardGroupListPage extends State<BoardGroupListPage> with AutomaticKeepAliveClientMixin {
+class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAliveClientMixin {
   var count = 10;
 
   ScrollController _scrollController = ScrollController();

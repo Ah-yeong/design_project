@@ -80,7 +80,7 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
                   },
                   body: const TabBarView(
                     children: [
-                      BoardGroupListPage(),
+                      BoardPostListPage(),
                       //BoardTaxiListPage(),
                       BoardLocationPage(),
                     ],

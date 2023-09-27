@@ -1,5 +1,7 @@
+import 'package:design_project/Boards/List/BoardMain.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';
 import 'package:flutter/material.dart';
+import '../Chat/ChatScreen.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 
@@ -205,8 +207,8 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                   padding: EdgeInsets.only(bottom: 18),
                                   child: InkWell(
                                       onTap: () {
-                                        //if (profileEntity!.getProfileId() == myProfileEntity.getProfileId()) return;
-                                        //Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
+                                        if (profileEntity!.getProfileId() == myProfileEntity!.getProfileId()) return;
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
                                       },
                                       child: SizedBox(
                                         height: 50,
