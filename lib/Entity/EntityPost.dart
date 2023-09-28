@@ -1,11 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:get/get.dart';
+import 'package:design_project/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import '../Chat/ChatScreen.dart';
 
 class EntityPost {
   int _postId;
@@ -21,6 +18,10 @@ class EntityPost {
   var _time;
   var _llName;
   var _category;
+  var _viewCount;
+  var user;
+
+  DocumentReference? _postDocRef;
 
   double _distance = 0.0;
 
@@ -31,29 +32,41 @@ class EntityPost {
   set llName(value) => _llName = value;
 
   late String _upTime;
-  var viewCount;
-  bool _isLoaded = false;
-  var user;
 
-  EntityPost(int this._postId) {}
+  bool _isLoaded = false;
+
+  EntityPost(int this._postId) {
+    _postDocRef = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
+  }
 
   Future<bool> applyToPost(String userId) async {
     bool requestSuccess = true;
     DocumentReference ref = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     try {
-      await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((DocumentSnapshot ds) async {
-
+      await FirebaseFirestore.instance
+          .collection("Post")
+          .doc(_postId.toString())
+          .get()
+          .then((DocumentSnapshot ds) async {
         List<Map<String, dynamic>> userList = (ds.get("user") as List).map((e) => e as Map<String, dynamic>).toList();
         if (userList.where((element) => element["id"] == userId).length != 0) {
           // 이미 신청을 했던 적이 있는 유저일 경우
           requestSuccess = false;
         } else {
-          await ref.update({"user": FieldValue.arrayUnion([{"id" : userId, "status" : 0}])});
+          await ref.update({
+            "user": FieldValue.arrayUnion([
+              {"id": userId, "status": 0}
+            ])
+          });
         }
       });
     } catch (error) {
-      if ( error.toString().contains("field does not exist within the DocumentSnapshotPlatform")) {
-        await ref.update({"user": FieldValue.arrayUnion([{"id" : userId, "status" : 0}])});
+      if (error.toString().contains("field does not exist within the DocumentSnapshotPlatform")) {
+        await ref.update({
+          "user": FieldValue.arrayUnion([
+            {"id": userId, "status": 0}
+          ])
+        });
       } else {
         print("[신청하기 오류] : $error");
       }
@@ -73,7 +86,7 @@ class EntityPost {
         reference.update({
           "user": users,
         }).then((value) async {
-          reference.update({"currentPerson" : FieldValue.increment(1)});
+          reference.update({"currentPerson": FieldValue.increment(1)});
         });
       }
     } catch (e) {
@@ -83,13 +96,13 @@ class EntityPost {
 
   Future<void> rejectToPost(String userId) async {
     try {
-      var postDoc = await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get();
-      var users = postDoc.data()?["user"] as List<dynamic>;
+      var postDoc = await _postDocRef!.get();
+      var users = postDoc.get("user") as List<dynamic>;
       var index = users.indexWhere((user) => user["id"] == userId);
 
       if (index != -1) {
         users[index]["status"] = 2;
-        await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).update({
+        _postDocRef!.update({
           "user": users,
         });
       }
@@ -113,25 +126,42 @@ class EntityPost {
       _time = ds.get("time");
       _upTime = ds.get("upTime");
       _category = ds.get("category");
-      viewCount = ds.get("viewCount");
+      _viewCount = ds.get("viewCount");
       user = ds.get("user");
       _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
     });
   }
 
   int getNewRequest() {
-    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String,dynamic>).toList();
+    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String, dynamic>).toList();
     return userList.where((element) => element["status"] == 0).length;
   }
 
   String getRequestState(String uuid) {
-    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String,dynamic>).toList();
+    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String, dynamic>).toList();
     userList.retainWhere((element) => element["id"] == uuid);
-    if ( userList.length == 0 ) {
+    if (userList.length == 0) {
       return "none";
     }
     Map<String, dynamic> userStatus = userList.first;
-    return userStatus["status"] == 0 ? "wait" : userStatus["status"] == 1 ? "accept" : "reject";
+    return userStatus["status"] == 0
+        ? "wait"
+        : userStatus["status"] == 1
+            ? "accept"
+            : "reject";
+  }
+
+  addViewCount(String uuid) async {
+    const PREFIX_COOL = "[PCD]_";
+    int? coolDown = LocalStorage!.getInt("${PREFIX_COOL}$_postId");
+    int standardTime = 1000 * 60 * 30; // milliseconds.
+    if (coolDown == null || DateTime.now().millisecondsSinceEpoch - coolDown > standardTime) {
+      _viewCount += 1;
+      _postDocRef!.update({"viewCount": FieldValue.increment(1)});
+      LocalStorage!.setInt("${PREFIX_COOL}$_postId", DateTime.now().millisecondsSinceEpoch);
+    } else {
+      print("[Debug] ${1800 - ((DateTime.now().millisecondsSinceEpoch - coolDown) / 1000)}초 뒤에 조회수 증가 가능.");
+    }
   }
 
   makeTestingPost() {
@@ -148,7 +178,7 @@ class EntityPost {
     _time = "2023-04-22 11:10:05";
     _llName = LLName(LatLng(36.833068, 127.178419), "천안시 동남구 안서동 300");
     _upTime = "2023-04-16 13:27:00";
-    viewCount = "1342";
+    _viewCount = "1342";
     _isLoaded = true;
   }
 
@@ -180,6 +210,8 @@ class EntityPost {
   int getMinAge() => _minAge;
 
   int getMaxAge() => _maxAge;
+
+  int getViewCount() => _viewCount;
 
   bool isLoad() => _isLoaded;
 

@@ -143,6 +143,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                     onTap: () async {
                       if (isSameId) {
                         showModalBottomSheet(
+                          isDismissible: false,
                             context: context,
                             builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
                             backgroundColor: Colors.transparent);
@@ -151,17 +152,19 @@ class _BoardPostPage extends State<BoardPostPage> {
                           await _loadPost(isReload: true).then((value) {
                             setState(() {
                               if (requestSuccess) {
-                                showAlert("신청이 완료되었습니다!", context, colorSuccess);
+                                showAlert("신청이 완료되었어요!", context, colorSuccess);
                               } else {
-                                showAlert("이미 신청한 적이 있는 게시글입니다!", context, colorError);
+                                showAlert("이미 신청한 적이 있는 게시글이에요!", context, colorError);
                               }
                             });
                           });
                         });
                       } else if (postEntity!.getRequestState(myUuid!) == "wait") {
-                        showAlert("이미 신청한 적이 있는 게시글입니다!", context, colorError);
-                      } else if (postEntity!.getRequestState(myUuid!) == "accpet") {
+                        showAlert("아직 참가 요청이 처리되지 않았어요!", context, colorGrey);
+                      } else if (postEntity!.getRequestState(myUuid!) == "accept") {
                         showAlert("참여자를 봅니다.", context, Colors.lightBlueAccent);
+                      } else if (postEntity!.getRequestState(myUuid!) == "reject") {
+                        Navigator.of(context).pop();
                       }
                     },
                     child: SizedBox(
@@ -212,7 +215,10 @@ class _BoardPostPage extends State<BoardPostPage> {
     super.initState();
     postId = widget.postId;
     postEntity = EntityPost(postId);
-    _loadPost().then((value) => setState(() => isRequestLoading = false));
+    _loadPost().then((value) {
+      postEntity!.addViewCount(myUuid!);
+      setState(() => isRequestLoading = false);
+    });
   }
 
   Future<void> _loadPost({bool? isReload}) async {
@@ -232,6 +238,10 @@ class _BoardPostPage extends State<BoardPostPage> {
     requestUsers = getRequestProfiles(profileList);
     acceptUsers = getAcceptProfiles(profileList);
     return;
+  }
+
+  _addViewCount() {
+
   }
 
   loadPostTime() {
@@ -275,7 +285,7 @@ class _BoardPostPage extends State<BoardPostPage> {
       } else if (postEntity!.getRequestState(myUuid!) == "accept") {
         text = "[참여 완료]  참가자 보기";
       } else if (postEntity!.getRequestState(myUuid!) == "reject") {
-        text = "[참여 거절]  참여가 거절되었습니다";
+        text = "[참여 거절]  다른 모임도 찾아보세요!";
       } else {
         text = "오류 발생, 문의 부탁드립니다!";
       }
@@ -414,7 +424,7 @@ class _BoardPostPage extends State<BoardPostPage> {
               Divider(thickness: 1),
               Padding(
                 padding: const EdgeInsets.all(20),
-                child: Text("신청자가 없습니다.", style: TextStyle(color: Colors.grey, fontSize: 14)),
+                child: Text("신청자가 없어요.", style: TextStyle(color: Colors.grey, fontSize: 14)),
               ),
             ],
           );
@@ -508,6 +518,9 @@ class _BoardPostPage extends State<BoardPostPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
+                      if(isRequestLoading) return;
+                      isRequestLoading = true;
+                      Navigator.of(context).pop();
                       if (status == 'accept') {
                         await _acceptRequest(profileId, postId);
                       }
@@ -519,7 +532,6 @@ class _BoardPostPage extends State<BoardPostPage> {
                           isRequestLoading = false;
                         });
                       });
-                      Navigator.of(context).pop();
                     },
                     child: Text('예'),
                     style: ElevatedButton.styleFrom(
@@ -582,6 +594,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                   child: Icon(
                     Icons.close_rounded,
                     color: Colors.black,
+                    size: 25,
                   ),
                 ),
               ),
@@ -744,7 +757,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
       ),
-      Text("조회수 ${post.viewCount}, ${getTimeBefore(post.getUpTime())}",
+      Text("조회수 ${post.getViewCount()}, ${getTimeBefore(post.getUpTime())}",
           style: const TextStyle(fontSize: 12.5, color: Color(0xFF888888))),
       // 조회수 및 게시글 시간
       const Padding(

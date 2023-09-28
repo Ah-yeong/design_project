@@ -15,6 +15,7 @@ import 'Resources/resources.dart';
 import 'package:get/get.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+SharedPreferences? LocalStorage;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +71,8 @@ class _MyHomePage extends State<MyHomePage> {
 
   bool _isManager = false;
 
+  final PREFIX_COOL = "[PCD]";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,21 +95,21 @@ class _MyHomePage extends State<MyHomePage> {
                         duration: Duration(milliseconds: 500),
                         child: Center(
                             child: GestureDetector(
-                          onDoubleTap: () {
-                            setState(() {
-                              _isManager = !_isManager;
-                            });
-                          },
-                          child: Text(
-                            "마음 맞는, 사람끼리",
-                            style: TextStyle(
-                              fontSize: 35,
-                              color: Colors.black87,
-                              fontFamily: "logo",
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )),
+                              onDoubleTap: () {
+                                setState(() {
+                                  _isManager = !_isManager;
+                                });
+                              },
+                              child: Text(
+                                "마음 맞는, 사람끼리",
+                                style: TextStyle(
+                                  fontSize: 35,
+                                  color: Colors.black87,
+                                  fontFamily: "logo",
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )),
                       ),
                       AnimatedOpacity(
                         opacity: _splashScreenShow ? 1 : 0,
@@ -204,7 +207,7 @@ class _MyHomePage extends State<MyHomePage> {
                                             child: Container(
                                               height: 18,
                                               decoration:
-                                                  BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
+                                              BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
                                               child: Text(
                                                 "비밀번호 재설정",
                                                 style: TextStyle(fontSize: 14, color: colorGrey),
@@ -415,21 +418,37 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
-    _loadStorage().then((value) => {
-          setState(() {
-            _saveIdEnabled = _localdb!.getBool("login_option_save_enabled");
-            _savedId = _localdb!.getString("login_option_saved_id");
-            if (_saveIdEnabled != null) {
-              _isRememberId = _saveIdEnabled!;
-              if (_saveIdEnabled == true && _savedId != null) {
-                controllerId!.text = _savedId!;
-              }
-            }
-          })
-        });
+    _loadStorage().then((value)
+    {
+      _handleViewCountCoolDown();
+      SharedPreferences.getInstance().then((value) => LocalStorage = value);
+      setState(() {
+        _saveIdEnabled = _localdb!.getBool("login_option_save_enabled");
+        _savedId = _localdb!.getString("login_option_saved_id");
+        if (_saveIdEnabled != null) {
+          _isRememberId = _saveIdEnabled!;
+          if (_saveIdEnabled == true && _savedId != null) {
+            controllerId!.text = _savedId!;
+          }
+        }
+      });
+    });
 
     Timer(Duration(milliseconds: 2500), () {
       _auth();
     });
+  }
+
+  // 조회수 쿨타임 지난 것들 로컬에서 제거
+  _handleViewCountCoolDown() {
+    for (String key in _localdb!.getKeys()) {
+      if(key.contains(PREFIX_COOL)) {
+        int now = DateTime.now().millisecondsSinceEpoch;
+        int dbTime = _localdb!.getInt(key)!;
+        if(now - dbTime > 1000 * 60 * 30 ) { // 1000 (1초) * 60 (1분) * 30 (30분)
+          _localdb!.remove(key);
+        }
+      }
+    }
   }
 }
