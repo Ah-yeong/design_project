@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const Color colorSuccess = const Color(0xFF6ACA89);
 const Color colorGrey = const Color(0xFF777777);
 const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
 const Color colorLightGrey = const Color(0xFFCCCCCC);
+
 var CategoryList = List.of([
   "술",
   "밥",

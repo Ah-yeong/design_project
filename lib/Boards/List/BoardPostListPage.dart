@@ -75,7 +75,7 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
   bool get wantKeepAlive => true;
 }
 
-// 바로 모임 카드
+// 모임 카드
 Widget buildFriendRow(EntityPost entity, double distance) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -84,11 +84,17 @@ Widget buildFriendRow(EntityPost entity, double distance) {
         width: 15,
         height: 10,
       ),
-      Icon(entity.getPostCurrentPerson() == 1
-          ? Icons.person
-          : entity.getPostCurrentPerson() == 2
-              ? CupertinoIcons.person_2_fill
-              : CupertinoIcons.person_3_fill),
+      Column(
+        children: [
+          Icon(entity.getPostCurrentPerson() == 1
+              ? Icons.person
+              : entity.getPostCurrentPerson() == 2
+                  ? CupertinoIcons.person_2_fill
+                  : CupertinoIcons.person_3_fill),
+          Text(getMaxPersonText(entity),
+              style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
       const SizedBox(
         width: 25,
         height: 10,
@@ -99,26 +105,28 @@ Widget buildFriendRow(EntityPost entity, double distance) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${entity.getPostHead()}', // 글 제목
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
+              padding: const EdgeInsets.only(top: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${entity.getPostHead()}', // 글 제목
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: Text(
+                      '${entity.getWriterNick()}', // 글 작성자 닉네임
+                      style: const TextStyle(fontSize: 12, color: colorGrey),
                     ),
-                    Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: Text(
-                          '${entity.getWriterNick()}', // 글 작성자 닉네임
-                          style: const TextStyle(fontSize: 10, color: Color(0xFF858585)),
-                        ))
-                  ],
-                )),
+                  ),
+                ],
+              ),
+            ),
             const Padding(
-              padding: EdgeInsets.only(bottom: 18),
+              padding: EdgeInsets.only(bottom: 10),
             ),
             distance != 0.0
                 ? Row(
@@ -168,10 +176,10 @@ Widget buildFriendRow(EntityPost entity, double distance) {
               ],
             ),
             SizedBox(
-              height: 5,
+              height: 4,
             ),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -180,76 +188,91 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: Colors.orangeAccent),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.getCategory(), style: TextStyle(color: Colors.white, fontSize: 10)),
+                            child: Text("모집중",
+                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
+                          // 더 추가해야함, 모집 완료
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 1, right: 1),
+                    const SizedBox(
+                      width: 2,
                     ),
                     SizedBox(
                       height: 18,
                       child: Container(
                         decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
+                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(getAgeText(entity), style: TextStyle(color: Colors.white, fontSize: 10)),
+                            child: Text(entity.getCategory(),
+                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 1, right: 1),
+                    const SizedBox(
+                      width: 2,
                     ),
-                    SizedBox(
-                      height: 18,
-                      child: Container(
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFBFBFBF)),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(getGenderText(entity), style: TextStyle(color: Colors.white, fontSize: 10)),
-                          ),
-                        ),
-                      ),
+                    getAgeText(entity) != "나이 무관"
+                        ? SizedBox(
+                            height: 18,
+                            child: Container(
+                              decoration:
+                                  BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 5, left: 5),
+                                  child: Text(getAgeText(entity),
+                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                    const SizedBox(
+                      width: 2,
                     ),
+                    getGenderText(entity) != "성별 무관"
+                        ? SizedBox(
+                            height: 18,
+                            child: Container(
+                              decoration:
+                                  BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 5, left: 5),
+                                  child: Text(getGenderText(entity),
+                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
                   ],
                 ),
-                Padding(
-                    padding: const EdgeInsets.only(right: 4, bottom: 4),
-                    child: Container(
-                      width: 60,
-                      height: 25,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        color: const Color(0xFF6ACA9A),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Center(
-                            child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.emoji_people,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                            Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.white, fontSize: 10)),
-                          ],
-                        )),
-                      ),
-                    ))
+                Padding(padding: EdgeInsets.only(right: 5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.remove_red_eye_outlined,
+                      color: const Color(0xFF858585),
+                      size: 11,
+                    ),
+                    Text(" ${entity.getViewCount()}",
+                        style: const TextStyle(color: const Color(0xFF858585), fontSize: 11)),
+                  ],
+                ),),
               ],
+            ),
+            SizedBox(
+              height: 4,
             ),
           ],
         ),
@@ -259,8 +282,8 @@ Widget buildFriendRow(EntityPost entity, double distance) {
 }
 
 String getMaxPersonText(EntityPost post) {
-  if (post.getPostMaxPerson() == -1) return " ${post.getPostCurrentPerson()}";
-  return " ${post.getPostCurrentPerson()}/${post.getPostMaxPerson()}";
+  if (post.getPostMaxPerson() == -1) return "${post.getPostCurrentPerson()}";
+  return "${post.getPostCurrentPerson()}/${post.getPostMaxPerson()}";
 }
 
 String getGenderText(EntityPost post) {

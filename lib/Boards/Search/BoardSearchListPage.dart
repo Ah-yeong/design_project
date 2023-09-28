@@ -263,9 +263,10 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
   }
 
   naviToPost(int index) {
+    final int postId = _pageManager.list[_pageManager.list.length - index - 1].getPostId();
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) =>
-            BoardPostPage(postId: _pageManager.list[_pageManager.list.length - index - 1].getPostId())));
+            BoardPostPage(postId: postId)));
   }
 
   OutlineInputBorder _buildOutlineInputBorder() {
