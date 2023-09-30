@@ -8,10 +8,10 @@ class EntityProfiles {
   var profileImagePath;
   var mannerGroup; // 소모임 매너지수
   var hobby;
+  var hobbyIndex;
   var mbti;
   var mbtiIndex;
   var commute;
-  var commuteIndex;
   var birth;
   var gender;
   var textInfo;
@@ -20,6 +20,7 @@ class EntityProfiles {
   // bool isLoaded = false;
   var addr1;
   var addr2;
+  var addr3;
 
   EntityProfiles(var this.profileId) {}
 
@@ -31,20 +32,19 @@ class EntityProfiles {
           age = ds.get("age");
           profileImagePath = "assets/images/userImage.png";
           commute = ds.get("commute");
-          commuteIndex = ds.get("commuteIndex");
           gender = ds.get("gender");
           hobby = ds.get("hobby");
-          // _hobbyIndex = ds.get("hobbyIndex");
-          mbti = ds.get("mbti");
+          hobbyIndex = ds.get("hobbyIndex");
           mbtiIndex = ds.get("mbtiIndex");
           name = ds.get("nickName");
           major = "소프트웨어학과";
           textInfo = ds.get("textInfo");
           mannerGroup = ds.get("mannerGroup");
           post = ds.get("post");
-          //group = ds.get("group");
+          group = ds.get("group");
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
+          addr3 = ds.get("addr3");
         });
     isLoading = false;
   }

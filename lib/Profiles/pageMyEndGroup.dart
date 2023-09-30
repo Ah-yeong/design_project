@@ -9,21 +9,21 @@ import 'package:design_project/Profiles/PageProfile.dart';
 
 import '../Resources/resources.dart';
 
-class PageMyPost extends StatefulWidget {
+class PageMyEndGroup extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _PageMyPost();
+  State<StatefulWidget> createState() => _PageMyEndGroup();
 }
 
-class _PageMyPost extends State<PageMyPost> {
+class _PageMyEndGroup extends State<PageMyEndGroup> {
   EntityProfiles? myProfile;
-  List<EntityPost> myPostList = List.empty(growable: true);
+  List<EntityPost> myEndGroupList = List.empty(growable: true);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "내가 만든 모임",
+          "종료된 모임",
           style: TextStyle(color: Colors.black, fontSize: 16),
         ),
         leading: GestureDetector(
@@ -44,73 +44,43 @@ class _PageMyPost extends State<PageMyPost> {
       backgroundColor: Colors.white,
       body: myProfile!.isLoading ?
       Center(
-        child: SizedBox(
-            height: 65,
-            width: 65,
-            child: CircularProgressIndicator()
-        )
+          child: SizedBox(
+              height: 65,
+              width: 65,
+              child: CircularProgressIndicator()
+          )
       ) :
       SingleChildScrollView(
         padding: EdgeInsets.all(10),
-        child: myPostList.isEmpty ?
-          Column(
-            children: [
-              SizedBox(height: 20),
-              Center(
-                child: Text("내가 만든 모임이 아직 없습니다.",
+        child: myEndGroupList.isEmpty ?
+        Column(
+          children: [
+            SizedBox(height: 20),
+            Center(
+                child: Text("종료된 모임이 아직 없습니다.",
                     style: TextStyle(color: Colors.grey, fontSize: 15)
                 )
-              )
-            ],
-          ) :
-          Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: myPostList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Card(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => BoardPostPage(postId: myPostList[index].getPostId()),
-                          ));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: _buildFriendRow(myPostList[index]),
-                        ),
-                      ),
-                    ),
-                    // 신청자 리스트 출력
-                    // Column(
-                    //   children: myPostList[index]!.User.map((group) {
-                    //     return Card(
-                    //       child: GestureDetector(
-                    //         onTap: () {
-                    //           Navigator.of(context).push(MaterialPageRoute(
-                    //             builder: (context) => BoardPostPage(postId: group.getPostId()),
-                    //           ));
-                    //         },
-                    //         child: Padding(
-                    //           padding: const EdgeInsets.all(7),
-                    //           child: _buildModalSheet(group),
-                    //         ),
-                    //       ),
-                    //     );
-                    //   }).toList(),
-                    // ),
-                  ],
-                );
-              },
-            ),
+            )
           ],
+        ) :
+        Column(
+          children: myEndGroupList.map((group) {
+            return Card(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => BoardPostPage(postId: group.getPostId()),
+                  ));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: _buildFriendRow(group),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
-
     );
   }
 
@@ -119,14 +89,16 @@ class _PageMyPost extends State<PageMyPost> {
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfile!.loadProfile().then((n) {
-      for (var postId in myProfile!.post) {
-        EntityPost myPost = EntityPost(postId);
-        myPost.loadPost().then((value) {
-          myPostList.add(myPost);
-          setState(() {
-          });
+      if(myProfile!.endGroup.isEmpty){
+        setState(() {});
+      } else {
+      for (var groupId in myProfile!.endGroup) {
+        EntityPost myEndGroup = EntityPost(groupId);
+        myEndGroup.loadPost().then((value) {
+          myEndGroupList.add(myEndGroup);
+          setState(() {});
         });
-      }
+      }}
     });
   }
 
@@ -149,7 +121,7 @@ class _PageMyPost extends State<PageMyPost> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${entity.getPostHead()}', // 글 제목
+                        '${entity!.getPostHead()}', // 글 제목
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.start,
@@ -170,7 +142,7 @@ class _PageMyPost extends State<PageMyPost> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Icon(Icons.emoji_people, color: Colors.white, size: 14,),
-                                      Text(getMaxPersonText(entity),
+                                      Text(getMaxPersonText(entity!),
                                           style: const TextStyle(
                                               color: Colors.white, fontSize: 10)),
                                     ],
@@ -189,7 +161,7 @@ class _PageMyPost extends State<PageMyPost> {
                 children: [
                   const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),
                   Text(
-                    " ${entity.getLLName().AddressName}",
+                    " ${entity!.getLLName().AddressName}",
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                   SizedBox(height: 1,),
@@ -200,7 +172,7 @@ class _PageMyPost extends State<PageMyPost> {
                 children: [
                   const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
                   Text(
-                    getMeetTimeText(entity.getTime()),
+                    getMeetTimeText(entity!),
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                 ],
@@ -212,18 +184,4 @@ class _PageMyPost extends State<PageMyPost> {
       ],
     );
   }
-
-  // Widget _buildModalSheet(BuildContext context, int postId) {
-  //   return SingleChildScrollView(
-  //     child: Container(
-  //         margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
-  //         decoration: BoxDecoration(
-  //           color: Colors.white,
-  //           borderRadius: BorderRadius.circular(6),
-  //         ),
-  //         child: Padding(
-  //             padding: EdgeInsets.all(13),
-  //             child: buildPostMember(profileEntity!, context))),
-  //   );
-  // }
 }

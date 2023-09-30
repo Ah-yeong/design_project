@@ -56,9 +56,9 @@ class _NicknameFormState extends State<NameSignUpScreen> {
     '영화', '노래', '술', '책',
     '춤', '축구', '여행', '공연',
     '공예', '요리', '게임', '쇼핑',
-    '영화', '노래', '술', '책',
-    '춤', '축구', '여행', '공연',
-    '공예', '요리', '게임', '쇼핑'
+    '영화2', '노래2', '술2', '책2',
+    '춤2', '축구2', '여행2', '공연2',
+    '공예2', '요리2', '게임2', '쇼핑2'
   ];
 
   final List<String> commute = [
@@ -72,7 +72,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   Color ButtonColor2 = Colors.grey;
   Color ButtonColor3 = Colors.grey;
 
-  int _commuteIndex = -1;
+  String? selectedCommute = null;
 
   Future<void> fetchData(int page) async {
     String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADEMD_INFO&page=';
@@ -148,11 +148,13 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 //   }
 //
   Future<void> _getImage(ImageSource imageSource) async {
-    final XFile? pickedFile = await picker.pickImage(source: imageSource);
+    XFile? pickedFile;
+    await picker.pickImage(source: imageSource).then((value) => pickedFile = value);
+    print(pickedFile);
     if (pickedFile != null) {
       setState(() {
         _image = XFile(pickedFile!.path);
-        print(pickedFile.path);
+        print(pickedFile?.path);
       });
     }
   }
@@ -551,45 +553,6 @@ class _NicknameFormState extends State<NameSignUpScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(height: 20),
-                // InkWell(
-                //   onTap: () async {
-                //     final source = await showDialog<ImageSource>(
-                //       context: context,
-                //       builder: (context) {
-                //         return AlertDialog(
-                //           title: Text('사진 업로드'),
-                //           actions: [
-                //             TextButton(
-                //               onPressed: () {
-                //                 _getImage(ImageSource.camera);
-                //               },
-                //               child: Text('카메라로 직접 촬영'),
-                //             ),
-                //             TextButton(
-                //               onPressed: () {
-                //                 _getImage(ImageSource.gallery);
-                //               },
-                //               child: Text('앨범에서 가져오기'),
-                //             ),
-                //           ],
-                //         );
-                //       },
-                //     );
-                //     if (source != null) {
-                //       await _getImage(source);
-                //     }
-                //   },
-                //   child: CircleAvatar(
-                //     radius: 100,
-                //     backgroundImage: _image != null ? AssetImage(_image!.path) : null,
-                //     child: _image == null
-                //         ? Icon(
-                //       Icons.person,
-                //       size: 80,
-                //     )
-                //         : null,
-                //   ),
-                // ),
                 _buildPhotoArea(),
                 SizedBox(
                   height: 26,
@@ -946,7 +909,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                     ButtonColor1 = _selectedColor;
                     ButtonColor2 = _unSelectedColor;
                     ButtonColor3 = _unSelectedColor;
-                    _commuteIndex = 0;
+                    selectedCommute = '통학';
                   });
                 },
                 child: Text(
@@ -970,7 +933,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                     ButtonColor1 = _unSelectedColor;
                     ButtonColor2 = _selectedColor;
                     ButtonColor3 = _unSelectedColor;
-                    _commuteIndex = 1;
+                    selectedCommute = '자취';
                   });
                 },
                 child: Text(
@@ -994,7 +957,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                     ButtonColor1 = _unSelectedColor;
                     ButtonColor2 = _unSelectedColor;
                     ButtonColor3 = _selectedColor;
-                    _commuteIndex = 2;
+                    selectedCommute = '기숙사';
                   });
                 },
                 child: Text(
@@ -1115,7 +1078,6 @@ class _NicknameFormState extends State<NameSignUpScreen> {
   _createProfile() async {
     List<int> hobbyIndex = [];
     List<String> selectedHobby = [];
-    print(FirebaseAuth.instance.currentUser!.uid);
     for (int i = 0; i < _selectedHobby.length; i++) {
       if (_selectedHobby[i]) {
         hobbyIndex.add(i);
@@ -1133,20 +1095,19 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'birth' : '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
         'age' : DateTime.now().year - year + 1,
         'mbtiIndex': _selectedMBTIIndex,
-        'mbti': mbti[_selectedMBTIIndex],
-        // 'hobbyIndex' hobbyIndex,
+        'hobbyIndex' : hobbyIndex,
         'hobby': selectedHobby,
-        'commuteIndex' : _commuteIndex,
-        'commute' : commute[_commuteIndex],
+        'commute' : selectedCommute,
         'mannerGroup': 50,
         'post': FieldValue.arrayUnion([]),
         'group': FieldValue.arrayUnion([]),
+        'endGroup': FieldValue.arrayUnion([]),
         'profileImagePath': _image,
         'addr1': selectedSiDo,
         'addr2': selectedSiGunGu,
         'addr3': selectedDong,
       });
-      print('Profile data updated successfully.');
+      // print('Profile data updated successfully.');
     } catch (e) {
       print('Error updating profile data: $e');
     }
