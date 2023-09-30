@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:design_project/Auth/PageResendVerifyMail.dart';
 import 'package:design_project/Auth/PageResetPassword.dart';
+import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,7 +29,7 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
         _user!.reload().then((event) {
           _user = FirebaseAuth.instance.currentUser;
           if (_user!.emailVerified) {
-            Get.off(() => BoardPageMainHub());
+            Get.off(() => NameSignUpScreen());
           } else {
             print("what?");
             showAlert("이메일 인증이 완료되지 않았어요!", context, colorWarning);

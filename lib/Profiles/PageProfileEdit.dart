@@ -8,6 +8,8 @@ import '../Entity/EntityProfile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import '../Resources/LoadingIndicator.dart';
+import '../Resources/resources.dart';
 import 'PageProfile.dart';
 import 'package:http/http.dart' as http;
 import 'package:design_project/Profiles/ProfileEarlySetting/inputForm.dart';
@@ -26,12 +28,11 @@ final List<String> mbti = [
 
 final List<String> hobby = [
   '영화', '노래', '술', '책',
-  '취미1,','취미2','취미3','취미4',
-  '취미5', '취미6', '취미6', '취미7'
-];
-
-final List<String> commute = [
-  '통학', '자취', '기숙사'
+  '춤', '축구', '여행', '공연',
+  '공예', '요리', '게임', '쇼핑',
+  '영화2', '노래2', '술2', '책2',
+  '춤2', '축구2', '여행2', '공연2',
+  '공예2', '요리2', '게임2', '쇼핑2'
 ];
 
 class _PageProfileEditState extends State<PageProfileEdit> {
@@ -39,11 +40,13 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   File? _image;
   EntityProfiles? myProfile;
 
-  int _mbtiIndex = -1;
+  int _mbtiIndex = 0;
+  bool selectMbti = false;
   bool _mbtiIsExpanded = false;
   Color _selectedColor = Color(0xFF6ACA9A);
   Color _unSelectedColor = Colors.grey;
 
+  String? selectedCommute = null;
   List<String> sigKorNames = [];
   String? selectedSiDo = null;
   String? selectedSiGunGu = null;
@@ -117,7 +120,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   }
 
   void _showSidoPicker() {
-    String sido ='';
+    String? sido = '';
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -148,7 +151,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedSiDo = sido;
+                    if(sido==''){selectedSiDo = siDoList[0];}
+                    else{selectedSiDo = sido;}
                     selectedSiGunGu = null;
                     selectedDong = null;
                   });
@@ -163,7 +167,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   }
 
   void _showSiGunGuPicker() {
-    String? siGunGu ='';
+    String? siGunGu = '';
     siGunGuMap.forEach((key, value) {
       value.sort();
     });
@@ -197,7 +201,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedSiGunGu = siGunGu;
+                    if(siGunGu==''){selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];}
+                    else{selectedSiGunGu = siGunGu;}
                     selectedDong = null;
                   });
                   Navigator.of(context).pop();
@@ -211,7 +216,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   }
 
   void _showDongPicker() {
-    String? dong ='';
+    String? dong = '';
     siGunGuMap.forEach((key, value) {
       value.sort();
     });
@@ -245,7 +250,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    selectedDong = dong;
+                    if(dong == ''){selectedDong = dongMap[selectedSiGunGu!]![0];}
+                    else{selectedDong = dong;}
                   });
                   Navigator.of(context).pop();
                 },
@@ -259,18 +265,17 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   TextEditingController? _nicknameController;
   TextEditingController? _textInfoController;
-  int _commuteIndex = -1;
 
   Color ButtonColor1 = Colors.grey;
   Color ButtonColor2 = Colors.grey;
   Color ButtonColor3 = Colors.grey;
 
   bool _hobbyIsExpanded = false;
-  List<bool> _hobbyIndex = List.generate(16, (index) => false);
+  List<bool> _selectedHobby = List.generate(24, (index) => false);
 
   void _onPressed(int index) {
     setState(() {
-      _hobbyIndex[index] = !_hobbyIndex[index];
+      _selectedHobby[index] = !_selectedHobby[index];
     });
   }
 
@@ -411,7 +416,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                     children: [
                                       Icon(Icons.mood),
                                       SizedBox(width: 12),
-                                      Text(mbti[_mbtiIndex], style: TextStyle(fontSize: 14)),
+                                      selectMbti == false? Text("mbti", style: TextStyle(fontSize: 14)):Text(mbti[_mbtiIndex], style: TextStyle(fontSize: 14)),
                                     ],
                                   ),
                                 );
@@ -431,17 +436,14 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                           (index) =>
                                           ElevatedButton(
                                             style: ButtonStyle(
-                                              backgroundColor: _mbtiIndex == index
+                                              backgroundColor: (_mbtiIndex == index && selectMbti == true)
                                                   ? MaterialStateProperty.all(_selectedColor)
-                                                  : MaterialStateProperty.all(Colors.grey),
+                                                  : MaterialStateProperty.all(_unSelectedColor),
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                if (_mbtiIndex == index) {
-                                                  _mbtiIndex = -1;
-                                                } else {
-                                                  _mbtiIndex = index;
-                                                }
+                                                if (_mbtiIndex != index) {_mbtiIndex = index; selectMbti = true;}
+                                                else { selectMbti = false;  _mbtiIndex = -1;}
                                               });
                                             },
                                             child: Text(
@@ -502,11 +504,11 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                     mainAxisSpacing: 5, // 행 사이의 간격 5
                                     childAspectRatio: 2.0,
                                     children: List.generate(
-                                      4, // 4행 4열 = 총 16개의 버튼
+                                      24,
                                           (index) => ElevatedButton(
                                         style: ButtonStyle(
                                           backgroundColor: MaterialStateProperty.all(
-                                            _hobbyIndex[index] ? _selectedColor : Colors.grey,
+                                            _selectedHobby[index] ? _selectedColor : Colors.grey,
                                           ),
                                         ),
                                         onPressed: () {
@@ -547,7 +549,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _selectedColor;
                                   ButtonColor2 = _unSelectedColor;
                                   ButtonColor3 = _unSelectedColor;
-                                  _commuteIndex = 0;
+                                  selectedCommute = '통학';
                                 });
                               },
                               child: Text(
@@ -571,7 +573,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _unSelectedColor;
                                   ButtonColor2 = _selectedColor;
                                   ButtonColor3 = _unSelectedColor;
-                                  _commuteIndex = 1;
+                                  selectedCommute = '자취';
                                 });
                               },
                               child: Text(
@@ -595,7 +597,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                   ButtonColor1 = _unSelectedColor;
                                   ButtonColor2 = _unSelectedColor;
                                   ButtonColor3 = _selectedColor;
-                                  _commuteIndex = 2;
+                                  selectedCommute = '기숙사';
                                 });
                               },
                               child: Text(
@@ -610,7 +612,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                       ),
                       SizedBox(height: 15),
                       Text(
-                          ' 통학 여부',
+                          ' 거주지',
                           style: TextStyle(
                             fontSize: 14,
                           )
@@ -637,7 +639,10 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: _showSiGunGuPicker,
+                        onPressed: () {
+                          if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
+                          else{_showSiGunGuPicker();};
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: selectedSiGunGu == null ? _unSelectedColor : _selectedColor,
                           padding: EdgeInsets.only(left: 6.0),
@@ -657,7 +662,11 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: _showDongPicker,
+                        onPressed: () {
+                          if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
+                          else if(selectedSiGunGu == null){ showAlert("시/군/구 먼저 선택해주세요", context, colorError); }
+                          else{ _showDongPicker(); }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: selectedDong == null ? _unSelectedColor : _selectedColor,
                           padding: EdgeInsets.only(left: 6.0),
@@ -689,12 +698,12 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         style: ElevatedButton.styleFrom(
                           primary: Color(0xFF6ACA9A),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          buildContainerLoading();
+                          await _updateProfile();
                           Navigator.pop(context);
-                          _updateProfile();
-                          // Get.off(() => PageProfile());
                         },
-                      ),
+                      )
                     )
                 ),
               ],
@@ -711,28 +720,39 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       _nicknameController = TextEditingController(text: '${myProfile!.name}');
       _textInfoController = TextEditingController(text: '${myProfile!.textInfo}');
 
-      if(myProfile!.commuteIndex == 0){
-        _commuteIndex = myProfile!.commuteIndex;
+      if(myProfile!.commute == '통학'){
         ButtonColor1 = _selectedColor;
       }
-      if(myProfile!.commuteIndex == 1){
-        _commuteIndex = myProfile!.commuteIndex;
+      if(myProfile!.commute == '자취'){
         ButtonColor2 = _selectedColor;
       }
-      if(myProfile!.commuteIndex == 2){
-        _commuteIndex = myProfile!.commuteIndex;
+      if(myProfile!.commute == '기숙사'){
         ButtonColor3 = _selectedColor;
       }
       _mbtiIndex = myProfile!.mbtiIndex;
-      // _hobbyIndex = myProfile!.hobbyIndex;
+      if (_mbtiIndex != -1) { selectMbti = true; }
+
+      for (int i = 0; i < myProfile!.hobbyIndex.length; i++) {
+        _selectedHobby[myProfile!.hobbyIndex[i]] = true;
+      }
+
       selectedSiDo = myProfile!.addr1;
       selectedSiGunGu = myProfile!.addr2;
-      // selectedDong = myProfile!.addr3;
+      selectedDong = myProfile!.addr3;
       setState(() {});
     });
+    fetchData(currentPage);
   }
 
   _updateProfile() async {
+    List<int> hobbyIndex = [];
+    List<String> selectedHobby = [];
+    for (int i = 0; i < _selectedHobby.length; i++) {
+      if (_selectedHobby[i]) {
+        hobbyIndex.add(i);
+        selectedHobby.add(hobby[i]);
+      }
+    }
     try {
       await FirebaseFirestore.instance
           .collection('UserProfile')
@@ -741,14 +761,12 @@ class _PageProfileEditState extends State<PageProfileEdit> {
         'nickName' : _nicknameController!.value.text,
         'textInfo' : _textInfoController!.value.text,
         'mbtiIndex': _mbtiIndex,
-        'mbti': mbti[_mbtiIndex],
-        // 'hobbyIndex' hobbyIndex,
-        // 'hobby': selectedHobby,
-        'commuteIndex' : _commuteIndex,
-        'commute' : commute[_commuteIndex],
+        'hobbyIndex' : hobbyIndex,
+        'hobby': selectedHobby,
+        'commute' : selectedCommute,
         'addr1' : selectedSiDo,
         'addr2' : selectedSiGunGu,
-        // 'addr3' : selectedDong
+        'addr3' : selectedDong
       });
       print('Profile data updated successfully.');
     } catch (e) {
