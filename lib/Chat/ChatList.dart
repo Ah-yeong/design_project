@@ -153,7 +153,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                             children: [
                                               // 닉네임 표시
                                               Text(
-                                                  '${list[index].isGroupChat ? postManager.list[list[index].postId!].getPostHead() : "${list[index].recvUserNick}"}',
+                                                  '${list[index].isGroupChat ? postManager.list[postManager.getIndexByPostId(list[index].postId!)].getPostHead() : "${list[index].recvUserNick}"}',
                                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                                               // 마지막 내용 표시
                                               Text("${list[index].lastTimeStampString}"),

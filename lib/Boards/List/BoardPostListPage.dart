@@ -188,11 +188,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: entity.isVoluntary() ? Colors.orangeAccent : Colors.cyan),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: entity.getPostCurrentPerson() > 8 ? Colors.orangeAccent :entity.isVoluntary() ? Colors.orangeAccent : Colors.cyan),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.isVoluntary() ? "자율 참여" : "위치 공유",
+                            child: Text(entity.getPostCurrentPerson() > 8 ? "자율참여" : entity.isVoluntary() ? "자율 참여" : "위치 공유",
                                 style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           // 더 추가해야함, 모집 완료
@@ -216,8 +216,8 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 2,
+                    SizedBox(
+                      width: getAgeText(entity) != "나이 무관" ? 2 : 0,
                     ),
                     getAgeText(entity) != "나이 무관"
                         ? SizedBox(
@@ -235,8 +235,8 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                             ),
                           )
                         : SizedBox(),
-                    const SizedBox(
-                      width: 2,
+                    SizedBox(
+                      width: getGenderText(entity) != "성별 무관" ? 2 : 0,
                     ),
                     getGenderText(entity) != "성별 무관"
                         ? SizedBox(
