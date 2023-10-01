@@ -4,6 +4,8 @@ import 'package:design_project/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../Resources/resources.dart';
+
 class EntityPost {
   int _postId;
   var _writerId;
@@ -19,6 +21,8 @@ class EntityPost {
   var _llName;
   var _category;
   var _viewCount;
+  var _isVoluntary;
+
   var user;
 
   DocumentReference? _postDocRef;
@@ -111,24 +115,44 @@ class EntityPost {
     }
   }
 
+  _loadField(DocumentSnapshot ds) {
+    _writerId = ds.get("writer_id");
+    _head = ds.get("head");
+    _body = ds.get("body");
+    _gender = ds.get("gender");
+    _maxPerson = ds.get("maxPerson");
+    _currentPerson = ds.get("currentPerson");
+    _writerNick = ds.get("writer_nick");
+    _minAge = ds.get("minAge");
+    _maxAge = ds.get("maxAge");
+    _time = ds.get("time");
+    _upTime = ds.get("upTime");
+    _category = ds.get("category");
+    _viewCount = ds.get("viewCount");
+    _isVoluntary = ds.get("voluntary");
+    user = ds.get("user");
+    _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
+  }
+
   Future<void> loadPost() async {
     _isLoaded = true;
-    await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((ds) {
-      _writerId = ds.get("writer_id");
-      _head = ds.get("head");
-      _body = ds.get("body");
-      _gender = ds.get("gender");
-      _maxPerson = ds.get("maxPerson");
-      _currentPerson = ds.get("currentPerson");
-      _writerNick = ds.get("writer_nick");
-      _minAge = ds.get("minAge");
-      _maxAge = ds.get("maxAge");
-      _time = ds.get("time");
-      _upTime = ds.get("upTime");
-      _category = ds.get("category");
-      _viewCount = ds.get("viewCount");
-      user = ds.get("user");
-      _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
+    DocumentReference doc = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot ds = await transaction.get(doc);
+      if (!ds.exists) return;
+      try {
+        _loadField(ds);
+      } catch (e) {
+        Map<String, dynamic> map = ds.data() as Map<String, dynamic>;
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          for (String key in postFieldDefault.keys) {
+            if (!map.containsKey(key)) {
+              await transaction.update(doc, {key: postFieldDefault[key]});
+            }
+          }
+        });
+        _loadField(ds);
+      }
     });
   }
 
@@ -164,24 +188,6 @@ class EntityPost {
     }
   }
 
-  makeTestingPost() {
-    _postId = 1;
-    _writerId = "jongwon1019";
-    _head = "제목 테스트 - 영화 볼 사람?!";
-    _minAge = -1;
-    _maxAge = 25;
-    _body = "내용입니다. \n다른 이유는 없습니다.";
-    _gender = 2;
-    _maxPerson = 5;
-    _currentPerson = 2;
-    _category = "기타";
-    _time = "2023-04-22 11:10:05";
-    _llName = LLName(LatLng(36.833068, 127.178419), "천안시 동남구 안서동 300");
-    _upTime = "2023-04-16 13:27:00";
-    _viewCount = "1342";
-    _isLoaded = true;
-  }
-
   // Getter, (ReadOnly)
   int getPostId() => _postId;
 
@@ -200,6 +206,8 @@ class EntityPost {
   String getWriterNick() => _writerNick;
 
   String getTime() => _time;
+
+  bool isVoluntary() => _isVoluntary;
 
   String getCategory() => _category;
 
@@ -245,8 +253,10 @@ String getTimeBefore(String upTime) {
   }
 }
 
-Future<bool> addPost(String head, String body, int gender, int maxPerson, String time, LLName llName, String upTime,
-    String category, int minAge, int maxAge, String writerNick) async {
+Future<bool> addPost({required String head, required String body, required int gender,
+  required int maxPerson, required String time, required LLName llName, required String upTime,
+  required String category, required int minAge, required int maxAge, required String writerNick,
+required bool isVoluntary}) async {
   try {
     int? new_post_id;
     DocumentReference<Map<String, dynamic>> ref = await FirebaseFirestore.instance.collection("Post").doc("postData");
@@ -275,6 +285,7 @@ Future<bool> addPost(String head, String body, int gender, int maxPerson, String
       "upTime": upTime,
       "viewCount": 1,
       "user": FieldValue.arrayUnion([]),
+      "voluntary" : isVoluntary
     });
     return true;
   } catch (e) {
