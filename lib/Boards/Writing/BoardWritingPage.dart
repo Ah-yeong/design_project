@@ -504,8 +504,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                               sigmaY: 2.5,
                                               controller: _tooltipController,
                                               content: Container(
-                                                width: MediaQuery.of(context).size.width * 8.5 / 10,
-                                                height: 150,
+                                                width: MediaQuery.of(context).size.width * 9 / 10,
+                                                height: 200,
                                                 child: Padding(
                                                   padding: const EdgeInsets.only(left: 10.0),
                                                   child: Column(
@@ -541,6 +541,21 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                                           )
                                                         ],
                                                       ),
+                                                      const SizedBox(height: 10),
+                                                      Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.info,
+                                                            size: 16,
+                                                            color: colorGrey,
+                                                          ),
+                                                          Text(
+                                                            " 인원 무제한시 : \n - 8명 이하면 [위치공유 모임]으로 설정돼요.\n - 9명 이상이면 [자율적인 모임]으로 설정돼요.",
+                                                            style: TextStyle(color: Colors.black, fontSize: 13),
+                                                          )
+                                                        ],
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -560,7 +575,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                           ),
                                         ],
                                       ),
-                                      CustomRadioButton(
+                                      _selectedPerson != "무제한" ? CustomRadioButton(
                                         buttonLables: const [
                                           "위치공유 모임",
                                           "자율적인 모임",
@@ -586,7 +601,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                         selectedBorderColor: Colors.green,
                                         unSelectedBorderColor: colorLightGrey,
                                         defaultSelected: "withGPS",
-                                      )
+                                      ) : Text("참여 인원수에 따른 자동 설정 ", style: TextStyle(color: colorGrey, fontSize: 16),)
                                     ],
                                   ),
 
