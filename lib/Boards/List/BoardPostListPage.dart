@@ -188,11 +188,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: Colors.orangeAccent),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: entity.isVoluntary() ? Colors.orangeAccent : Colors.cyan),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text("모집중",
+                            child: Text(entity.isVoluntary() ? "자율 참여" : "위치 공유",
                                 style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           // 더 추가해야함, 모집 완료

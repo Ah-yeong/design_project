@@ -12,6 +12,27 @@ const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
 const Color colorLightGrey = const Color(0xFFCCCCCC);
 
+const Map<String, dynamic> postFieldDefault = {
+  "writer_id": null,
+  "head": "제목",
+  "body": "내용",
+  "gender": 0,
+  "maxPerson": 2,
+  "currentPerson": 1,
+  "writer_nick": "UserName",
+  "minAge": -1,
+  "maxAge": -1,
+  "time": "2025-10-19 07:00:00",
+  "upTime": "1999-10-19 07:00:00",
+  "category": ["술"],
+  "viewCount": 1,
+  "user": [],
+  "voluntary": false,
+  "lat": 36.833068,
+  "lng": 127.178419,
+  "name": "상명대학교"
+};
+
 var CategoryList = List.of([
   "술",
   "밥",
