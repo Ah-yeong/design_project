@@ -183,8 +183,6 @@ class EntityPost {
       _viewCount += 1;
       _postDocRef!.update({"viewCount": FieldValue.increment(1)});
       LocalStorage!.setInt("${PREFIX_COOL}$_postId", DateTime.now().millisecondsSinceEpoch);
-    } else {
-      print("[Debug] ${1800 - ((DateTime.now().millisecondsSinceEpoch - coolDown) / 1000)}초 뒤에 조회수 증가 가능.");
     }
   }
 

@@ -728,7 +728,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
               height: 20,
             ),
             SizedBox(
-              height: 100,
+              height: 120,
               width: double.infinity,
               child: Column(children: [
                 Wrap(
