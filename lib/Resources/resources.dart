@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const Color colorSuccess = const Color(0xFF6ACA89);
 const Color colorGrey = const Color(0xFF777777);
@@ -67,6 +66,19 @@ Color getColorForScore(int score) {
 void updateChatList(String uuid) {
   Random rd = Random();
   FirebaseFirestore.instance.collection("UserChatData").doc(uuid).update({"streamIO": rd.nextInt(100000000).toInt()});
+}
+
+SnackBar getAlert(String message, Color color) {
+  return SnackBar(
+    elevation: 2,
+    content: Text(
+      message,
+      style: TextStyle(color: Colors.white, fontSize: 15),
+      textAlign: TextAlign.center,
+    ),
+    duration: Duration(milliseconds: 1300),
+    backgroundColor: color,
+  );
 }
 
 void showAlert(String message, BuildContext cont, Color color) {
