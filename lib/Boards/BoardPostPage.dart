@@ -101,49 +101,24 @@ class _BoardPostPage extends State<BoardPostPage> {
               toolbarHeight: 40,
               elevation: 1,
             ),
-            backgroundColor: Colors.white,
-            body: Stack(children: [
-              SingleChildScrollView(
-                  child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 3 / 8,
-                      child: GoogleMap(
-                        markers: Set.from(_markers),
-                        mapType: MapType.normal,
-                        initialCameraPosition: CameraPosition(
-                          target: postEntity!.getLLName().latLng,
-                          zoom: 17.4746,
-                        ),
-                        onMapCreated: (GoogleMapController controller) {
-                          if (!_controller.isCompleted) _controller.complete(controller);
-                        },
-                      ),
-                    ),
-                    // 지도 표시 구간
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 16, 0, 4),
-                    ),
-
-                    // 제목 및 카테고리
-                    buildPostContext(postEntity!, profileEntity!, context),
-                    // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
-                    // Text("Gender Limit : ${postEntity!.getPostGender()}"),
-                  ]),
-                ),
-              )),
-              Padding(
-                padding: EdgeInsets.only(bottom: 40, left: 10, right: 10),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)
+                ]
+              ),
+              width: double.infinity,
+              height: 105,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15),
                 child: Align(
-                  alignment: Alignment.bottomCenter,
+                  alignment: Alignment.topCenter,
                   child: InkWell(
                     onTap: () async {
                       if (isSameId) {
                         showModalBottomSheet(
-                          isDismissible: false,
+                            isDismissible: false,
                             context: context,
                             builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
                             backgroundColor: Colors.transparent);
@@ -205,6 +180,41 @@ class _BoardPostPage extends State<BoardPostPage> {
                   ),
                 ),
               ),
+            ),
+            backgroundColor: Colors.white,
+            body: Stack(children: [
+              SingleChildScrollView(
+                  child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 3 / 8,
+                      child: GoogleMap(
+                        markers: Set.from(_markers),
+                        mapType: MapType.normal,
+                        initialCameraPosition: CameraPosition(
+                          target: postEntity!.getLLName().latLng,
+                          zoom: 17.4746,
+                        ),
+                        onMapCreated: (GoogleMapController controller) {
+                          if (!_controller.isCompleted) _controller.complete(controller);
+                        },
+                      ),
+                    ),
+                    // 지도 표시 구간
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 4),
+                    ),
+
+                    // 제목 및 카테고리
+                    buildPostContext(postEntity!, profileEntity!, context),
+                    // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
+                    // Text("Gender Limit : ${postEntity!.getPostGender()}"),
+                  ]),
+                ),
+              )),
               isRequestLoading ? buildContainerLoading(30) : SizedBox(),
             ]),
           );
@@ -226,8 +236,7 @@ class _BoardPostPage extends State<BoardPostPage> {
       profileEntity = EntityProfiles(postEntity!.getWriterId());
       await profileEntity!.loadProfile().then((value) {
         if (isReload != true) {
-          _markers.add(Marker(
-              markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
+          _markers.add(Marker(markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
           _checkWriterId(postEntity!.getWriterId());
           loadPostTime();
         }
@@ -240,13 +249,9 @@ class _BoardPostPage extends State<BoardPostPage> {
     return;
   }
 
-  _addViewCount() {
-
-  }
-
   loadPostTime() {
-    String ptime = getTimeBefore(postEntity!.getUpTime());
-    postTime = ptime;
+    String pTime = getTimeBefore(postEntity!.getUpTime());
+    postTime = pTime;
     setState(() {
       postTimeIsLoaded = true;
       isLoaded = true;
@@ -262,7 +267,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   String _getRequestButtonText() {
     String text = "";
     if (isSameId) {
-      text += "[신청자 관리]  현재 ${postEntity!.getPostCurrentPerson()}";
+      text += "[신청자 관리, 모임 성사]  현재 ${postEntity!.getPostCurrentPerson()}";
       if (postEntity!.getPostMaxPerson() != -1) {
         text += "/${postEntity!.getPostMaxPerson()}";
       }
@@ -329,8 +334,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                     child: GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -348,8 +352,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                 children: [
                                   Text(
                                     "${userProfile.name}",
-                                    style:
-                                        const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
                                   const Padding(padding: EdgeInsets.only(top: 4)),
                                   Text(
@@ -389,22 +392,18 @@ class _BoardPostPage extends State<BoardPostPage> {
                                   children: [
                                     ElevatedButton(
                                         onPressed: () {
-                                          _showDialog(userProfile.name, userProfile.profileId, 'accept', postId,
-                                              modalStateSetter);
+                                          _showDialog(userProfile.name, userProfile.profileId, 'accept', postId, modalStateSetter);
                                         },
-                                        style: ElevatedButton.styleFrom(
-                                            elevation: 0, backgroundColor: colorSuccess, minimumSize: Size(0, 25)),
+                                        style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: colorSuccess, minimumSize: Size(0, 25)),
                                         child: Text('수락')),
                                     SizedBox(
                                       width: 4,
                                     ),
                                     ElevatedButton(
                                         onPressed: () {
-                                          _showDialog(userProfile.name, userProfile.profileId, 'reject', postId,
-                                              modalStateSetter);
+                                          _showDialog(userProfile.name, userProfile.profileId, 'reject', postId, modalStateSetter);
                                         },
-                                        style: ElevatedButton.styleFrom(
-                                            elevation: 0, backgroundColor: Colors.grey, minimumSize: Size(0, 25)),
+                                        style: ElevatedButton.styleFrom(elevation: 0, backgroundColor: Colors.grey, minimumSize: Size(0, 25)),
                                         child: Text('거절'))
                                   ],
                                 ),
@@ -448,8 +447,7 @@ class _BoardPostPage extends State<BoardPostPage> {
             EntityProfiles userProfile = requestList[index];
             return GestureDetector(
               onTap: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -472,8 +470,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                               children: [
                                 Text(
                                   "${userProfile.name}",
-                                  style:
-                                      const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
                                 ),
                                 const Padding(padding: EdgeInsets.only(top: 4)),
                                 Text(
@@ -510,15 +507,14 @@ class _BoardPostPage extends State<BoardPostPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 20),
-              Text(status == 'accept' ? '${name}님의 모임 참가를 수락하시겠습니까 ?' : '${name}님의 모임 참가를 거절하시겠습니까 ?',
-                  style: TextStyle(fontSize: 16)),
+              Text(status == 'accept' ? '${name}님의 모임 참가를 수락하시겠습니까 ?' : '${name}님의 모임 참가를 거절하시겠습니까 ?', style: TextStyle(fontSize: 16)),
               SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      if(isRequestLoading) return;
+                      if (isRequestLoading) return;
                       isRequestLoading = true;
                       Navigator.of(context).pop();
                       if (status == 'accept') {
@@ -630,8 +626,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     onTap: () {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -757,8 +752,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
       ),
-      Text("조회수 ${post.getViewCount()}, ${getTimeBefore(post.getUpTime())}",
-          style: const TextStyle(fontSize: 12.5, color: Color(0xFF888888))),
+      Text("조회수 ${post.getViewCount()}, ${getTimeBefore(post.getUpTime())}", style: const TextStyle(fontSize: 12.5, color: Color(0xFF888888))),
       // 조회수 및 게시글 시간
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 12, 0, 0),

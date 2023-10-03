@@ -452,7 +452,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                           unSelectedColor: colorGrey,
                                         ),
                                         elevation: 0,
-                                        width: 75,
+                                        width: 73.33,
                                         height: 30,
                                         enableShape: true,
                                         radius: 5,
@@ -488,7 +488,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                       Row(
                                         children: [
                                           const Text(
-                                            "모임 방식  ",
+                                            "모임 방식 ",
                                             style: TextStyle(color: colorGrey, fontSize: 16),
                                           ),
                                           GestureDetector(
@@ -594,7 +594,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                           unSelectedColor: colorGrey,
                                         ),
                                         elevation: 0,
-                                        width: 116.5,
+                                        width: 114,
                                         height: 30,
                                         enableShape: true,
                                         radius: 5,
