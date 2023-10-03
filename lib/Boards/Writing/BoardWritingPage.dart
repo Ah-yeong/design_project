@@ -59,8 +59,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     }
   }
 
-  TimeOfDay _selectedTime = TimeOfDay.now().hour < 23
-      ? TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1, minute: (TimeOfDay.now().minute / 5).round() * 5)
+  TimeOfDay _selectedTime = (TimeOfDay.now().hour + ((TimeOfDay.now().minute / 5).round() * 5 == 60 ? 1 : 0)) < 23
+      ? TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1 + ((TimeOfDay.now().minute / 5).round() * 5 == 60 ? 1 : 0), minute: (TimeOfDay.now().minute / 5).round() * 5 == 60 ? 0 : (TimeOfDay.now().minute / 5).round() * 5)
       : TimeOfDay(hour: 23, minute: 59);
 
   Future<void> _selectTime(BuildContext context) async {

@@ -156,6 +156,10 @@ class EntityPost {
     });
   }
 
+  bool isFull() {
+    return _maxPerson != -1 && _currentPerson >= _maxPerson;
+  }
+
   int getNewRequest() {
     List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String, dynamic>).toList();
     return userList.where((element) => element["status"] == 0).length;
@@ -227,6 +231,14 @@ class EntityPost {
     if (_upTime.isEmpty) return "";
     DateTime upTime = DateTime.parse(_upTime);
     return "${upTime.month}월 ${upTime.day}일${hour ? " ${upTime.hour}시" : ""} ${minute ? " ${upTime.minute}분" : ""}";
+  }
+
+  List<String> getCompletedMembers() {
+    List<String> memberList = [];
+    List<Map<String, dynamic>> userList = (user as List).map((e) => e as Map<String, dynamic>).toList();
+    userList.retainWhere((element) => element["status"] == 1);
+    userList.forEach((element) => memberList.add(element["id"]));
+    return memberList;
   }
 }
 
