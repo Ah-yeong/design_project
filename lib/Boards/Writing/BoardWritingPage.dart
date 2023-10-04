@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import '../../Entity/EntityLatLng.dart';
 import '../../Entity/EntityProfile.dart';
+import '../../Meeting/models/MeetingManager.dart';
 import '../../Resources/resources.dart';
 
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -902,6 +903,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     setState(() => _isUploading = true); // 업로드 시작
     DateTime dt = DateTime.now();
     successUpload = await addPost(
+        writerId: myProfileEntity!.getProfileId(),
         head: _head!.text,
         body: _body!.text,
         gender: _selectedGender!,
@@ -915,8 +917,15 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         maxAge: _maxAge,
         writerNick: myProfileEntity!.name,
         isVoluntary: _isVoluntary);
+
+    // 내 프로필에 post (내가 쓴 글) 추가
     profileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    successUploadProfiles = await profileEntity!.addPostId();
+    int newPostId = await profileEntity!.addPostId();
+    successUploadProfiles = newPostId != -1;
+
+    // 내가 속한 모임에 추가
+    var meetingManager = MeetingManager();
+    await meetingManager.addMeetingPost(myProfileEntity!.getProfileId(), newPostId);
 
     return successUpload && successUploadProfiles;
   }

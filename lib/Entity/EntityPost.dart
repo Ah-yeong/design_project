@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/Entity/EntityLatLng.dart';
+import 'package:design_project/Meeting/models/MeetingManager.dart';
 import 'package:design_project/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -93,6 +94,7 @@ class EntityPost {
           reference.update({"currentPerson": FieldValue.increment(1)});
         });
       }
+
     } catch (e) {
       print("수락 실패: $e");
     }
@@ -139,7 +141,10 @@ class EntityPost {
     DocumentReference doc = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot ds = await transaction.get(doc);
-      if (!ds.exists) return;
+      if (!ds.exists) {
+        print("오류 : 게시물을 찾을 수 없음");
+        return;
+      }
       try {
         _loadField(ds);
       } catch (e) {
@@ -152,6 +157,7 @@ class EntityPost {
           }
         });
         _loadField(ds);
+        print("오류 발생");
       }
     });
   }
@@ -263,7 +269,7 @@ String getTimeBefore(String upTime) {
   }
 }
 
-Future<bool> addPost({required String head, required String body, required int gender,
+Future<bool> addPost({required String writerId, required String head, required String body, required int gender,
   required int maxPerson, required String time, required LLName llName, required String upTime,
   required String category, required int minAge, required int maxAge, required String writerNick,
 required bool isVoluntary}) async {
@@ -275,10 +281,9 @@ required bool isVoluntary}) async {
       if (new_post_id == -1) return false; // 업로드 실패
     });
     await ref.update({"last_id": new_post_id});
-    String uuid = await FirebaseAuth.instance.currentUser!.uid;
     await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
       "post_id": new_post_id,
-      "writer_id": uuid,
+      "writer_id": writerId,
       "head": head,
       "body": body,
       "gender": gender,

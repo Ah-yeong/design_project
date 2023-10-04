@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/Meeting/models/MeetingManager.dart';
 
 class EntityProfiles {
   var profileId;
@@ -16,7 +17,6 @@ class EntityProfiles {
   var gender;
   var textInfo;
   var post;
-  var group;
   bool isLoading = true;
   // bool isLoaded = false;
   var addr1;
@@ -43,7 +43,6 @@ class EntityProfiles {
           textInfo = ds.get("textInfo");
           mannerGroup = ds.get("mannerGroup");
           post = ds.get("post");
-          group = ds.get("group");
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
         });
@@ -63,7 +62,7 @@ class EntityProfiles {
     commute = "통학";
   }
 
-  Future<bool> addPostId() async {
+  Future<int> addPostId() async {
     try {
       int? new_post_id;
       DocumentReference<Map<String, dynamic>> ref =
@@ -77,23 +76,15 @@ class EntityProfiles {
         "post": FieldValue.arrayUnion([new_post_id]),
         //"post" : new_post_id,
       });
-      return true;
+      return Future.value(new_post_id);
     } catch (e) {
-      return false;
+      return -1;
     }
   }
 
   // 수락된 게시물 아이디 추가 (내가 속한 그룹)
-  Future<bool> addGroupId(postId) async {
-    try {
-      await FirebaseFirestore.instance.collection("UserProfile").doc(profileId.toString())
-          .update({
-        "group": FieldValue.arrayUnion([postId]),
-      });
-      return true;
-    } catch (e) {
-      return false;
-    }
+  Future<void> addGroupId(postId) async {
+    await MeetingManager().addMeetingPost(profileId.toString(), postId);
   }
 }
 

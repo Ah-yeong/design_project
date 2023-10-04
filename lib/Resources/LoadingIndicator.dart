@@ -11,7 +11,15 @@ Widget buildContainerLoading(int alpha) {
     ),
     child: Center(
         child:
-            SpinKitThreeBounce(size: 25, color: const Color(0xDDFFFFFF), duration: const Duration(milliseconds: 1200))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("데이터를 처리중이에요", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, decoration: TextDecoration.none), ),
+                SpinKitThreeBounce(size: 25, color: const Color(0xDDFFFFFF), duration: const Duration(milliseconds: 1200))
+              ],
+            )
+    ),
   );
 }
 

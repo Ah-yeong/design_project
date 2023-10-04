@@ -130,7 +130,7 @@ class _PageMyPost extends State<PageMyPost> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${entity!.getPostHead()}', // 글 제목
+                        '${entity.getPostHead()}', // 글 제목
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.start,
@@ -151,7 +151,7 @@ class _PageMyPost extends State<PageMyPost> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Icon(Icons.emoji_people, color: Colors.white, size: 14,),
-                                      Text(getMaxPersonText(entity!),
+                                      Text(getMaxPersonText(entity),
                                           style: const TextStyle(
                                               color: Colors.white, fontSize: 10)),
                                     ],
@@ -170,7 +170,7 @@ class _PageMyPost extends State<PageMyPost> {
                 children: [
                   const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),
                   Text(
-                    " ${entity!.getLLName().AddressName}",
+                    " ${entity.getLLName().AddressName}",
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                   SizedBox(height: 1,),
@@ -181,7 +181,7 @@ class _PageMyPost extends State<PageMyPost> {
                 children: [
                   const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
                   Text(
-                    getMeetTimeText(entity!),
+                    getMeetTimeText(entity.getTime()),
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                 ],
