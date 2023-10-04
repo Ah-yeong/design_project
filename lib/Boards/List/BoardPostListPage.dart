@@ -170,7 +170,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                   size: 13,
                 ),
                 Text(
-                  getMeetTimeText(entity),
+                  getMeetTimeText(entity.getTime()),
                   style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                 ),
               ],
@@ -308,8 +308,8 @@ String getAgeText(EntityPost post) {
   }
 }
 
-String getMeetTimeText(EntityPost post) {
-  Duration timeGap = DateTime.now().difference(DateTime.parse(post.getTime()));
+String getMeetTimeText(String time) {
+  Duration timeGap = DateTime.now().difference(DateTime.parse(time));
   bool isNegative = timeGap.isNegative;
   timeGap = timeGap.abs();
   String val;
