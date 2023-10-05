@@ -7,6 +7,7 @@ import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 
+import '../Resources/LoadingIndicator.dart';
 import '../Resources/resources.dart';
 
 class PageMyEndGroup extends StatefulWidget {
@@ -42,14 +43,7 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
         elevation: 1,
       ),
       backgroundColor: Colors.white,
-      body: myProfile!.isLoading ?
-      Center(
-          child: SizedBox(
-              height: 65,
-              width: 65,
-              child: CircularProgressIndicator()
-          )
-      ) :
+      body: myProfile!.isLoading ? buildLoadingProgress():
       SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: myEndGroupList.isEmpty ?
