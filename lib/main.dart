@@ -1,18 +1,19 @@
 import 'dart:async';
 
-import 'package:design_project/Auth/PageEmailVerified.dart';
-import 'package:design_project/Auth/PageResetPassword.dart';
-import 'package:design_project/Boards/List/BoardMain.dart';
-import 'package:design_project/Resources/LoadingIndicator.dart';
+import 'package:design_project/Auth/email_verified.dart';
+import 'package:design_project/Auth/reset_password.dart';
+import 'package:design_project/Resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Auth/PageSignUp.dart';
+import 'Auth/signup.dart';
 import 'Resources/resources.dart';
 import 'package:get/get.dart';
+
+import 'boards/post_list/page_hub.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 SharedPreferences? LocalStorage;
