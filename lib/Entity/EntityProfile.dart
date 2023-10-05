@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../Meeting/models/MeetingManager.dart';
+
 class EntityProfiles {
   var profileId;
   var name;
@@ -41,7 +43,6 @@ class EntityProfiles {
           textInfo = ds.get("textInfo");
           mannerGroup = ds.get("mannerGroup");
           post = ds.get("post");
-          group = ds.get("group");
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
           addr3 = ds.get("addr3");

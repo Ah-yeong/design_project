@@ -1,3 +1,4 @@
+import 'package:design_project/Profiles/pageMyEndGroup.dart';
 import 'package:design_project/Profiles/pageMyGroup.dart';
 import 'package:design_project/Profiles/pageMyPost.dart';
 import 'package:design_project/Resources/LoadingIndicator.dart';

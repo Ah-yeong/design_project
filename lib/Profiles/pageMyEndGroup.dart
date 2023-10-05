@@ -83,16 +83,16 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfile!.loadProfile().then((n) {
-      if(myProfile!.endGroup.isEmpty){
-        setState(() {});
-      } else {
-      for (var groupId in myProfile!.endGroup) {
-        EntityPost myEndGroup = EntityPost(groupId);
-        myEndGroup.loadPost().then((value) {
-          myEndGroupList.add(myEndGroup);
-          setState(() {});
-        });
-      }}
+      // if(myProfile!.endGroup.isEmpty){
+      //   setState(() {});
+      // } else {
+      // for (var groupId in myProfile!.endGroup) {
+      //   EntityPost myEndGroup = EntityPost(groupId);
+      //   myEndGroup.loadPost().then((value) {
+      //     myEndGroupList.add(myEndGroup);
+      //     setState(() {});
+      //   });
+      // }}
     });
   }
 
@@ -166,7 +166,7 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
                 children: [
                   const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
                   Text(
-                    getMeetTimeText(entity!),
+                    getMeetTimeText(entity.getTime()),
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                 ],

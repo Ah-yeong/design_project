@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Resources/resources.dart';
+import '../main.dart';
 
 class EntityPost {
   int _postId;
@@ -210,6 +211,8 @@ class EntityPost {
   int getMinAge() => _minAge;
   int getMaxAge() => _maxAge;
   bool isLoad() => _isLoaded;
+  int getViewCount() => _viewCount;
+  bool isVoluntary() => _isVoluntary;
   List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
@@ -225,6 +228,8 @@ class EntityPost {
     userList.forEach((element) => memberList.add(element["id"]));
     return memberList;
   }
+
+
 }
 
 String getTimeBefore(String upTime) {
