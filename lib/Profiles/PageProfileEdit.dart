@@ -699,7 +699,6 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                           primary: Color(0xFF6ACA9A),
                         ),
                         onPressed: () async {
-                          buildContainerLoading();
                           await _updateProfile();
                           Navigator.pop(context);
                         },
