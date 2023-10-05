@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../Boards/BoardPostPage.dart';
 import '../Boards/List/BoardPostListPage.dart';
 import '../Entity/EntityPost.dart';
 import '../Entity/EntityProfile.dart';
 import 'package:design_project/Profiles/PageProfile.dart';
 
+import '../Resources/LoadingIndicator.dart';
 import '../Resources/resources.dart';
 
 class PageMyPost extends StatefulWidget {
@@ -17,6 +19,7 @@ class PageMyPost extends StatefulWidget {
 class _PageMyPost extends State<PageMyPost> {
   EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
+  Map<String, List<EntityPost>> groupedPosts = {};
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +45,8 @@ class _PageMyPost extends State<PageMyPost> {
         elevation: 1,
       ),
       backgroundColor: Colors.white,
-      body: myProfile!.isLoading ?
-      Center(
-        child: SizedBox(
-            height: 65,
-            width: 65,
-            child: CircularProgressIndicator()
-        )
-      ) :
-      SingleChildScrollView(
+      body: myProfile!.isLoading ? buildLoadingProgress()
+      : SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: myPostList.isEmpty ?
           Column(
@@ -85,24 +81,6 @@ class _PageMyPost extends State<PageMyPost> {
                         ),
                       ),
                     ),
-                    // 신청자 리스트 출력
-                    // Column(
-                    //   children: myPostList[index]!.User.map((group) {
-                    //     return Card(
-                    //       child: GestureDetector(
-                    //         onTap: () {
-                    //           Navigator.of(context).push(MaterialPageRoute(
-                    //             builder: (context) => BoardPostPage(postId: group.getPostId()),
-                    //           ));
-                    //         },
-                    //         child: Padding(
-                    //           padding: const EdgeInsets.all(7),
-                    //           child: _buildModalSheet(group),
-                    //         ),
-                    //       ),
-                    //     );
-                    //   }).toList(),
-                    // ),
                   ],
                 );
               },
@@ -110,7 +88,6 @@ class _PageMyPost extends State<PageMyPost> {
           ],
         ),
       ),
-
     );
   }
 
@@ -123,8 +100,19 @@ class _PageMyPost extends State<PageMyPost> {
         EntityPost myPost = EntityPost(postId);
         myPost.loadPost().then((value) {
           myPostList.add(myPost);
-          setState(() {
-          });
+          if (myPostList.length == myProfile!.post.length) {
+            myPostList.sort((a, b) => a.getTime().compareTo(b.getTime()));
+
+            for (var post in myPostList) {
+              final dateKey = post.getTime().substring(0, post.getTime().indexOf(' '));
+              if (!groupedPosts.containsKey(dateKey)) {
+                groupedPosts[dateKey] = [];
+              }
+              groupedPosts[dateKey]!.add(post);
+            }
+            setState(() {
+            });
+          }
         });
       }
     });
@@ -212,18 +200,4 @@ class _PageMyPost extends State<PageMyPost> {
       ],
     );
   }
-
-  // Widget _buildModalSheet(BuildContext context, int postId) {
-  //   return SingleChildScrollView(
-  //     child: Container(
-  //         margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
-  //         decoration: BoxDecoration(
-  //           color: Colors.white,
-  //           borderRadius: BorderRadius.circular(6),
-  //         ),
-  //         child: Padding(
-  //             padding: EdgeInsets.all(13),
-  //             child: buildPostMember(profileEntity!, context))),
-  //   );
-  // }
 }
