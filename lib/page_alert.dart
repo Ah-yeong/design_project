@@ -1,4 +1,4 @@
-import 'package:design_project/Chat/chat_screen.dart';
+import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/profiles/profile_first_setting/input_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';

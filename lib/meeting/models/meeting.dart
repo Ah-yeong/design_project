@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/latlng.dart';
-import 'package:design_project/Entity/entity_post.dart';
+import 'package:design_project/entity/latlng.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../Resources/resources.dart';
+import '../../chat/chat_screen.dart';
+import '../../resources/resources.dart';
 import '../../boards/post_list/post_list.dart';
 
 class Meeting {
@@ -71,8 +72,11 @@ class Meeting {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        if (isCompleted) return;
-        // 모임 정보 화면으로 이동
+        // 모임 채팅방으로 이동
+        Get.off(() => ChatScreen(
+          postId: _meetingId,
+          members: _memberUuids,
+        ));
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

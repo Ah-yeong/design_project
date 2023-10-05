@@ -1,12 +1,12 @@
-import 'package:design_project/Meeting/models/meeting.dart';
-import 'package:design_project/Meeting/models/meeting_manager.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/meeting/models/meeting.dart';
+import 'package:design_project/meeting/models/meeting_manager.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
-import '../Boards/post.dart';
-import '../Entity/entity_post.dart';
-import '../Entity/profile.dart';
+import '../boards/post.dart';
+import '../entity/entity_post.dart';
+import '../entity/profile.dart';
 
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 import '../boards/post_list/page_hub.dart';
 import '../boards/post_list/post_list.dart';
 

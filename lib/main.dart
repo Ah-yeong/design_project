@@ -1,22 +1,24 @@
 import 'dart:async';
 
-import 'package:design_project/Auth/email_verified.dart';
-import 'package:design_project/Auth/reset_password.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/auth/email_verified.dart';
+import 'package:design_project/auth/reset_password.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Auth/signup.dart';
-import 'Resources/resources.dart';
+import 'auth/signup.dart';
+import 'entity/post_page_manager.dart';
+import 'resources/resources.dart';
 import 'package:get/get.dart';
 
 import 'boards/post_list/page_hub.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 SharedPreferences? LocalStorage;
+PostPageManager postManager = PostPageManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -314,33 +316,46 @@ class _MyHomePage extends State<MyHomePage> {
   _auth() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (FirebaseAuth.instance.currentUser != null) {
-        // 로고 페이드 아웃 및 메인으로 넘어가기
+        // postManager 로딩
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
-          setState(() {
-            _fadeOutLogo = true;
-          });
-          Timer(Duration(milliseconds: 550), () {
-            Get.off(() => BoardPageMainHub());
-          });
-        } else {
-          setState(() {
-            _fadeOutLogo = true;
-          });
-          Timer(Duration(milliseconds: 550), () {
-            Get.off(() => PageEmailVerified());
-          });
+          postManager.loadPages("");
         }
-      } else {
-        // 로고 상단으로 올리고 가입화면 표시하기
-        setState(() {
-          _splashScreenAnimated = true;
-          Timer(Duration(milliseconds: 800), () {
-            setState(() {
-              _splashScreenShow = true;
-            });
-          });
-        });
       }
+    });
+    Timer(const Duration(milliseconds: 2400), () {
+      Timer.periodic(const Duration(milliseconds: 100), (timer) {
+        if (!postManager.isLoading) {
+          timer.cancel();
+          if (FirebaseAuth.instance.currentUser != null) {
+            // 로고 페이드 아웃 및 메인으로 넘어가기
+            if (FirebaseAuth.instance.currentUser!.emailVerified) {
+              setState(() {
+                _fadeOutLogo = true;
+              });
+              Timer(Duration(milliseconds: 550), () {
+                Get.off(() => BoardPageMainHub());
+              });
+            } else {
+              setState(() {
+                _fadeOutLogo = true;
+              });
+              Timer(Duration(milliseconds: 550), () {
+                Get.off(() => PageEmailVerified());
+              });
+            }
+          } else {
+            // 로고 상단으로 올리고 가입화면 표시하기
+            setState(() {
+              _splashScreenAnimated = true;
+              Timer(Duration(milliseconds: 800), () {
+                setState(() {
+                  _splashScreenShow = true;
+                });
+              });
+            });
+          }
+        }
+      });
     });
   }
 
@@ -434,10 +449,7 @@ class _MyHomePage extends State<MyHomePage> {
         }
       });
     });
-
-    Timer(Duration(milliseconds: 2500), () {
-      _auth();
-    });
+    _auth();
   }
 
   // 조회수 쿨타임 지난 것들 로컬에서 제거

@@ -1,12 +1,12 @@
-import 'package:design_project/Entity/latlng.dart';
-import 'package:design_project/Entity/post_page_manager.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/entity/post_page_manager.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../Entity/entity_post.dart';
-import '../../Resources/resources.dart';
+import '../../entity/entity_post.dart';
+import '../../entity/latlng.dart';
+import '../../resources/resources.dart';
 import '../post.dart';
 import '../post_list/page_hub.dart';
 import '../post_list/post_list.dart';

@@ -1,8 +1,8 @@
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/entity_post.dart';
-import 'package:design_project/Resources/resources.dart';
+import 'package:design_project/entity/entity_post.dart';
+import 'package:design_project/resources/resources.dart';
 
 import 'chat_storage.dart';
 

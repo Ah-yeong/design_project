@@ -1,10 +1,10 @@
-import 'package:design_project/Profiles/completed_group.dart';
-import 'package:design_project/Profiles/my_group.dart';
-import 'package:design_project/Profiles/my_post.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/profiles/completed_group.dart';
+import 'package:design_project/profiles/my_group.dart';
+import 'package:design_project/profiles/my_post.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
-import '../Entity/profile.dart';
-import '../Entity/entity_post.dart';
+import '../entity/profile.dart';
+import '../entity/entity_post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_edit.dart';
 

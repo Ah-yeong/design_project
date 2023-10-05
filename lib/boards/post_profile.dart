@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Entity/profile.dart';
+import '../entity/profile.dart';
 import 'package:design_project/Profiles/profile_main.dart';
 
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 
 class BoardProfilePage extends StatefulWidget {
   final String profileId;

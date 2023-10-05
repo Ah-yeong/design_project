@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/latlng.dart';
+import 'package:design_project/entity/latlng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 import '../main.dart';
 
 class EntityPost {

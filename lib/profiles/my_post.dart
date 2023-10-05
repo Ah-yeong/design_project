@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../Boards/post.dart';
-import '../Entity/entity_post.dart';
-import '../Entity/profile.dart';
+import '../boards/post.dart';
+import '../entity/entity_post.dart';
+import '../entity/profile.dart';
 
-import '../Resources/loading_indicator.dart';
-import '../Resources/resources.dart';
+import '../resources/loading_indicator.dart';
+import '../resources/resources.dart';
 import '../boards/post_list/post_list.dart';
 
 class PageMyPost extends StatefulWidget {

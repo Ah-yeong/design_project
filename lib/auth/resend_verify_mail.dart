@@ -1,12 +1,10 @@
-import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Resources/resources.dart';
-import '../main.dart';
+import '../resources/resources.dart';
 
 class PageResendVerifyMail extends StatefulWidget {
   const PageResendVerifyMail({super.key});

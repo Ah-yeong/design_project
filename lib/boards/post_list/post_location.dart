@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:design_project/Boards/post.dart';
-import 'package:design_project/Entity/profile.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
-import 'package:design_project/boards/post_list/page_hub.dart';
+import 'package:design_project/boards/post.dart';
+import 'package:design_project/entity/profile.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,8 @@ import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 import 'dart:async';
 
-import '../../Entity/entity_post.dart';
+import '../../entity/entity_post.dart';
+import '../../main.dart';
 
 class BoardLocationPage extends StatefulWidget {
   const BoardLocationPage({super.key});
