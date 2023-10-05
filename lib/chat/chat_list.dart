@@ -14,7 +14,7 @@ class ChatRoomListScreen extends StatefulWidget {
   _ChatRoomListScreenState createState() => _ChatRoomListScreenState();
 }
 
-class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
+class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticKeepAliveClientMixin{
   bool isLoaded = false;
   Stream<List<ChatRoom>>? chatStream;
 
