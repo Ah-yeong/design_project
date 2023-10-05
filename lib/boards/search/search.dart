@@ -1,6 +1,6 @@
-import 'package:design_project/Resources/resources.dart';
+import 'package:design_project/resources/resources.dart';
 import 'package:get/get.dart';
-import 'package:design_project/Boards/Search/search_post_list.dart';
+import 'package:design_project/boards/search/search_post_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

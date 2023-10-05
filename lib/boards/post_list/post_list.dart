@@ -1,11 +1,11 @@
-import 'package:design_project/Boards/post.dart';
-import 'package:design_project/Boards/Search/search_post_list.dart';
-import 'package:design_project/Entity/entity_post.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
-import 'page_hub.dart';
+import 'package:design_project/boards/post.dart';
+import 'package:design_project/boards/search/search_post_list.dart';
+import 'package:design_project/entity/entity_post.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../Resources/resources.dart';
+import '../../resources/resources.dart';
+import '../../main.dart';
 
 class BoardPostListPage extends StatefulWidget {
   const BoardPostListPage({super.key});
@@ -52,7 +52,6 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
   @override
   void initState() {
     super.initState();
-    postManager.loadPages("").then((value) => setState(() {}));
     _scrollController.addListener(() {
       setState(() {
         if (_scrollController.offset + 100 < _scrollController.position.minScrollExtent &&

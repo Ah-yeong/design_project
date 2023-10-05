@@ -1,4 +1,4 @@
-import 'package:design_project/Resources/resources.dart';
+import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 

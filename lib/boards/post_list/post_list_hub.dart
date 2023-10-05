@@ -14,7 +14,6 @@ class BoardHomePage extends StatefulWidget {
 }
 
 class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  int _page = 1;
   TabController? controller;
   ScrollController? scrollController;
   bool isScrollTop = true;

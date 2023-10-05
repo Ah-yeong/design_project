@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:design_project/Resources/loading_indicator.dart';
-import 'package:design_project/Resources/resources.dart';
+import 'package:design_project/resources/loading_indicator.dart';
+import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../boards/post_list/page_hub.dart';

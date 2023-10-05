@@ -1,6 +1,6 @@
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
-import 'package:design_project/Entity/entity_post.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/entity/entity_post.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/boards/write/select_position.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:super_tooltip/super_tooltip.dart';
-import '../../Entity/latlng.dart';
-import '../../Entity/profile.dart';
-import '../../Meeting/models/meeting_manager.dart';
-import '../../Resources/resources.dart';
+import '../../entity/latlng.dart';
+import '../../entity/profile.dart';
+import '../../meeting/models/meeting_manager.dart';
+import '../../resources/resources.dart';
+import '../../main.dart';
 import '../post_list/page_hub.dart';
 
 // import 'package:google_maps_flutter/google_maps_flutter.dart';

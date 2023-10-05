@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/profile.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/entity/profile.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 import '../boards/post_list/page_hub.dart';
+import '../main.dart';
 import 'chat_screen.dart';
 import 'models/chat_room.dart';
 
@@ -13,7 +14,7 @@ class ChatRoomListScreen extends StatefulWidget {
   _ChatRoomListScreenState createState() => _ChatRoomListScreenState();
 }
 
-class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticKeepAliveClientMixin {
+class _ChatRoomListScreenState extends State<ChatRoomListScreen> {
   bool isLoaded = false;
   Stream<List<ChatRoom>>? chatStream;
 
@@ -22,6 +23,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
 
   @override
   void initState() {
+    print(myUuid);
     chatStream = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid).snapshots().asyncMap((chats) =>
         Future.wait([
           for (var room in chats['chat']) _loadRooms(false, room),
@@ -55,7 +57,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       int checkCount = 0;
       for (QueryDocumentSnapshot readBy in chatDocs) {
         List<dynamic> readByList = readBy.get("readBy");
-        if (!readByList.contains(myUuid)) {
+        if (!readByList.contains(myUuid!)) {
           // 읽지 않은 index에 도착한다면 전체 길이에서 index 값을 뺀 만큼이 읽지 않은 메시지의 개수
           room.unreadCount = chatDocs.length - checkCount;
           break;

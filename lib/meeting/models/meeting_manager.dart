@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/Entity/latlng.dart';
-import 'package:design_project/Entity/entity_post.dart';
+import 'package:design_project/entity/latlng.dart';
+import 'package:design_project/entity/entity_post.dart';
 
 import 'meeting.dart';
 

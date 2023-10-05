@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'package:design_project/Meeting/models/meeting_manager.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/meeting/models/meeting_manager.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/boards/post_list/post_list.dart';
 import 'package:flutter/material.dart';
-import '../Entity/entity_post.dart';
-import '../Entity/profile.dart';
+import '../entity/entity_post.dart';
+import '../entity/profile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:design_project/Resources/resources.dart';
-import '../Boards/post_profile.dart';
+import 'package:design_project/resources/resources.dart';
+import '../boards/post_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BoardPostPage extends StatefulWidget {

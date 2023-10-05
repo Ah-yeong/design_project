@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../Meeting/models/meeting_manager.dart';
+import '../meeting/models/meeting_manager.dart';
 
 class EntityProfiles {
   var profileId;

@@ -1,13 +1,11 @@
-import 'package:design_project/Auth/email_verified.dart';
-import 'package:design_project/Resources/loading_indicator.dart';
+import 'package:design_project/auth/email_verified.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});

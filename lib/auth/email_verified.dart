@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:design_project/Auth/resend_verify_mail.dart';
+import 'package:design_project/auth/resend_verify_mail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Resources/resources.dart';
+import '../resources/resources.dart';
 import '../main.dart';
 import '../profiles/profile_first_setting/input_form.dart';
 
