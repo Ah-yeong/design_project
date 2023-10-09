@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:design_project/boards/post.dart';
 import 'package:design_project/boards/search/search_post_list.dart';
 import 'package:design_project/entity/entity_post.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart';
 import '../../resources/resources.dart';
 import '../../main.dart';
 
@@ -17,12 +20,15 @@ class BoardPostListPage extends StatefulWidget {
 class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAliveClientMixin {
   var count = 10;
 
+  Timer? _firstLoadingTimer;
   ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     return postManager.isLoading
-        ? buildLoadingProgress()
+        ? _firstLoadingTimer!.isActive
+          ? SizedBox()
+          : buildLoadingProgress()
         : CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -52,6 +58,7 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
   @override
   void initState() {
     super.initState();
+    _initLoadedPageChecker();
     _scrollController.addListener(() {
       setState(() {
         if (_scrollController.offset + 100 < _scrollController.position.minScrollExtent &&
@@ -67,6 +74,15 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) =>
             BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())));
+  }
+
+  void _initLoadedPageChecker() {
+    _firstLoadingTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      if(!postManager.isLoading) {
+        setState(() {});
+        timer.cancel();
+      }
+    });
   }
 
   @override

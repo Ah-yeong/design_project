@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'boards/post_list/page_hub.dart';
+import 'meeting/models/location_data.dart';
 
 class PageAlert extends StatelessWidget {
   @override
@@ -44,15 +45,15 @@ class PageAlert extends StatelessWidget {
                           recvUserId: "ki654uiWotZTum8GetnSC7HTgIk2",
                         )));
               } else if (index == 4) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                          postId: 1,
-                          members: [
-                            "EM4L1plnXrOJDvRkfkX9k1DJRX32",
-                            "dBfF9GPpQqVvxY3SxNmWpdT1er43",
-                            "ki654uiWotZTum8GetnSC7HTgIk2"
-                          ],
-                        )));
+                var shareLocationManager = LocationManager();
+                // shareLocationManager.createShareLocation(43, [
+                //   "EM4L1plnXrOJDvRkfkX9k1DJRX32",
+                //   "dBfF9GPpQqVvxY3SxNmWpdT1er43",
+                //   "ki654uiWotZTum8GetnSC7HTgIk2"
+                // ]);
+                
+                //shareLocationManager.uploadMyPosition(43);
+                shareLocationManager.getAllPosition(43).then((value) => value.forEach((element) {element.printThis();}));
               } else if (index == 5) {
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => NameSignUpScreen()));
               }

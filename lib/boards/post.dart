@@ -27,7 +27,6 @@ class _BoardPostPage extends State<BoardPostPage> {
 
   final List<Marker> _markers = [];
   bool isSameId = false;
-
   static const CameraPosition _kSeoul = CameraPosition(
     target: LatLng(36.833068, 127.178419),
     zoom: 17.4746,

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:design_project/boards/post.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:design_project/resources/resources.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -230,7 +231,7 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
             Marker(markerId: MarkerId('1'), position: newLatLng, onTap: () {}, draggable: true, icon: _markerIcons[0]),
           );
         } catch (e) {
-          print(e);
+          showAlert("위치 서비스를 활성화해주세요!", context, colorError);
         }
       });
     });
