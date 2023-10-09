@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
 const Color colorSuccess = const Color(0xFF6ACA89);
@@ -103,4 +107,25 @@ extension TimestampToDateFormat on Timestamp {
     DateTime dt = this.toDate();
     return "${dateFormatter.format(dt)} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}";
   }
+}
+
+
+// 맵 스타일 변경
+void changeMapMode(GoogleMapController mapController) {
+  getJsonFile("assets/map_style.json").then((value) => mapController.setMapStyle(value));
+}
+
+// Json 디코딩
+Future<String> getJsonFile(String path) async {
+  ByteData byte = await rootBundle.load(path);
+  var list = byte.buffer.asUint8List(byte.offsetInBytes, byte.lengthInBytes);
+  return utf8.decode(list);
+}
+
+// Asset 에서 getBytes
+Future<Uint8List> getBytesFromAsset(String path, int width) async {
+  ByteData data = await rootBundle.load(path);
+  ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+  ui.FrameInfo fi = await codec.getNextFrame();
+  return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
 }

@@ -23,8 +23,8 @@ Widget buildContainerLoading(int alpha) {
   );
 }
 
-Widget buildLoadingProgress() {
+Widget buildLoadingProgress({double? size, Color? color}) {
   return Center(
-    child: SpinKitThreeBounce(size: 25, color: colorGrey, duration: const Duration(milliseconds: 1200)),
+    child: SpinKitThreeBounce(size: size ?? 25, color: color ?? colorGrey, duration: const Duration(milliseconds: 1200)),
   );
 }

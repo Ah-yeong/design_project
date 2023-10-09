@@ -27,6 +27,7 @@ class _BoardSearchPage extends State<BoardSearchPage> {
 
   @override
   void initState() {
+    super.initState();
     _searchHistory = List.empty(growable: true);
     tempCategory = CategoryList;
     itemCnt = tempCategory!.length;

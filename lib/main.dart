@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:design_project/auth/email_verified.dart';
 import 'package:design_project/auth/reset_password.dart';
+import 'package:design_project/resources/icon_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/signup.dart';
 import 'entity/post_page_manager.dart';
@@ -19,6 +21,7 @@ import 'boards/post_list/page_hub.dart';
 final navigatorKey = GlobalKey<NavigatorState>();
 SharedPreferences? LocalStorage;
 PostPageManager postManager = PostPageManager();
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -326,7 +329,7 @@ class _MyHomePage extends State<MyHomePage> {
                 _fadeOutLogo = true;
               });
               Timer(Duration(milliseconds: 500), () {
-                Get.off(() => BoardPageMainHub());
+                Get.off(() => BoardPageMainHub(), transition: Transition.fadeIn);
               });
             }
           });
@@ -427,6 +430,7 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
+    MyIcon.loadUserIcon();
     _loadStorage().then((value) {
       _handleViewCountCoolDown();
       SharedPreferences.getInstance().then((value) => LocalStorage = value);
