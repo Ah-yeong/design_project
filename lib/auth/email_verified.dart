@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:design_project/auth/resend_verify_mail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

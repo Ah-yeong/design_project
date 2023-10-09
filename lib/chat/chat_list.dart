@@ -23,7 +23,6 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
 
   @override
   void initState() {
-    print(myUuid);
     chatStream = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid).snapshots().asyncMap((chats) =>
         Future.wait([
           for (var room in chats['chat']) _loadRooms(false, room),

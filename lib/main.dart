@@ -37,11 +37,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return GetMaterialApp(
       title: 'Capstone design',
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate
-      ],
+      localizationsDelegates: [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
       supportedLocales: [
         const Locale('ko', 'KR'),
       ],
@@ -98,21 +94,21 @@ class _MyHomePage extends State<MyHomePage> {
                         duration: Duration(milliseconds: 500),
                         child: Center(
                             child: GestureDetector(
-                              onDoubleTap: () {
-                                setState(() {
-                                  _isManager = !_isManager;
-                                });
-                              },
-                              child: Text(
-                                "마음 맞는, 사람끼리",
-                                style: TextStyle(
-                                  fontSize: 35,
-                                  color: Colors.black87,
-                                  fontFamily: "logo",
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )),
+                          onDoubleTap: () {
+                            setState(() {
+                              _isManager = !_isManager;
+                            });
+                          },
+                          child: Text(
+                            "마음 맞는, 사람끼리",
+                            style: TextStyle(
+                              fontSize: 35,
+                              color: Colors.black87,
+                              fontFamily: "logo",
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )),
                       ),
                       AnimatedOpacity(
                         opacity: _splashScreenShow ? 1 : 0,
@@ -209,8 +205,7 @@ class _MyHomePage extends State<MyHomePage> {
                                           GestureDetector(
                                             child: Container(
                                               height: 18,
-                                              decoration:
-                                              BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
+                                              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: colorGrey))),
                                               child: Text(
                                                 "비밀번호 재설정",
                                                 style: TextStyle(fontSize: 14, color: colorGrey),
@@ -218,8 +213,7 @@ class _MyHomePage extends State<MyHomePage> {
                                             ),
                                             behavior: HitTestBehavior.translucent,
                                             onTap: () {
-                                              Navigator.of(context)
-                                                  .push(MaterialPageRoute(builder: (context) => PageResetPassword()));
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageResetPassword()));
                                             },
                                           ),
                                         ],
@@ -254,8 +248,7 @@ class _MyHomePage extends State<MyHomePage> {
                                           ),
                                           behavior: HitTestBehavior.translucent,
                                           onTap: () {
-                                            Navigator.of(context)
-                                                .push(MaterialPageRoute(builder: (cont) => const SignUpPage()));
+                                            Navigator.of(context).push(MaterialPageRoute(builder: (cont) => const SignUpPage()));
                                           },
                                         ),
                                       ),
@@ -323,39 +316,39 @@ class _MyHomePage extends State<MyHomePage> {
       }
     });
     Timer(const Duration(milliseconds: 2400), () {
-      Timer.periodic(const Duration(milliseconds: 100), (timer) {
-        if (!postManager.isLoading) {
-          timer.cancel();
-          if (FirebaseAuth.instance.currentUser != null) {
-            // 로고 페이드 아웃 및 메인으로 넘어가기
-            if (FirebaseAuth.instance.currentUser!.emailVerified) {
+      if (FirebaseAuth.instance.currentUser != null) {
+        // 로고 페이드 아웃 및 메인으로 넘어가기
+        if (FirebaseAuth.instance.currentUser!.emailVerified) {
+          Timer.periodic(const Duration(milliseconds: 100), (timer) {
+            if (!postManager.isLoading) {
+              timer.cancel();
               setState(() {
                 _fadeOutLogo = true;
               });
-              Timer(Duration(milliseconds: 550), () {
+              Timer(Duration(milliseconds: 500), () {
                 Get.off(() => BoardPageMainHub());
               });
-            } else {
-              setState(() {
-                _fadeOutLogo = true;
-              });
-              Timer(Duration(milliseconds: 550), () {
-                Get.off(() => PageEmailVerified());
-              });
             }
-          } else {
-            // 로고 상단으로 올리고 가입화면 표시하기
-            setState(() {
-              _splashScreenAnimated = true;
-              Timer(Duration(milliseconds: 800), () {
-                setState(() {
-                  _splashScreenShow = true;
-                });
-              });
-            });
-          }
+          });
+        } else {
+          setState(() {
+            _fadeOutLogo = true;
+          });
+          Timer(Duration(milliseconds: 550), () {
+            Get.off(() => PageEmailVerified());
+          });
         }
-      });
+      } else {
+        // 로고 상단으로 올리고 가입화면 표시하기
+        setState(() {
+          _splashScreenAnimated = true;
+          Timer(Duration(milliseconds: 800), () {
+            setState(() {
+              _splashScreenShow = true;
+            });
+          });
+        });
+      }
     });
   }
 
@@ -375,8 +368,8 @@ class _MyHomePage extends State<MyHomePage> {
 
       // Firebase 사용자 인증, 등록
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: manager ? controllerId!.text : "${controllerId!.text}@sangmyung.kr", password: controllerPw!.text);
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: manager ? controllerId!.text : "${controllerId!.text}@sangmyung.kr", password: controllerPw!.text);
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
           saveId(controllerId!.text);
@@ -434,8 +427,7 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
-    _loadStorage().then((value)
-    {
+    _loadStorage().then((value) {
       _handleViewCountCoolDown();
       SharedPreferences.getInstance().then((value) => LocalStorage = value);
       setState(() {
@@ -455,10 +447,11 @@ class _MyHomePage extends State<MyHomePage> {
   // 조회수 쿨타임 지난 것들 로컬에서 제거
   _handleViewCountCoolDown() {
     for (String key in _localdb!.getKeys()) {
-      if(key.contains(PREFIX_COOL)) {
+      if (key.contains(PREFIX_COOL)) {
         int now = DateTime.now().millisecondsSinceEpoch;
         int dbTime = _localdb!.getInt(key)!;
-        if(now - dbTime > 1000 * 60 * 30 ) { // 1000 (1초) * 60 (1분) * 30 (30분)
+        if (now - dbTime > 1000 * 60 * 30) {
+          // 1000 (1초) * 60 (1분) * 30 (30분)
           _localdb!.remove(key);
         }
       }

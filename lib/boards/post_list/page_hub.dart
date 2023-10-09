@@ -160,7 +160,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
     myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
     myProfileEntity!.loadProfile();
     myUuid = FirebaseAuth.instance.currentUser!.uid;
-    print(myUuid);
+    if ( postManager.isLoading ) postManager.loadPages("").then((_) => setState(() {}));
     _pageController = PageController();
 
   }
