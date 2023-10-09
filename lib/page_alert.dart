@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'boards/post_list/page_hub.dart';
-import 'meeting/models/location_data.dart';
+import 'meeting/models/location_manager.dart';
 
 class PageAlert extends StatelessWidget {
   @override
@@ -46,14 +46,13 @@ class PageAlert extends StatelessWidget {
                         )));
               } else if (index == 4) {
                 var shareLocationManager = LocationManager();
-                // shareLocationManager.createShareLocation(43, [
-                //   "EM4L1plnXrOJDvRkfkX9k1DJRX32",
-                //   "dBfF9GPpQqVvxY3SxNmWpdT1er43",
-                //   "ki654uiWotZTum8GetnSC7HTgIk2"
-                // ]);
-                
+                shareLocationManager.createShareLocation(43, postManager.list[postManager.getIndexByPostId(43)].getLLName(), [
+                  "EM4L1plnXrOJDvRkfkX9k1DJRX32",
+                  "dBfF9GPpQqVvxY3SxNmWpdT1er43",
+                  "ki654uiWotZTum8GetnSC7HTgIk2"
+                ]);
                 //shareLocationManager.uploadMyPosition(43);
-                shareLocationManager.getAllPosition(43).then((value) => value.forEach((element) {element.printThis();}));
+                //shareLocationManager.getAllPosition(43).then((value) => value.forEach((element) {element.printThis();}));
               } else if (index == 5) {
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => NameSignUpScreen()));
               }
