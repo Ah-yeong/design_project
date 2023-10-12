@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../boards/post_list/page_hub.dart';
-import '../../boards/post_list/post_location.dart';
 import '../../entity/latlng.dart';
 import '../../entity/profile.dart';
 import 'location_data.dart';
@@ -23,27 +22,22 @@ class LocationManager {
   }
 
   // 자신의 위치 업로드
-  Future<Position?> uploadMyPosition(int meetingId, {bool? isOnlyTesting}) async {
-    Position? position;
+  Future<void> uploadMyPosition(int meetingId, LatLng latLng, {bool? isOnlyTesting}) async {
     if (!myUuid!.contains("dBfF9GPpQqVvxY3SxNmWpdT1er43")) isOnlyTesting = false;
-    await determinePosition().then((pos) async {
-      position = pos;
-      try {
-        DocumentReference _locationInstance = _instance.doc(meetingId.toString());
-        FirebaseFirestore.instance.runTransaction((transaction) => transaction.get(_locationInstance).then((snapshot) async {
-          transaction.update(_locationInstance, {
-            myUuid!: {
-              "nickname": snapshot.get(myUuid!)["nickname"],
-              "latitude": isOnlyTesting == true ? 36.831619 : pos.latitude,
-              "longitude": isOnlyTesting == true ? 127.174704 : pos.longitude,
-              "timestamp": pos.timestamp,
-            }
-          });
-        }));
-      } catch (e) {
-      }
-    });
-    return Future.value(position);
+    try {
+      DocumentReference _locationInstance = _instance.doc(meetingId.toString());
+      await FirebaseFirestore.instance.runTransaction((transaction) => transaction.get(_locationInstance).then((snapshot) async {
+        transaction.update(_locationInstance, {
+          myUuid!: {
+            "nickname": snapshot.get(myUuid!)["nickname"],
+            "latitude": isOnlyTesting == true ? 36.831619 : latLng.latitude,
+            "longitude": isOnlyTesting == true ? 127.174704 : latLng.longitude,
+          }
+        });
+      }));
+    } catch (e) {
+    }
+    return;
   }
 
   Future<LocationGroupData?> getLocationGroupData(int meetingId) async {
@@ -65,8 +59,7 @@ class LocationManager {
     for (String uuid in memberList) {
       try {
         Map<String, dynamic> data = snapshot.get(uuid);
-        locationList.add(LocationData(data["latitude"], data["longitude"],
-            data["timestamp"] != null ? (data["timestamp"] as Timestamp).toDate() : null, uuid, data["nickname"]));
+        locationList.add(LocationData(data["latitude"], data["longitude"], uuid, data["nickname"]));
       } catch (e) {
         print(e);
       }

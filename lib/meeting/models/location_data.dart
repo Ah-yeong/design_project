@@ -6,16 +6,15 @@ import '../../entity/latlng.dart';
 class LocationData {
   double? _latitude;
   double? _longitude;
-  DateTime? _timestamp;
   String _uuid;
   String _nickname;
 
-  LocationData(this._latitude, this._longitude, this._timestamp, this._uuid, this._nickname);
+  LocationData(this._latitude, this._longitude, this._uuid, this._nickname);
 
-  bool isValidPosition() => _latitude == null || _longitude == null || _timestamp == null;
+  bool isValidPosition() => _latitude == null || _longitude == null;
 
   void printThis() {
-    print("[Debug] - latitude : $_latitude   longitude : $_longitude   timestamp : $_timestamp   uuid : $_uuid   nickname : $_nickname\n");
+    print("[Debug] - latitude : $_latitude   longitude : $_longitude   uuid : $_uuid   nickname : $_nickname\n");
   }
 }
 
@@ -31,9 +30,11 @@ class LocationGroupData {
     if ( _userLocationList == null ) return markerList;
     for (int i = 0; i < _userLocationList!.length; i++) {
       if (!_userLocationList![i].isValidPosition()){
-        markerList.add(Marker(markerId: MarkerId("${i+1}")
-            , position: LatLng(_userLocationList![i]._latitude!, _userLocationList![i]._longitude!)
-            , icon: _userLocationList![i]._uuid == myUuid! ? MyIcon.my_position : MyIcon.randomIcon(startIndex: 1)));
+        if ( _userLocationList![i]._uuid != myUuid!) {
+          markerList.add(Marker(markerId: MarkerId("${i+1}")
+              , position: LatLng(_userLocationList![i]._latitude!, _userLocationList![i]._longitude!)
+              , icon: MyIcon.randomIcon(startIndex: 1)));
+        }
       }
     }
     return markerList;
