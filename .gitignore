@@ -135,6 +135,7 @@ app.*.symbols
 !.vscode/settings.json
 
 #etc
+keystore/
 test/
 web/
 linux/
