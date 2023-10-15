@@ -1145,7 +1145,7 @@ class _BoardSearchListPage extends State<BoardSearchListPage> {
 String getDistanceString(double dist) {
   if (dist > 1000) {
     dist /= 1000;
-    return dist.toStringAsFixed(1) + "KM";
+    return dist.toStringAsFixed(1) + " km";
   }
-  return dist.toStringAsFixed(0) + "M";
+  return dist.toStringAsFixed(0) + " m";
 }

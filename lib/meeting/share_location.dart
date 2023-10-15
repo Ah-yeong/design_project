@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:design_project/boards/post.dart';
 import 'package:design_project/boards/search/search_post_list.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/meeting/models/location_data.dart';
@@ -13,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../entity/profile.dart';
 import '../resources/icon_set.dart';
 import 'models/location_manager.dart';
 
@@ -21,9 +23,9 @@ class PageShareLocation extends StatefulWidget {
   State<StatefulWidget> createState() => _PageShareLocation();
 }
 
-class _PageShareLocation extends State<PageShareLocation>{
+class _PageShareLocation extends State<PageShareLocation> {
   // 인자 전달받기
-  var meetingId = Get.arguments;
+  var _meetingId = Get.arguments;
 
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   LocationManager _locManager = LocationManager();
@@ -32,8 +34,11 @@ class _PageShareLocation extends State<PageShareLocation>{
   bool _groupListLoading = true;
   bool _myLocationLoading = true;
 
+  List<EntityProfiles> _memberProfiles = [];
+
   Timer? _locationUpdateTimer;
   Timer? _myLocationTimer;
+  bool isVisibleMembers = true;
 
   final Queue<LatLng> _myLocationQueue = Queue();
   LatLng? myPosition;
@@ -52,7 +57,7 @@ class _PageShareLocation extends State<PageShareLocation>{
             backgroundColor: Colors.white,
             toolbarHeight: 40,
             title: Text(
-              "${meetingId == null ? "모임원 위치 찾기" : "위치 공유 : ${postManager.list[postManager.getIndexByPostId(meetingId)].getPostHead()}"}",
+              "${_meetingId == null ? "모임원 위치 찾기" : "위치 공유 : ${postManager.list[postManager.getIndexByPostId(_meetingId)].getPostHead()}"}",
               style: const TextStyle(fontSize: 16.5, color: Colors.black),
             ),
             leading: BackButton(
@@ -60,39 +65,144 @@ class _PageShareLocation extends State<PageShareLocation>{
             ),
           ),
           body: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    _groupListLoading || _myLocationLoading ? SizedBox() : Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorLightGrey)
-                      ),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 3 / 8,
-                      child: GoogleMap(
-
-                        markers: Set.from(_positionMarkers),
-                        mapType: MapType.normal,
-                        initialCameraPosition: CameraPosition(
-                          target: _initCameraPosition,
-                          zoom: 16.75,
+            bottom: false,
+            child: _groupListLoading || _myLocationLoading
+                ? SizedBox()
+                : Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(border: Border.all(color: colorLightGrey)),
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: GoogleMap(
+                          markers: Set.from(_positionMarkers),
+                          mapType: MapType.normal,
+                          initialCameraPosition: CameraPosition(
+                            target: _initCameraPosition,
+                            zoom: 16.75,
+                          ),
+                          onMapCreated: (GoogleMapController controller) {
+                            if (!_controller.isCompleted) _controller.complete(controller);
+                            changeMapMode(controller);
+                          },
+                          scrollGesturesEnabled: true,
+                          myLocationButtonEnabled: false,
+                          mapToolbarEnabled: false,
                         ),
-                        onMapCreated: (GoogleMapController controller) {
-                          if (!_controller.isCompleted) _controller.complete(controller);
-                          changeMapMode(controller);
-                        },
-                        scrollGesturesEnabled: true,
-                        myLocationButtonEnabled: false,
-                        mapToolbarEnabled: false,
                       ),
-                    ),
-                    if (!(_groupListLoading || _myLocationLoading)) Text("약속 장소까지 ${getDistanceString(Geolocator.distanceBetween(myPosition!.latitude, myPosition!.longitude, _initCameraPosition.latitude, _initCameraPosition.longitude))}"),
-                    if (!(_groupListLoading || _myLocationLoading)) Text("myPosData\nlatitude : ${myPosition?.latitude}\nlongitude : ${myPosition?.longitude}"),
-                  ],
-                ),
-              )
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 7),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  isVisibleMembers = !isVisibleMembers;
+                                });
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                decoration:
+                                    BoxDecoration(borderRadius: BorderRadius.circular(7), border: Border.all(), color: colorLightGrey.withAlpha(190)),
+                                height: 35,
+                                child: Center(
+                                  child: Icon(isVisibleMembers ? Icons.arrow_downward : Icons.arrow_upward),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 50),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: AnimatedCrossFade(
+                                firstChild: Container(
+                                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 3 / 8, minHeight: 100),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: colorGrey.withAlpha(220)),
+                                    color: Colors.white.withAlpha(235),
+                                  ),
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      double dist = _locationGroupList!.getDistance(_memberProfiles[index].profileId);
+                                      return Padding(
+                                        padding: EdgeInsets.all(5),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: Row(
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/userImage.png",
+                                                    width: 20,
+                                                    height: 20,
+                                                  ),
+                                                  Text(
+                                                    "  ${_memberProfiles[index].name}",
+                                                    overflow: TextOverflow.clip,
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    "약속 장소까지",
+                                                    style: TextStyle(fontSize: 13),
+                                                  ),
+                                                  Text(
+                                                    "${dist > 200 ? "150m 이상" : dist == -1 ? "알 수 없음" : getDistanceString(dist)}",
+                                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Flexible(
+                                              flex: 1,
+                                              fit: FlexFit.loose,
+                                              child: Container(
+                                                width: 70,
+                                                height: 30,
+                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color:
+                                                dist == -1 ? Colors.grey : dist < 30 ? colorSuccess :  Colors.indigoAccent),
+                                                child: Center(
+                                                  child: Text(
+                                                    "${dist == -1 ? "미공개" : dist < 30 ? "도착" : "이동중"}",
+                                                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    itemCount: _memberProfiles.length,
+                                    padding: EdgeInsets.all(10),
+                                    separatorBuilder: (BuildContext context, int index) {
+                                      return Divider(
+                                        thickness: 1,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                secondChild: SizedBox(),
+                                crossFadeState: isVisibleMembers ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                                duration: Duration(milliseconds: 750),
+                                sizeCurve: Curves.decelerate,
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
           ),
         ),
         if (_groupListLoading) buildContainerLoading(135)
@@ -110,7 +220,7 @@ class _PageShareLocation extends State<PageShareLocation>{
   void _initMyLocation() {
     int i = 0;
     Timer.periodic(Duration(milliseconds: 200), (timer) async {
-      if ( i >= 4 ) timer.cancel();
+      if (i >= 4) timer.cancel();
       i += 1;
       await determinePosition(LocationAccuracy.best).then((position) {
         _myLocationQueue.add(LatLng(position.latitude, position.longitude));
@@ -139,13 +249,13 @@ class _PageShareLocation extends State<PageShareLocation>{
   void _setAveragePosition() {
     double lat = 0, lng = 0;
     _myLocationQueue.forEach((locationValue) {
-      lat += locationValue.latitude; lng += locationValue.longitude;
+      lat += locationValue.latitude;
+      lng += locationValue.longitude;
     });
     myPosition = LatLng(lat / 5, lng / 5);
     _positionMarkers.removeWhere((element) => element.markerId.value == "myPos");
-    _positionMarkers.add(Marker(markerId: MarkerId("myPos")
-        , position: LatLng(myPosition!.latitude, myPosition!.longitude)
-        , icon: MyIcon.my_position));
+    _positionMarkers
+        .add(Marker(markerId: MarkerId("myPos"), position: LatLng(myPosition!.latitude, myPosition!.longitude), icon: MyIcon.my_position));
     // _setCameraPosition(myPosition!);
     setState(() {});
   }
@@ -170,10 +280,10 @@ class _PageShareLocation extends State<PageShareLocation>{
   }
 
   void _uploadPositionAndReload() {
-    _locManager.uploadMyPosition(meetingId, myPosition ?? LatLng(0, 0), isOnlyTesting: true).then((value) {
+    _locManager.uploadMyPosition(_meetingId, myPosition ?? LatLng(0, 0), isOnlyTesting: true).then((value) {
       Future.delayed(Duration(milliseconds: 100), () {
-        if(mounted) {
-          _loadMeetingPosition().then((value) => setState((){}));
+        if (mounted) {
+          _loadMeetingPosition().then((value) => setState(() {}));
         }
       });
     });
@@ -183,23 +293,26 @@ class _PageShareLocation extends State<PageShareLocation>{
     _positionMarkers.retainWhere((marker) {
       return marker.markerId.value == "myPos";
     });
-    await _locManager.getLocationGroupData(meetingId).then((groupData) {
+    await _locManager.getLocationGroupData(_meetingId).then((groupData) async {
       _locationGroupList = groupData;
 
-      if ( _locationGroupList != null ) {
+      if (_locationGroupList != null) {
         // initMarkers
         _positionMarkers.add(_locationGroupList!.getMeetingLocationMarker());
         _positionMarkers.addAll(_locationGroupList!.getMapMarkerList());
 
         // initCameraPosition
-        if ( _initFlag ) {
+        if (_initFlag) {
           _initCameraPosition = _locationGroupList!.getMeetingLocationMarker().position;
         }
       }
-      if ( _initFlag ) {
-        setState(() {
-          _groupListLoading = false;
-          _initFlag = false;
+      if (_initFlag) {
+        _locationGroupList!.getProfiles().then((profileList) {
+          _memberProfiles = profileList;
+          setState(() {
+            _groupListLoading = false;
+            _initFlag = false;
+          });
         });
       }
     });

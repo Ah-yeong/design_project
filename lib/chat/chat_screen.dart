@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/chat/models/chat_storage.dart';
 import 'package:design_project/entity/profile.dart';
+import 'package:design_project/main.dart';
+import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import '../boards/post_list/page_hub.dart';
@@ -39,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
+    isInChat = true;
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId.toString());
     _savedChat!.init().then((value) {
       setState(() {
@@ -48,13 +53,16 @@ class _ChatScreenState extends State<ChatScreen> {
     if (recvUserId != null) {
       recvUser = EntityProfiles(recvUserId);
       recvUser.loadProfile().then((value) {
-        setState(() {
+        FCMController.chatRoomName = recvUser.name;
+            setState(() {
           _isLoaded = true;
         });
       });
     } else {
       if (members == null) {
+        FCMController.chatRoomName = "[Post]$postId";
         _initGroupChat().then((value) => setState(() => _isLoaded = true));
+
       } else {
         _isLoaded = true;
       }
@@ -65,6 +73,13 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     updateChatList(myUuid!);
+    if ( nestedChatOpenSignal ) {
+      nestedChatOpenSignal = false;
+    } else {
+      FCMController.chatRoomName = "";
+      isInChat = false;
+    }
+
     super.dispose();
   }
 

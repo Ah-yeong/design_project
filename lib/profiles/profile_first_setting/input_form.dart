@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:design_project/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -1107,6 +1108,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'addr1': selectedSiDo,
         'addr2': selectedSiGunGu,
         'addr3': selectedDong,
+        'fcmToken' : myToken,
       });
       // print('Profile data updated successfully.');
     } catch (e) {

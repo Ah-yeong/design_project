@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../boards/post_list/page_hub.dart';
+import '../entity/profile.dart';
 import 'models/chat_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,9 +42,12 @@ class _ChatMessageState extends State<ChatMessage> {
   late String sendUserId;
   bool isFirstChatted = true;
 
+  Map<String, EntityProfiles> _memberProfiles = {};
+
   bool calculateChecker = false;
   bool spLoaded = false;
   bool dbLoaded = false;
+  bool profileLoaded = false;
 
   FocusNode? myFocus;
   late ChatStorage? _savedChat;
@@ -51,18 +56,36 @@ class _ChatMessageState extends State<ChatMessage> {
   void initState() {
     super.initState();
     myFocus = FocusNode();
+
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId!.toString());
     _savedChat!.init().then((value) => setState(() {
           spLoaded = true;
           _savedChat!.load();
         }));
     _initDatabases().then((value) => setState(() => dbLoaded = true));
+    _loadProfiles().then((value) => setState(() => profileLoaded = true));
   }
 
   @override
   void dispose() {
     _chatController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProfiles() async {
+    EntityProfiles profile;
+    if ( isGroupChat ) {
+      await Future.forEach(members!, (uuid) async {
+        profile = EntityProfiles(uuid);
+        await profile.loadProfile();
+        _memberProfiles[profile.profileId] = profile;;
+      });
+    } else {
+      profile = EntityProfiles(recvUserId);
+      await profile.loadProfile();
+      _memberProfiles[profile.profileId] = profile;
+    }
+    return;
   }
 
   Future<void> _initDatabases() async {
@@ -118,10 +141,25 @@ class _ChatMessageState extends State<ChatMessage> {
     }
     _chatController.clear();
     myFocus!.requestFocus();
+
+    FCMController fcm = FCMController();
+    EntityProfiles? profile;
     if (isGroupChat) {
-      for (String member in members!) updateChatList(member);
+      for (String member in members!) {
+        updateChatList(member);
+
+        if(member == myUuid!) continue;
+        profile = _memberProfiles[member]!;
+        fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, clickAction: {
+          "chat_id" : postId.toString(),
+          "is_group_chat" : "true",
+          "type" : "chat",
+        }).then((value) => print(value));
+      }
     } else {
       updateChatList(recvUserId!);
+      profile = _memberProfiles[recvUserId!]!;
+      fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, clickAction: {"chat_id" : myProfileEntity!.profileId, "type" : "chat",}).then((value) => print(value));
     }
 
     //savedChatData.add(MessageModel(senderUid: sendUserId, message: message, timestamp: timestamp.toString(), nickName: myProfileEntity.name).toMap());
@@ -193,7 +231,7 @@ class _ChatMessageState extends State<ChatMessage> {
     //     });
     //   }
     // });
-    return !(spLoaded && dbLoaded)
+    return !(spLoaded && dbLoaded && profileLoaded)
         ? buildLoadingProgress()
         : SafeArea(
             child: Column(
@@ -399,7 +437,7 @@ class _ChatMessageState extends State<ChatMessage> {
                       maxLengthEnforcement: MaxLengthEnforcement.none,
                       maxLines: 1,
                       cursorColor: colorGrey,
-                      textInputAction: TextInputAction.send,
+                      textInputAction: TextInputAction.newline,
                       decoration: InputDecoration(
                         counterText: '',
                         hintText: '',
