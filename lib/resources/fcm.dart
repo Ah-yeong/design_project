@@ -71,7 +71,7 @@ class FCMController {
       if (_response!.statusCode == 200) {
         return null;
       } else {
-        if(resend != null && !resend) {
+        if(resend == null) {
           await tokenTimestampCheck();
           String? result = await sendMessage(userToken: userToken, title: title, body: body, clickAction: clickAction, resend: true);
           return result;
