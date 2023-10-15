@@ -63,6 +63,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                     Expanded(
                         child: GestureDetector(
                             onTap: () => _onTappedItem(0),
+                            behavior: HitTestBehavior.translucent,
                             child: SizedBox(
                                 height: 50,
                                 width: 50,
@@ -73,6 +74,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                     ),
                     Expanded(
                         child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () => _onTappedItem(1),
                             child: SizedBox(
                                 height: 50,
@@ -84,6 +86,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                     ),
                     Expanded(
                         child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () => _onTappedItem(2),
                             child: SizedBox(
                                 height: 50,
@@ -95,6 +98,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                     ),
                     Expanded(
                         child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () => _onTappedItem(3),
                             child: SizedBox(
                                 height: 50,

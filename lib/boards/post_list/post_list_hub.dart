@@ -51,6 +51,7 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
                               width: 40,
                               height: 50,
                               child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
                                   onTap: () async {
                                     Navigator.of(context)
                                         .push(MaterialPageRoute(builder: (context) => BoardSearchPage()));
@@ -61,6 +62,7 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
                               width: 40,
                               height: 50,
                               child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
                                   onTap: () {
                                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => PageSettings()));
                                   },
