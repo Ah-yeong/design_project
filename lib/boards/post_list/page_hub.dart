@@ -1,11 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/chat/chat_list.dart';
+import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/profiles/profile_main.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:design_project/boards/post_list/post_list_hub.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../main.dart';
 import '../../page_alert.dart';
@@ -153,15 +157,46 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
       _pageController!.animateToPage(idx, duration: Duration(milliseconds: 500), curve: Curves.easeOutCubic);
     });
   }
+  
+  Future<void> _myProfileLoad() async {
+    myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
+    DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+    await reference.get().then((ds) async {
+      await myProfileEntity!.loadProfile();
+    });
+    return;
+  }
 
   @override
   void initState() {
     super.initState();
-    myProfileEntity = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    myProfileEntity!.loadProfile();
-    myUuid = FirebaseAuth.instance.currentUser!.uid;
+
+    _myProfileLoad().then((value) => setupGetMessages());
+
     if ( postManager.isLoading ) postManager.loadPages("").then((_) => setState(() {}));
     _pageController = PageController();
 
+  }
+
+  Future<void> setupGetMessages() async {
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    final String CHAT_ID = 'chat_id';
+    if (message.data[CHAT_ID] != null) {
+      if (message.data['is_group_chat'] != null) {
+        int postId = int.parse(message.data[CHAT_ID]);
+        Get.to(() => ChatScreen(postId: postId));
+      } else {
+        Get.to(() => ChatScreen(recvUserId: message.data[CHAT_ID],));
+      }
+    }
   }
 }

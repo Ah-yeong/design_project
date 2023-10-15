@@ -122,6 +122,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () {
                                   Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                    isInChat = true;
                                     if (list[index].isGroupChat) {
                                       return ChatScreen(
                                         postId: list[index].postId,
@@ -131,7 +132,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                         recvUserId: list[index].recvUserId,
                                       );
                                     }
-                                  }));
+                                  }, settings: ModalRoute.of(context)!.settings)).then((_) => isInChat = false);
                                 },
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,

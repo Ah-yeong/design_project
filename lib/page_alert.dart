@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/profiles/profile_first_setting/input_form.dart';
+import 'package:design_project/resources/fcm.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,6 +29,7 @@ class PageAlert extends StatelessWidget {
             onTap: () async {
               if (index == 0) {
                 await FirebaseAuth.instance.signOut().then((value) {
+                  FCMController()..removeUserTokenDB();
                   Get.off(() => MyHomePage());
                 });
               } else if (index == 1) {
@@ -35,22 +38,17 @@ class PageAlert extends StatelessWidget {
                           recvUserId: "EM4L1plnXrOJDvRkfkX9k1DJRX32",
                         )));
               } else if (index == 2) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                          recvUserId: "dBfF9GPpQqVvxY3SxNmWpdT1er43",
-                        )));
+                  FCMController fcmController = FCMController();
+                  fcmController.showChatNotificationSnackBar(title: "title", body: "body", clickActionValue: {"chat_id" : "f3jtqz6Y7iae1fQkdmsUpUsZeHt1"});
               } else if (index == 3) {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                          recvUserId: "ki654uiWotZTum8GetnSC7HTgIk2",
-                        )));
+                //FirebaseFirestore.instance.collection("test").doc("test").set({"token" : myToken});
               } else if (index == 4) {
-                var shareLocationManager = LocationManager();
-                shareLocationManager.createShareLocation(43, postManager.list[postManager.getIndexByPostId(43)].getLLName(), [
-                  "EM4L1plnXrOJDvRkfkX9k1DJRX32",
-                  "dBfF9GPpQqVvxY3SxNmWpdT1er43",
-                  "ki654uiWotZTum8GetnSC7HTgIk2"
-                ]);
+                // var shareLocationManager = LocationManager();
+                // shareLocationManager.createShareLocation(43, postManager.list[postManager.getIndexByPostId(43)].getLLName(), [
+                //   "EM4L1plnXrOJDvRkfkX9k1DJRX32",
+                //   "dBfF9GPpQqVvxY3SxNmWpdT1er43",
+                //   "ki654uiWotZTum8GetnSC7HTgIk2"
+                // ]);
                 //shareLocationManager.uploadMyPosition(43);
                 //shareLocationManager.getAllPosition(43).then((value) => value.forEach((element) {element.printThis();}));
               } else if (index == 5) {
@@ -77,11 +75,11 @@ class PageAlert extends StatelessWidget {
       case 1:
         return "부계정과 대화하기";
       case 2:
-        return "본계정과 대화하기";
+        return "푸시전송";
       case 3:
-        return "세번째 계정과 대화하기";
+        return "getToken";
       case 4:
-        return "그룹채팅 대화하기 (본,부1,부2)";
+        return "shareLocationManager.createShareLocation";
       case 5:
         return "프로필 재설정";
     }

@@ -1,31 +1,81 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/auth/email_verified.dart';
 import 'package:design_project/auth/reset_password.dart';
+import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/icon_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/signup.dart';
 import 'entity/post_page_manager.dart';
+import 'entity/profile.dart';
 import 'resources/resources.dart';
 import 'package:get/get.dart';
 
 import 'boards/post_list/page_hub.dart';
 
+
+
 final navigatorKey = GlobalKey<NavigatorState>();
+
 SharedPreferences? LocalStorage;
 PostPageManager postManager = PostPageManager();
+NotificationSettings? notificationSettings;
+String? myToken;
+String? accessToken;
 
+bool isInChat = false;
+bool nestedChatOpenSignal = false;
+
+// 백그라운드 푸시알림 핸들러
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // To do..
+}
+
+// 서버 토큰 갱신
+Future<void> tokenTimestampCheck() async {
+  DocumentReference ref = FirebaseFirestore.instance.collection("Token").doc("accessToken");
+  DocumentSnapshot snapshot = await ref.get();
+  if (snapshot.exists) {
+    try {
+      Timestamp lastUploadTime = snapshot.get("timestamp") as Timestamp;
+      Timestamp now = Timestamp.now();
+      if ( now.millisecondsSinceEpoch - lastUploadTime.millisecondsSinceEpoch > 1000 * 2700 ) {
+        // 3600 = 1시간, 2700 = 45분
+        FCMController controller = FCMController();
+        AccessToken token = await controller.getAccessToken();
+        ref.set({"tokenValue" : token.data, "timestamp" : now});
+      }
+      accessToken = snapshot.get("tokenValue");
+    } catch (e) {
+      print("오류 : 필드를 찾을 수 없음");
+    }
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 파이어베이스 초기화
   await Firebase.initializeApp();
+
+  // 알림 설정 상태
+  notificationSettings = await FirebaseMessaging.instance.requestPermission(
+      badge: true,
+      alert: true,
+      sound: true
+  );
+
+  // 로컬 알림 세팅
+  // FCMController.init();
   runApp(const MyApp());
 }
 
@@ -40,6 +90,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return GetMaterialApp(
       title: 'Capstone design',
+      navigatorKey: navigatorKey,
       localizationsDelegates: [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
       supportedLocales: [
         const Locale('ko', 'KR'),
@@ -307,14 +358,13 @@ class _MyHomePage extends State<MyHomePage> {
     );
   }
 
-  //test
-
   _auth() {
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () async {
       if (FirebaseAuth.instance.currentUser != null) {
         // postManager 로딩
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           postManager.loadPages("");
+          await _initializeFCM();
         }
       }
     });
@@ -323,7 +373,7 @@ class _MyHomePage extends State<MyHomePage> {
         // 로고 페이드 아웃 및 메인으로 넘어가기
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Timer.periodic(const Duration(milliseconds: 100), (timer) {
-            if (!postManager.isLoading) {
+            if (!postManager.isLoading && myToken != null) {
               timer.cancel();
               setState(() {
                 _fadeOutLogo = true;
@@ -373,6 +423,7 @@ class _MyHomePage extends State<MyHomePage> {
       try {
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: manager ? controllerId!.text : "${controllerId!.text}@sangmyung.kr", password: controllerPw!.text);
+        await _initializeFCM();
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
           Get.off(() => const BoardPageMainHub());
           saveId(controllerId!.text);
@@ -430,6 +481,9 @@ class _MyHomePage extends State<MyHomePage> {
     super.initState();
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
+
+    // 서버 토큰 갱신
+    tokenTimestampCheck();
     MyIcon.loadUserIcon();
     _loadStorage().then((value) {
       _handleViewCountCoolDown();
@@ -460,5 +514,52 @@ class _MyHomePage extends State<MyHomePage> {
         }
       }
     }
+  }
+
+  _initializeFCM() async {
+    // FCM 토큰 받아오기
+    myUuid = FirebaseAuth.instance.currentUser!.uid;
+    myToken = await FirebaseMessaging.instance.getToken();
+    try {
+      DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+      await reference.update({"fcmToken" : myToken});
+    } catch (e) {
+      if ( e.toString().contains("document was not found")) {
+        FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
+      }
+    }
+
+
+    // 토큰 리프레시
+    FirebaseMessaging.instance.onTokenRefresh
+        .listen((fcmToken) async {
+      myToken = fcmToken;
+      myProfileEntity!.fcmToken = fcmToken;
+      DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+      await reference.get().then((ds) async {
+        await reference.update({"fcmToken" : fcmToken});
+      });
+    })
+        .onError((err) {
+      // Error getting token
+    });
+    // 백그라운드 푸시알림
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // 포어그라운드 푸시알림
+    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+      if (message != null) {
+        if (message.notification != null) {
+          if (message.data.containsKey("type")) {
+            String type = message.data["type"];
+            if (type == "chat") {
+              var fcm = FCMController();
+              fcm.showChatNotificationSnackBar(title: message.notification!.title!, body: message.notification!.body!, clickActionValue: message.data);
+            }
+            // else if ...
+          }
+        }
+      }
+    });
   }
 }

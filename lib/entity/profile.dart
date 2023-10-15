@@ -23,6 +23,7 @@ class EntityProfiles {
   var addr1;
   var addr2;
   var addr3;
+  var fcmToken;
 
   EntityProfiles(var this.profileId) {}
 
@@ -46,6 +47,7 @@ class EntityProfiles {
           addr1 = ds.get("addr1");
           addr2 = ds.get("addr2");
           addr3 = ds.get("addr3");
+          fcmToken = ds.get("fcmToken");
         });
     isLoading = false;
   }

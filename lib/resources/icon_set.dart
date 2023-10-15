@@ -22,7 +22,6 @@ class MyIcon {
             .then((value) => _userIcon[i] = BitmapDescriptor.fromBytes(value));
       }
 
-      print("length : ${_userIcon.length}");
       isLoading = false;
     }
     return;
