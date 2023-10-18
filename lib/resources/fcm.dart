@@ -95,23 +95,6 @@ class FCMController {
     return null;
   }
 
-  Future<AccessToken> getAccessToken() async {
-    final serviceAccount = await ServiceAccount.getServiceAccount();
-
-    final accountCredentials = ServiceAccountCredentials.fromJson({
-      "private_key_id" : serviceAccount.privateKeyId,
-      "private_key" : serviceAccount.privateKey,
-      "client_email" : serviceAccount.clientEmail,
-      "client_id" : serviceAccount.clientId,
-      "type" : serviceAccount.type,
-    });
-
-    final scopes = ["https://www.googleapis.com/auth/firebase.messaging"];
-
-    final AuthClient authClient = await clientViaServiceAccount(accountCredentials, scopes)..close();
-    return authClient.credentials.accessToken;
-  }
-
   Future<void> removeUserTokenDB() async {
     FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).update({"fcmToken" : "logOut"});
   }

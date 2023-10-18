@@ -1,23 +1,21 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/alert/models/alert_manager.dart';
-import 'package:design_project/entity/profile.dart';
 import 'package:design_project/meeting/share_location.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../alert/models/alert_object.dart';
 import '../boards/post_list/page_hub.dart';
 import '../main.dart';
 import '../resources/fcm.dart';
 
+Timer? tempTimer;
+int a = 0;
 class PageSettings extends StatelessWidget {
-  final FirebaseFirestore _database = FirebaseFirestore.instance;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,8 +35,7 @@ class PageSettings extends StatelessWidget {
             title: Text('로그아웃'),
             onTap: () async {
               await FirebaseAuth.instance.signOut().then((value) {
-                FCMController()
-                  ..removeUserTokenDB();
+                FCMController()..removeUserTokenDB();
                 Get.off(() => MyHomePage());
               });
             },
@@ -81,8 +78,19 @@ class PageSettings extends StatelessWidget {
             title: Text('알림 추가'),
             onTap: () async {
               int rd = Random().nextInt(1000);
-              AlertObject testObj = AlertObject(title: "DB테스트", body: rd.toString(), time: DateTime.now(), alertType: AlertType.TO_SHARE_LOCATION_PAGE, clickAction: {"meeting_id" : "47"}, isRead: false);
-              await FirebaseFirestore.instance.collection("Alert").doc(myUuid).collection("alert").doc(DateTime.now().millisecondsSinceEpoch.toString()).set({"alertJson" : jsonEncode(testObj.toJson())});
+              AlertObject testObj = AlertObject(
+                  title: "DB테스트",
+                  body: rd.toString(),
+                  time: DateTime.now(),
+                  alertType: AlertType.TO_SHARE_LOCATION_PAGE,
+                  clickAction: {"meeting_id": "47"},
+                  isRead: false);
+              await FirebaseFirestore.instance
+                  .collection("Alert")
+                  .doc(myUuid)
+                  .collection("alert")
+                  .doc(DateTime.now().millisecondsSinceEpoch.toString())
+                  .set({"alertJson": jsonEncode(testObj.toJson())});
               print("완료");
             },
           ),
@@ -100,8 +108,50 @@ class PageSettings extends StatelessWidget {
               String body = "히히";
               int rd = Random().nextInt(1000);
               AlertManager manager = AlertManager(LocalStorage!);
-              bool result = await manager.sendAlert(title: title, body: rd.toString(), alertType: AlertType.NONE, userUUID: "ki654uiWotZTum8GetnSC7HTgIk2", withPushNotifications: true);
-              },
+              bool result = await manager.sendAlert(
+                  title: title,
+                  body: rd.toString(),
+                  alertType: AlertType.NONE,
+                  userUUID: "ki654uiWotZTum8GetnSC7HTgIk2",
+                  withPushNotifications: true);
+            },
+          ),
+          ListTile(
+            title: Text('위치 업데이트 시작'),
+            onTap: () async {
+              if (tempTimer != null) {
+                tempTimer!.cancel();
+              }
+              tempTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
+                a++;
+                DocumentReference _locationInstance = FirebaseFirestore.instance.collection("updateTest").doc("test");
+                await FirebaseFirestore.instance.runTransaction((transaction) => transaction.get(_locationInstance).then((snapshot) async {
+                      transaction.update(_locationInstance, {
+                        myUuid!: {"nickname": a}
+                      });
+                    }));
+              });
+            },
+          ),
+          Divider(
+            color: Colors.grey[400],
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
+          ),
+          ListTile(
+            title: Text('json 출력'),
+            onTap: () async {
+              print(jsonEncode(AlertObject(title: "aa", body: "body", time: DateTime.now(), alertType: AlertType.NONE, isRead: false, clickAction: {"aa": "bb", "cc": "dd"})));
+            },
+          ),
+          Divider(
+            color: Colors.grey[400],
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
           ),
         ],
       ),

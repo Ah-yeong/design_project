@@ -51,31 +51,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // To do..
 }
 
-// 서버 토큰 갱신
+// 서버 토큰 받아오기
 Future<void> tokenTimestampCheck() async {
   DocumentReference ref = FirebaseFirestore.instance.collection("Token").doc("accessToken");
   DocumentSnapshot snapshot = await ref.get();
-  if (snapshot.exists) {
-    try {
-      Timestamp lastUploadTime = snapshot.get("timestamp") as Timestamp;
-      Timestamp now = Timestamp.now();
-      if ( now.millisecondsSinceEpoch - lastUploadTime.millisecondsSinceEpoch > 1000 * 2700 ) {
-        // 3600 = 1시간, 2700 = 45분
-        FCMController controller = FCMController();
-        AccessToken token = await controller.getAccessToken();
-        ref.set({"tokenValue" : token.data, "timestamp" : now});
-      }
-      accessToken = snapshot.get("tokenValue");
-    } catch (e) {
-      print("오류 : 필드를 찾을 수 없음");
-    }
-  }
+  accessToken = snapshot.get("tokenValue");
+  FirebaseMessaging.instance.subscribeToTopic("notice");
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 파이어베이스 초기화
   await Firebase.initializeApp();
 
   // 알림 설정 상태

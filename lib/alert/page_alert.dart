@@ -107,7 +107,6 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         snapshotList.forEach((snapshot) async {
-          print("${snapshot.reference.toString()}");
           transaction.delete(snapshot.reference);
           Map<String, dynamic> alertJson = jsonDecode(snapshot.get("alertJson"));
           await _alertManager!.addAlert(alertObject: AlertObject.fromJson(alertJson));

@@ -85,7 +85,7 @@ class AlertObject {
         _time = DateTime.fromMillisecondsSinceEpoch(json['time']),
         _title = json['title'],
         _body = json['body'],
-        _clickAction = json['action'],
+        _clickAction = (json['action'] as Map<String, dynamic>).map((key, value) => MapEntry(key, value!.toString())) ,
         _isRead = json['read'];
 
   Map<String, dynamic> toJson() =>
