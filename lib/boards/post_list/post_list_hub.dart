@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../Settings/settings.dart';
+import '../../settings/settings.dart';
 import 'post_list.dart';
 import 'post_location.dart';
 import '../Search/search.dart';

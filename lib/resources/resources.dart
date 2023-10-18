@@ -86,6 +86,7 @@ SnackBar getAlert(String message, Color color) {
 
 void showAlert(String message, BuildContext cont, Color color) {
   final snackBar = SnackBar(
+    behavior: SnackBarBehavior.floating,
     elevation: 2,
     content: Text(
       message,

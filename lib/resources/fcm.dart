@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/alert/models/alert_object.dart';
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/main.dart';
@@ -34,11 +35,14 @@ class FCMController {
   static String chatRoomName = "";
   http.Response? _response;
 
-  Future<String?> sendMessage({required String userToken, required String title, required String body, Map<String, String>? clickAction, bool? resend}) async {
+  Future<String?> sendMessage({required String userToken, required String title, required String body, required AlertType type, Map<String, String>? clickAction, bool? resend}) async {
     if (userToken == "logOut") {
       return "로그아웃된 사용자";
     }
     try {
+      if (clickAction != null) {
+        clickAction["type"] = type.toJson();
+      }
       _response = await http.post(
           Uri.parse(
             "https://fcm.googleapis.com/v1/projects/loginexampleproject-90ced/messages:send",
@@ -63,7 +67,12 @@ class FCMController {
               },
               "apns": {
                 "payload": {
-                  "aps": {"category": "Message Category", "content-available": 1}
+                  "aps": {
+                    "category": "Message Category",
+                    "content-available": 1,
+                    "badge" : 0, // 뱃지 설정,
+                    // 뱃지는 서버에서 계산해서 보내야한다고 한다.... 이를 우째
+                  }
                 }
               }
             }
@@ -73,7 +82,7 @@ class FCMController {
       } else {
         if(resend == null) {
           await tokenTimestampCheck();
-          String? result = await sendMessage(userToken: userToken, title: title, body: body, clickAction: clickAction, resend: true);
+          String? result = await sendMessage(userToken: userToken, title: title, body: body, type: type, clickAction: clickAction, resend: true);
           return result;
         } else {
           print(_response!.body);

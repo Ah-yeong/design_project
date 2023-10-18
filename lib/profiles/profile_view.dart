@@ -3,7 +3,7 @@ import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import '../chat/chat_screen.dart';
 import '../entity/profile.dart';
-import 'package:design_project/Profiles/profile_main.dart';
+import 'package:design_project/profiles/profile_main.dart';
 
 import '../resources/resources.dart';
 

@@ -8,7 +8,7 @@ import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:design_project/resources/resources.dart';
-import '../boards/post_profile.dart';
+import '../profiles/profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BoardPostPage extends StatefulWidget {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/alert/models/alert_object.dart';
 import 'package:design_project/auth/email_verified.dart';
 import 'package:design_project/auth/reset_password.dart';
 import 'package:design_project/resources/fcm.dart';
@@ -16,7 +17,6 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/signup.dart';
 import 'entity/post_page_manager.dart';
-import 'entity/profile.dart';
 import 'resources/resources.dart';
 import 'package:get/get.dart';
 
@@ -29,6 +29,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 SharedPreferences? LocalStorage;
 PostPageManager postManager = PostPageManager();
 NotificationSettings? notificationSettings;
+StateSetter? bAppbarStateSetter;
+bool newChat = false;
+bool newAlert = false;
+
 String? myToken;
 String? accessToken;
 
@@ -37,6 +41,13 @@ bool nestedChatOpenSignal = false;
 
 // 백그라운드 푸시알림 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (message.notification != null) {
+    if (message.data.containsKey("type")) {
+      String type = message.data["type"];
+      _bottomAppbarRefresh(type);
+      // else if ...
+    }
+  }
   // To do..
 }
 
@@ -551,15 +562,28 @@ class _MyHomePage extends State<MyHomePage> {
       if (message != null) {
         if (message.notification != null) {
           if (message.data.containsKey("type")) {
-            String type = message.data["type"];
-            if (type == "chat") {
+            AlertType type = AlertType.fromJson(message.data["type"]);
+            if (type == AlertType.TO_CHAT_ROOM) {
               var fcm = FCMController();
               fcm.showChatNotificationSnackBar(title: message.notification!.title!, body: message.notification!.body!, clickActionValue: message.data);
             }
+            //_bottomAppbarRefresh(type);
             // else if ...
           }
         }
       }
     });
+  }
+}
+
+// 바텀 앱바의 뱃지를 새로고침하기 위한 기능
+_bottomAppbarRefresh(String type) {
+  if (bAppbarStateSetter != null) {
+    if (type == "chat") {
+      newChat = true;
+    } else if (type == "alert") {
+      newAlert = true;
+    }
+    bAppbarStateSetter!(() {});
   }
 }

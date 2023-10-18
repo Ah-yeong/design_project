@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:design_project/alert/models/alert_object.dart';
 import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/resources/resources.dart';
@@ -150,7 +151,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
         if(member == myUuid!) continue;
         profile = _memberProfiles[member]!;
-        fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, clickAction: {
+        fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
           "chat_id" : postId.toString(),
           "is_group_chat" : "true",
           "type" : "chat",
@@ -159,7 +160,7 @@ class _ChatMessageState extends State<ChatMessage> {
     } else {
       updateChatList(recvUserId!);
       profile = _memberProfiles[recvUserId!]!;
-      fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, clickAction: {"chat_id" : myProfileEntity!.profileId, "type" : "chat",}).then((value) => print(value));
+      fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {"chat_id" : myProfileEntity!.profileId, "type" : "chat",}).then((value) => print(value));
     }
 
     //savedChatData.add(MessageModel(senderUid: sendUserId, message: message, timestamp: timestamp.toString(), nickName: myProfileEntity.name).toMap());

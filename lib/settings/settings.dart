@@ -1,10 +1,19 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/alert/models/alert_manager.dart';
+import 'package:design_project/entity/profile.dart';
 import 'package:design_project/meeting/share_location.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../alert/models/alert_object.dart';
 import '../boards/post_list/page_hub.dart';
+import '../main.dart';
+import '../resources/fcm.dart';
 
 class PageSettings extends StatelessWidget {
   final FirebaseFirestore _database = FirebaseFirestore.instance;
@@ -25,17 +34,13 @@ class PageSettings extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-            title: Text('콜렉션 생성'),
-            onTap: () {
-              // _database
-              //     .collection("TestCollection")
-              //     .doc(DateTime.now().millisecondsSinceEpoch.toString())
-              //     .set({"a": true});
-              // _database.collection("TestCollection").get().then((d) {
-              //   for (DocumentSnapshot ds in d.docs) {
-              //     print(ds.id);
-              //   }
-              // });
+            title: Text('로그아웃'),
+            onTap: () async {
+              await FirebaseAuth.instance.signOut().then((value) {
+                FCMController()
+                  ..removeUserTokenDB();
+                Get.off(() => MyHomePage());
+              });
             },
           ),
           Divider(
@@ -46,20 +51,10 @@ class PageSettings extends StatelessWidget {
             endIndent: 16,
           ),
           ListTile(
-            title: Text('콜렉션 삭제'),
+            title: Text('알림 삭제'),
             onTap: () {
-              // CollectionReference _collection = _database.collection("TestCollection");
-              // _collection.get().then((qs) {
-              //   List<QueryDocumentSnapshot> list = qs.docs;
-              //   for (int i = 0; i < list.length; i++) {
-              //     _collection.doc(list[i].id).delete();
-              //     print("${list[i].id} is deleted!");
-              //   }
-              //   for (DocumentSnapshot ds in qs.docs) {
-              //     _collection.doc(ds.id).delete();
-              //     print("${ds.id} is deleted!");
-              //   }
-              // });
+              var manager = AlertManager(LocalStorage!);
+              LocalStorage!.remove(manager.ALERT_FIELD);
             },
           ),
           Divider(
@@ -83,18 +78,12 @@ class PageSettings extends StatelessWidget {
             endIndent: 20,
           ),
           ListTile(
-            title: Text('채팅 데이터 지우기'),
+            title: Text('알림 추가'),
             onTap: () async {
-              // SharedPreferences _shared = await SharedPreferences.getInstance();
-              // int count = 0;
-              // for (String key in _shared.getKeys()) {
-              //   if (key.contains("ChatData") && key.contains(myUuid!)) {
-              //     print("remove $key");
-              //     await _shared.remove(key);
-              //     count++;
-              //   }
-              // }
-              // print("$count개 데이터 삭제 완료");
+              int rd = Random().nextInt(1000);
+              AlertObject testObj = AlertObject(title: "DB테스트", body: rd.toString(), time: DateTime.now(), alertType: AlertType.TO_SHARE_LOCATION_PAGE, clickAction: {"meeting_id" : "47"}, isRead: false);
+              await FirebaseFirestore.instance.collection("Alert").doc(myUuid).collection("alert").doc(DateTime.now().millisecondsSinceEpoch.toString()).set({"alertJson" : jsonEncode(testObj.toJson())});
+              print("완료");
             },
           ),
           Divider(
@@ -105,19 +94,14 @@ class PageSettings extends StatelessWidget {
             endIndent: 16,
           ),
           ListTile(
-            title: Text('기기 채팅 데이터 전체삭제'),
+            title: Text('알림 보내기 : test3'),
             onTap: () async {
-              // SharedPreferences _shared = await SharedPreferences.getInstance();
-              // int count = 0;
-              // for (String key in _shared.getKeys()) {
-              //   if (key.contains("ChatData")) {
-              //     print("remove $key");
-              //     await _shared.remove(key);
-              //     count++;
-              //   }
-              // }
-              // print("$count개 데이터 삭제 완료");
-            },
+              String title = "테스트 알림이에요!";
+              String body = "히히";
+              int rd = Random().nextInt(1000);
+              AlertManager manager = AlertManager(LocalStorage!);
+              bool result = await manager.sendAlert(title: title, body: rd.toString(), alertType: AlertType.NONE, userUUID: "ki654uiWotZTum8GetnSC7HTgIk2", withPushNotifications: true);
+              },
           ),
         ],
       ),

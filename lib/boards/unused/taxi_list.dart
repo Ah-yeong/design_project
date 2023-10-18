@@ -1,5 +1,5 @@
 /*
-import 'package:design_project/Boards/post.dart';
+import 'package:design_project/boards/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../../resources.dart';

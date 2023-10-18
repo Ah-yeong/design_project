@@ -293,29 +293,34 @@ class _PageShareLocation extends State<PageShareLocation> {
     _positionMarkers.retainWhere((marker) {
       return marker.markerId.value == "myPos";
     });
-    await _locManager.getLocationGroupData(_meetingId).then((groupData) async {
-      _locationGroupList = groupData;
+    try {
+      await _locManager.getLocationGroupData(_meetingId).then((groupData) async {
+        _locationGroupList = groupData;
 
-      if (_locationGroupList != null) {
-        // initMarkers
-        _positionMarkers.add(_locationGroupList!.getMeetingLocationMarker());
-        _positionMarkers.addAll(_locationGroupList!.getMapMarkerList());
+        if (_locationGroupList != null) {
+          // initMarkers
+          _positionMarkers.add(_locationGroupList!.getMeetingLocationMarker());
+          _positionMarkers.addAll(_locationGroupList!.getMapMarkerList());
 
-        // initCameraPosition
-        if (_initFlag) {
-          _initCameraPosition = _locationGroupList!.getMeetingLocationMarker().position;
+          // initCameraPosition
+          if (_initFlag) {
+            _initCameraPosition = _locationGroupList!.getMeetingLocationMarker().position;
+          }
         }
-      }
-      if (_initFlag) {
-        _locationGroupList!.getProfiles().then((profileList) {
-          _memberProfiles = profileList;
-          setState(() {
-            _groupListLoading = false;
-            _initFlag = false;
+        if (_initFlag) {
+          _locationGroupList!.getProfiles().then((profileList) {
+            _memberProfiles = profileList;
+            setState(() {
+              _groupListLoading = false;
+              _initFlag = false;
+            });
           });
-        });
-      }
-    });
+        }
+      });
+    } catch (e) {
+      showAlert("지원이 종료된 모임입니다.", context, colorError);
+    }
+
     return;
   }
 
