@@ -85,12 +85,8 @@ class PageSettings extends StatelessWidget {
                   alertType: AlertType.TO_SHARE_LOCATION_PAGE,
                   clickAction: {"meeting_id": "47"},
                   isRead: false);
-              await FirebaseFirestore.instance
-                  .collection("Alert")
-                  .doc(myUuid)
-                  .collection("alert")
-                  .doc(DateTime.now().millisecondsSinceEpoch.toString())
-                  .set({"alertJson": jsonEncode(testObj.toJson())});
+              var manager = AlertManager(LocalStorage!);
+              manager.sendAlert(title: "DB테스트1", body: rd.toString(), alertType: AlertType.NONE, userUUID: myUuid!, withPushNotifications: false);
               print("완료");
             },
           ),

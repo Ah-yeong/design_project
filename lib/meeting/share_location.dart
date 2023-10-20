@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 import '../resources/icon_set.dart';
 import 'models/location_manager.dart';
@@ -39,10 +40,12 @@ class _PageShareLocation extends State<PageShareLocation> {
   Timer? _locationUpdateTimer;
   Timer? _myLocationTimer;
   bool isVisibleMembers = true;
+  EntityPost? _post;
 
   final Queue<LatLng> _myLocationQueue = Queue();
   LatLng? myPosition;
 
+  bool _isLoading = true;
   bool _initFlag = true;
   final List<Marker> _positionMarkers = [];
 
@@ -57,7 +60,7 @@ class _PageShareLocation extends State<PageShareLocation> {
             backgroundColor: Colors.white,
             toolbarHeight: 40,
             title: Text(
-              "${_meetingId == null ? "모임원 위치 찾기" : "위치 공유 : ${postManager.list[postManager.getIndexByPostId(_meetingId)].getPostHead()}"}",
+              "${_meetingId == null || _isLoading || _post == null ? "모임원 위치 찾기" : "위치 공유 : ${_post!.getPostHead()}"}",
               style: const TextStyle(fontSize: 16.5, color: Colors.black),
             ),
             leading: BackButton(
@@ -173,7 +176,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                                                 dist == -1 ? Colors.grey : dist < 30 ? colorSuccess :  Colors.indigoAccent),
                                                 child: Center(
                                                   child: Text(
-                                                    "${dist == -1 ? "미공개" : dist < 30 ? "도착" : "이동중"}",
+                                                    "${dist == -1 ? "미연결" : dist < 30 ? "도착" : "이동중"}",
                                                     style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                                                   ),
                                                 ),
@@ -212,9 +215,17 @@ class _PageShareLocation extends State<PageShareLocation> {
 
   @override
   void initState() {
+    _initPostInfo();
     _initMyLocation();
     _initMyLocationTimer();
     super.initState();
+  }
+
+  void _initPostInfo() async {
+    await postManager.getPostById(_meetingId, true).then((value) {
+      _post = value;
+      setState(() {_isLoading=false;});
+    });
   }
 
   void _initMyLocation() {
@@ -318,7 +329,8 @@ class _PageShareLocation extends State<PageShareLocation> {
         }
       });
     } catch (e) {
-      showAlert("지원이 종료된 모임입니다.", context, colorError);
+      showAlert("지원이 종료된 모임이에요.", context, colorError);
+      Navigator.of(context).pop();
     }
 
     return;

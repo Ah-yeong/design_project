@@ -52,6 +52,8 @@ class _ChatMessageState extends State<ChatMessage> {
   bool dbLoaded = false;
   bool profileLoaded = false;
 
+  bool sendMessageCoolDown = false;
+
   FocusNode? myFocus;
   late ChatStorage? _savedChat;
 
@@ -69,6 +71,7 @@ class _ChatMessageState extends State<ChatMessage> {
       if(isInit != null && isInit == true) _sendMessage(isInits: true);
       profileLoaded = true;
     }));
+
   }
 
   @override
@@ -107,6 +110,10 @@ class _ChatMessageState extends State<ChatMessage> {
   // 메시지 전송 메서드
   Future<void> _sendMessage({bool? isInits}) async {
     // 1:1 채팅인 경우, 이름 순서가 바뀐 Document가 있는지 검사 후 해당 Document이름으로 chatDocName 변경.
+    if (sendMessageCoolDown) return;
+    sendMessageCoolDown = true;
+    Future.delayed(Duration(milliseconds: 1200), () => sendMessageCoolDown = false);
+
     bool init = isInits != null && isInits == true;
     if (isFirstChatted) {
       isFirstChatted = false;
@@ -124,14 +131,14 @@ class _ChatMessageState extends State<ChatMessage> {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentReference ref = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName);
         var ds;
-        if ( isGroupChat ) {
-          ds = await FirebaseFirestore.instance.collection("Post").doc(postId.toString()).get();
+        if ( init && isGroupChat ) {
+          ds = await FirebaseFirestore.instance.collection("ProcessingPost").doc(postId.toString()).get();
         }
         var documentSnapshots = await transaction.get(ref);
         if (!documentSnapshots.exists) {
           // document가 존재하지 않으면 members 초기화 후 삽입
           await ref.set({
-            "roomName" : isGroupChat ? ds.get("head") : "none",
+            "roomName" : isGroupChat && init ? ds.get("head") : "none",
             "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
           });
         }

@@ -42,15 +42,16 @@ class EntityPost {
     _postDocRef = FirebaseFirestore.instance.collection(isProcessing != null && isProcessing ? "ProcessingPost" : "Post").doc(_postId.toString());
   }
 
+  int getTimeRemainInSeconds() {
+    DateTime now = DateTime.now();
+    return DateTime.parse(_time).difference(now).inSeconds;
+  }
+
   Future<bool> applyToPost(String userId) async {
     bool requestSuccess = true;
     DocumentReference ref = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     try {
-      await FirebaseFirestore.instance
-          .collection("Post")
-          .doc(_postId.toString())
-          .get()
-          .then((DocumentSnapshot ds) async {
+      await FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).get().then((DocumentSnapshot ds) async {
         List<Map<String, dynamic>> userList = (ds.get("user") as List).map((e) => e as Map<String, dynamic>).toList();
         if (userList.where((element) => element["id"] == userId).length != 0) {
           // 이미 신청을 했던 적이 있는 유저일 경우
@@ -93,7 +94,6 @@ class EntityPost {
           reference.update({"currentPerson": FieldValue.increment(1)});
         });
       }
-
     } catch (e) {
       print("수락 실패: $e");
     }
@@ -140,7 +140,6 @@ class EntityPost {
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot ds = await transaction.get(_postDocRef!);
       if (!ds.exists) {
-        print("게시물을 찾을 수 없음");
         throw Exception("게시물을 찾을 수 없음");
       }
       try {
@@ -158,6 +157,33 @@ class EntityPost {
         print("오류 발생");
       }
     });
+  }
+
+  Future<void> postMoveToProcess() async {
+    try {
+      await Future.wait([
+        FirebaseFirestore.instance.collection("Post").doc(_postId.toString()).delete(),
+        addPost(
+            writerId: _writerId,
+            head: _head,
+            body: _body,
+            gender: _gender,
+            maxPerson: _maxPerson,
+            time: _time,
+            llName: _llName,
+            upTime: _upTime,
+            category: _category,
+            minAge: _minAge,
+            maxAge: _maxAge,
+            writerNick: _writerNick,
+            isVoluntary: _isVoluntary,
+            isProcessingPost: true,
+            postId: _postId),
+      ]);
+      return;
+    } catch (e) {
+      print(e);
+    }
   }
 
   bool isFull() {
@@ -196,22 +222,39 @@ class EntityPost {
 
   // Getter, (ReadOnly)
   int getPostId() => _postId;
+
   String getWriterId() => _writerId;
+
   String getPostHead() => _head;
+
   String getPostBody() => _body;
+
   int getPostGender() => _gender;
+
   int getPostMaxPerson() => _maxPerson;
+
   int getPostCurrentPerson() => _currentPerson;
+
   String getWriterNick() => _writerNick;
+
   String getTime() => _time;
+
   String getCategory() => _category;
+
   String getUpTime() => _upTime;
+
   LLName getLLName() => _llName;
+
   int getMinAge() => _minAge;
+
   int getMaxAge() => _maxAge;
+
   bool isLoad() => _isLoaded;
+
   int getViewCount() => _viewCount;
+
   bool isVoluntary() => _isVoluntary;
+
   List<dynamic> getUser() => user;
 
   String getDateString(bool hour, bool minute) {
@@ -227,8 +270,6 @@ class EntityPost {
     userList.forEach((element) => memberList.add(element["id"]));
     return memberList;
   }
-
-
 }
 
 String getTimeBefore(String upTime) {
@@ -252,19 +293,36 @@ String getTimeBefore(String upTime) {
   }
 }
 
-Future<bool> addPost({required String writerId, required String head, required String body, required int gender,
-  required int maxPerson, required String time, required LLName llName, required String upTime,
-  required String category, required int minAge, required int maxAge, required String writerNick,
-required bool isVoluntary}) async {
+Future<bool> addPost(
+    {required String writerId,
+    required String head,
+    required String body,
+    required int gender,
+    required int maxPerson,
+    required String time,
+    required LLName llName,
+    required String upTime,
+    required String category,
+    required int minAge,
+    required int maxAge,
+    required String writerNick,
+    required bool isVoluntary,
+    bool? isProcessingPost,
+    int? postId}) async {
   try {
+    bool processingPost = isProcessingPost != null && isProcessingPost && postId != null;
     int? new_post_id;
-    DocumentReference<Map<String, dynamic>> ref = await FirebaseFirestore.instance.collection("Post").doc("postData");
-    await ref.get().then((DocumentSnapshot ds) {
-      new_post_id = ds.get("last_id") + 1;
-      if (new_post_id == -1) return false; // 업로드 실패
-    });
-    await ref.update({"last_id": new_post_id});
-    await FirebaseFirestore.instance.collection("Post").doc(new_post_id.toString()).set({
+    if (!processingPost) {
+      DocumentReference<Map<String, dynamic>> ref = await FirebaseFirestore.instance.collection("Post").doc("postData");
+      await ref.get().then((DocumentSnapshot ds) {
+        new_post_id = ds.get("last_id") + 1;
+        if (new_post_id == -1) return false; // 업로드 실패
+      });
+      await ref.update({"last_id": new_post_id});
+    } else {
+      new_post_id = postId;
+    }
+    await FirebaseFirestore.instance.collection(processingPost ? "ProcessingPost" : "Post").doc(new_post_id.toString()).set({
       "post_id": new_post_id,
       "writer_id": writerId,
       "head": head,
@@ -283,7 +341,7 @@ required bool isVoluntary}) async {
       "upTime": upTime,
       "viewCount": 1,
       "user": FieldValue.arrayUnion([]),
-      "voluntary" : isVoluntary
+      "voluntary": isVoluntary
     });
     return true;
   } catch (e) {

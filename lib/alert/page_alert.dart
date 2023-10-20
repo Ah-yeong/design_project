@@ -17,10 +17,6 @@ class PageAlert extends StatefulWidget {
 
 class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
   AlertManager? _alertManager;
-  CollectionReference? _reference;
-
-  bool _isLoading = true;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,10 +73,11 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
                           }
                           AlertObject alert = _alertManager!.alertList[_alertManager!.alertList.length - index];
                           return GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               bool isReading = alert.reading();
                               if (isReading) {
-                                _alertManager!.saveAlert(isSync: true).then((successful) { if(successful) setState(() {});});
+                                await _alertManager!.readAlertCount(myUuid!);
+                                await _alertManager!.saveAlert(isSync: true).then((successful) { if(successful) setState(() {});});
                               }
                               alert.onClick();
                             },
@@ -106,20 +103,12 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
   _alertReadByDatabase(List<QueryDocumentSnapshot> snapshotList) async {
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        snapshotList.forEach((snapshot) async {
-          transaction.delete(snapshot.reference);
-          Map<String, dynamic> alertJson = jsonDecode(snapshot.get("alertJson"));
+        snapshotList.forEach((qds) async {
+          Map<String, dynamic> alertJson = jsonDecode(qds.get("alertJson"));
           await _alertManager!.addAlert(alertObject: AlertObject.fromJson(alertJson));
+          await qds.reference.delete();
         });
       });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  _loadAlertDatabase() async {
-    try {
-      _reference = FirebaseFirestore.instance.collection("Alert").doc(myUuid).collection("alert");
     } catch (e) {
       print(e);
     }
@@ -130,7 +119,6 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
     super.initState();
     _alertManager = AlertManager(LocalStorage!);
     _alertManager!.loadAlert();
-    _loadAlertDatabase();
   }
 
   @override

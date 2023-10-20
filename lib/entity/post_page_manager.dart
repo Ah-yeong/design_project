@@ -15,9 +15,9 @@ class PostPageManager {
     return list.indexWhere((element) => element.getPostId() == postId);
   }
 
-  Future<EntityPost?> getProcessingPost(int _postId) async {
+  Future<EntityPost?> getPostById(int _postId, bool isProcessingPost) async {
     try {
-      EntityPost post = EntityPost(_postId, isProcessing: true);
+      EntityPost post = EntityPost(_postId, isProcessing: isProcessingPost);
       await post.loadPost();
       return post;
     } catch (e) {

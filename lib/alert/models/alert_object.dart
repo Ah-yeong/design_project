@@ -1,3 +1,4 @@
+import 'package:design_project/alert/models/alert_manager.dart';
 import 'package:design_project/boards/post.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/entity/entity_post.dart';
@@ -8,8 +9,6 @@ import 'package:design_project/profiles/profile_view.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../settings/settings.dart';
 
 class AlertObject {
   late String _title;
@@ -70,7 +69,7 @@ class AlertObject {
             await existTest.getLocationGroupData(int.parse(_clickAction["meeting_id"]!));
             Get.to(() => PageShareLocation(), arguments: int.parse(_clickAction["meeting_id"]!));
           } catch (e) {
-            showAlert("위치 공유 지원이 종료된 모임입니다.", navigatorKey.currentContext!, colorError);
+            showAlert("위치 공유 지원이 종료된 모임이에요!", navigatorKey.currentContext!, colorError);
           }
         }
         break;

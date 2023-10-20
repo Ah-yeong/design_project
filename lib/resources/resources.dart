@@ -87,10 +87,12 @@ SnackBar getAlert(String message, Color color) {
 void showAlert(String message, BuildContext cont, Color color) {
   final snackBar = SnackBar(
     behavior: SnackBarBehavior.floating,
+    width: MediaQuery.of(cont).size.width - 20,
+    padding: EdgeInsets.all(14),
     elevation: 2,
     content: Text(
       message,
-      style: TextStyle(color: Colors.white, fontSize: 15),
+      style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
       textAlign: TextAlign.center,
     ),
     duration: Duration(milliseconds: 1300),

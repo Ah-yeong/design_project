@@ -52,7 +52,16 @@ class AlertManager {
     try {
       DateTime time = DateTime.now();
       AlertObject tempObj = AlertObject(title: title, body: body, time: time, alertType: alertType, isRead: false, clickAction: clickAction);
-      await FirebaseFirestore.instance.collection("Alert").doc(userUUID).collection("alert").doc(time.millisecondsSinceEpoch.toString()).set({"alertJson" : jsonEncode(tempObj.toJson())});
+      DocumentReference ref = FirebaseFirestore.instance.collection("Alert").doc(userUUID);
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        var documentSnapshots = await transaction.get(ref);
+        if ( documentSnapshots.exists ) {
+          await transaction.update(ref, {"unread_alert" : FieldValue.increment(1)});
+        } else {
+          await transaction.set(ref, {"unread_alert" : 1});
+        }
+      });
+      await ref.collection("alert").doc(time.millisecondsSinceEpoch.toString()).set({"alertJson" : jsonEncode(tempObj.toJson())});
       if ( withPushNotifications ) {
         EntityProfiles profile = EntityProfiles(userUUID);
         await profile.loadProfile();
@@ -67,6 +76,20 @@ class AlertManager {
       successful = false;
     }
     return successful;
+  }
+
+  Future<void> readAlertCount(String userUUID) async {
+    DocumentReference ref = FirebaseFirestore.instance.collection("Alert").doc(userUUID);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      var documentSnapshots = await transaction.get(ref);
+      if ( documentSnapshots.exists ) {
+        if (documentSnapshots.get("unread_alert") > 0 )
+        await transaction.update(ref, {"unread_alert" : FieldValue.increment(-1)});
+      } else {
+        await transaction.set(ref, {"unread_alert" : 0});
+      }
+    });
+    return;
   }
 
 }

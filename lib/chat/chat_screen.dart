@@ -1,15 +1,23 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/boards/post.dart';
+import 'package:design_project/boards/post_list/post_list.dart';
 import 'package:design_project/chat/models/chat_storage.dart';
+import 'package:design_project/entity/entity_post.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/main.dart';
+import 'package:design_project/meeting/share_location.dart';
 import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/resources.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import '../boards/post_list/page_hub.dart';
+import '../meeting/models/location_manager.dart';
 import 'chat_message.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -36,12 +44,25 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _chatLoaded = false;
   bool _isLoaded = false;
 
+  EntityPost? _post;
+  Timer? timeSetTimer;
+  StateSetter? timeSetter;
+
   late EntityProfiles recvUser;
   late bool isGroupChat;
 
   @override
   void initState() {
     super.initState();
+
+    timeSetTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      if (timeSetter != null) {
+        if (mounted)
+          timeSetter!(() {});
+        else
+          timer.cancel();
+      }
+    });
 
     isInChat = true;
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId.toString());
@@ -54,7 +75,7 @@ class _ChatScreenState extends State<ChatScreen> {
       recvUser = EntityProfiles(recvUserId);
       recvUser.loadProfile().then((value) {
         FCMController.chatRoomName = recvUser.name;
-            setState(() {
+        setState(() {
           _isLoaded = true;
         });
       });
@@ -62,7 +83,6 @@ class _ChatScreenState extends State<ChatScreen> {
       if (members == null) {
         FCMController.chatRoomName = "[Post]$postId";
         _initGroupChat().then((value) => setState(() => _isLoaded = true));
-
       } else {
         _isLoaded = true;
       }
@@ -72,8 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    timeSetTimer?.cancel();
     updateChatList(myUuid!);
-    if ( nestedChatOpenSignal ) {
+    if (nestedChatOpenSignal) {
       nestedChatOpenSignal = false;
     } else {
       FCMController.chatRoomName = "";
@@ -86,134 +107,159 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          elevation: 1,
-          title: Text(
-              _isLoaded == false
-                  ? "불러오는 중"
-                  : isGroupChat
-                      ? "그룹채팅 (${members!.length} 명)"
-                      : recvUser.name,
-              style: TextStyle(color: Colors.black, fontSize: 19)),
-          backgroundColor: Colors.white,
-          leading: BackButton(
-            color: Colors.black,
-          ),
+      appBar: AppBar(
+        elevation: 1,
+        title: Text(
+            _isLoaded == false
+                ? "불러오는 중"
+                : isGroupChat
+                    ? "${_post!.getPostHead()}".length > 12
+                        ? "${_post!.getPostHead().replaceRange(12, null, "...")} (${members!.length}명)"
+                        : "${_post!.getPostHead()} (${members!.length}명)"
+                    : recvUser.name,
+            style: TextStyle(color: Colors.black, fontSize: 19)),
+        backgroundColor: Colors.white,
+        leading: BackButton(
+          color: Colors.black,
         ),
-        body: (_isLoaded == false || _chatLoaded == false)
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                child: Container(
-                    child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ChatMessage(
-                      postId: postId,
-                      recvUser: recvUserId,
-                      members: members,
-                      isInit: Get.arguments == "initMessageSend",
-                    ),
-                    // Align(
-                    //   alignment: Alignment.topCenter,
-                    //   child: Padding(
-                    //     padding: EdgeInsets.only(top: 10),
-                    //     child: Row(
-                    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //       children: [
-                    //         Expanded(
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    //             child: FloatingActionButton.extended(
-                    //               elevation: 0,
-                    //               onPressed: () {
-                    //                 _savedChat!.getStorage().remove("${myUuid}_ChatData_${isGroupChat ? postId : recvUserId}");
-                    //                 // Navigator.push(
-                    //                 //   context,
-                    //                 //   MaterialPageRoute(
-                    //                 //       builder: (context) => GoogleMapPage()),
-                    //                 // );
-                    //               },
-                    //               label: Container(
-                    //                 width: 100,
-                    //                 child: Text('위치 공유',
-                    //                   textAlign: TextAlign.center,
-                    //                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    //                 ),
-                    //               ),
-                    //               backgroundColor: colorError,
-                    //               heroTag: null,
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         Expanded(
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    //             child: FloatingActionButton.extended(
-                    //               elevation: 0,
-                    //               onPressed: () {
-                    //                 showDialog(
-                    //                   context: context,
-                    //                   builder: (BuildContext context) {
-                    //                     return AlertDialog(
-                    //                       title: Text('모임'),
-                    //                       content: Container(
-                    //                         width: double.maxFinite,
-                    //                         child: Column(
-                    //                           mainAxisSize: MainAxisSize.min,
-                    //                           crossAxisAlignment: CrossAxisAlignment.start,
-                    //                           children: <Widget>[
-                    //                             Text(
-                    //                               '시간: 18:30 PM',
-                    //                               style: TextStyle(fontSize: 18),
-                    //                             ),
-                    //                             SizedBox(height: 10),
-                    //                             Text(
-                    //                               '장소: 안서 동보 앞 GS25',
-                    //                               style: TextStyle(fontSize: 18),
-                    //                             ),
-                    //                           ],
-                    //                         ),
-                    //                       ),
-                    //                       actions: <Widget>[
-                    //                         TextButton(
-                    //                           onPressed: () {
-                    //                             Navigator.of(context).pop();
-                    //                           },
-                    //                           child: Text('닫기'),
-                    //                         ),
-                    //                       ],
-                    //                     );
-                    //                   },
-                    //                 );
-                    //               },
-                    //               label: Container(
-                    //                 width: 100,
-                    //                 child: Text('모임 일정',
-                    //                   textAlign: TextAlign.center,
-                    //                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    //                 ),
-                    //               ),
-                    //               backgroundColor: Color(0xFF999999),
-                    //               heroTag: null,
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                )),
-              ));
+      ),
+      body: (_isLoaded == false || _chatLoaded == false)
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Stack(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
+                  child: Container(
+                      child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ChatMessage(
+                        postId: postId,
+                        recvUser: recvUserId,
+                        members: members,
+                        isInit: Get.arguments == "initMessageSend",
+                      ),
+                    ],
+                  )),
+                ),
+                isGroupChat
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 13),
+                            child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(color: Colors.white.withAlpha(180), borderRadius: BorderRadius.circular(6)),
+                                child: StatefulBuilder(
+                                  builder: (BuildContext context, StateSetter timeRemainSetter) {
+                                    timeSetter = timeRemainSetter;
+                                    int gapSeconds = _post!.getTimeRemainInSeconds();
+                                    return Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time_filled_rounded,
+                                          size: 20,
+                                          color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent,
+                                        ),
+                                        Text(
+                                          "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작")}",
+                                          style: TextStyle(
+                                              color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                )),
+                          ),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 13, top: 13),
+                                child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: colorGrey),
+                                      boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(15),
+                                        onTap: () {
+                                          Get.to(() => BoardPostPage(postId: postId), arguments: true);
+                                        },
+                                        overlayColor: MaterialStateProperty.all(colorSuccess),
+                                        child: const Icon(
+                                          Icons.file_copy,
+                                          size: 25,
+                                          color: colorGrey,
+                                        ),
+                                      ),
+                                    )),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 13, top: 13),
+                                child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: colorGrey),
+                                      boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(15),
+                                        onTap: () async {
+                                          if (_post!.isVoluntary()) {
+                                            showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
+                                            return;
+                                          }
+                                          if (_post!.getTimeRemainInSeconds() > 60 * 15) {
+                                            showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
+                                            return;
+                                          }
+                                          try {
+                                            LocationManager existTest = LocationManager();
+                                            await existTest.getLocationGroupData(postId!);
+                                            Get.to(() => PageShareLocation(), arguments: postId);
+                                          } catch (e) {
+                                            showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
+                                          }
+                                        },
+                                        overlayColor: MaterialStateProperty.all(colorSuccess),
+                                        child: const Icon(
+                                          Icons.location_on,
+                                          size: 28,
+                                          color: colorGrey,
+                                        ),
+                                      ),
+                                    )),
+                              ),
+                            ],
+                          )
+                        ],
+                      )
+                    : SizedBox(),
+              ],
+            ),
+    );
   }
 
   Future<void> _initGroupChat() async {
+    _post = EntityPost(postId!, isProcessing: true);
+    await _post!.loadPost();
     await FirebaseFirestore.instance.collection("PostGroupChat").doc(postId.toString()).get().then((ds) {
       members = List.empty(growable: true);
       for (dynamic data in ds.get("members")) {

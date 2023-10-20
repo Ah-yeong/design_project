@@ -246,6 +246,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                         child: GoogleMap(
                           markers: Set.from(_markers),
                           mapType: MapType.normal,
+                          myLocationButtonEnabled: false,
                           initialCameraPosition: CameraPosition(
                             target: postEntity!.getLLName().latLng,
                             zoom: 17.4746,
@@ -304,15 +305,15 @@ class _BoardPostPage extends State<BoardPostPage> {
       if(!isProcessing!) {
         List<String> loadedProfileList = [];
         postEntity!.getUser().forEach((element) => loadedProfileList.add(element["id"].toString()));
-        if (_loadedUserList.toString() != postEntity!.getUser().toString()) {
-          await (requestUsers = getRequestProfiles(loadedProfileList));
-          await (acceptUsers = getAcceptProfiles(loadedProfileList));
+        if (postEntity!.getUser().length == 0 || _loadedUserList.toString() != postEntity!.getUser().toString()) {
+          requestUsers = getRequestProfiles(loadedProfileList);
+          acceptUsers = getAcceptProfiles(loadedProfileList);
           _loadedUserList = postEntity!.getUser();
         }
       }
     } catch (e) {
       Navigator.of(context).pop(false);
-      Future.delayed(Duration(milliseconds: 350), () => showAlert("게시글이 삭제되었거나, 모임이 이미 성사되었어요!", navigatorKey.currentContext!, colorError));
+      Future.delayed(Duration(milliseconds: 350), () => showAlert("게시글이 삭제되었거나, 모임이 이미 완료되었어요!!", navigatorKey.currentContext!, colorError));
       return false;
     }
     return true;
@@ -434,7 +435,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                         List<String> members = getAcceptUuids()..add(myUuid!);
                         LocationManager locManager = LocationManager();
                         await locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members);
-
+                        await postEntity!.postMoveToProcess();
                         Get.to(() => ChatScreen(postId: postEntity!.getPostId(), members: members,), arguments: "initMessageSend");
                         _btnClickDelay_startMeeting = false;
                       }
