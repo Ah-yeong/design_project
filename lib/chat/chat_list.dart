@@ -3,6 +3,7 @@ import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 
+import '../entity/entity_post.dart';
 import '../resources/resources.dart';
 import '../boards/post_list/page_hub.dart';
 import '../main.dart';
@@ -42,6 +43,8 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       chatDocs = qs.docs;
     });
     if (isGroupChat) {
+      var ds = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).get();
+      room.roomName = ds.get("roomName");
       room.postId = receiveId;
     } else {
       receiveId = receiveId.replaceAll("-", "").replaceAll(myUuid!, "");
@@ -155,7 +158,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                             children: [
                                               // 닉네임 표시
                                               Text(
-                                                  '${list[index].isGroupChat ? postManager.list[postManager.getIndexByPostId(list[index].postId!)].getPostHead() : "${list[index].recvUserNick}"}',
+                                                  '${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
                                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                                               // 마지막 내용 표시
                                               Text("${list[index].lastTimeStampString}"),

@@ -38,8 +38,8 @@ class EntityPost {
 
   bool _isLoaded = false;
 
-  EntityPost(int this._postId) {
-    _postDocRef = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
+  EntityPost(int this._postId, {bool? isProcessing}) {
+    _postDocRef = FirebaseFirestore.instance.collection(isProcessing != null && isProcessing ? "ProcessingPost" : "Post").doc(_postId.toString());
   }
 
   Future<bool> applyToPost(String userId) async {
@@ -73,6 +73,7 @@ class EntityPost {
       } else {
         print("[신청하기 오류] : $error");
       }
+      requestSuccess = false;
     }
     return requestSuccess;
   }
@@ -136,12 +137,11 @@ class EntityPost {
 
   Future<void> loadPost() async {
     _isLoaded = true;
-    DocumentReference doc = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      DocumentSnapshot ds = await transaction.get(doc);
+      DocumentSnapshot ds = await transaction.get(_postDocRef!);
       if (!ds.exists) {
-        print("오류 : 게시물을 찾을 수 없음");
-        return;
+        print("게시물을 찾을 수 없음");
+        throw Exception("게시물을 찾을 수 없음");
       }
       try {
         _loadField(ds);
@@ -150,7 +150,7 @@ class EntityPost {
         await FirebaseFirestore.instance.runTransaction((transaction) async {
           for (String key in postFieldDefault.keys) {
             if (!map.containsKey(key)) {
-              await transaction.update(doc, {key: postFieldDefault[key]});
+              await transaction.update(_postDocRef!, {key: postFieldDefault[key]});
             }
           }
         });

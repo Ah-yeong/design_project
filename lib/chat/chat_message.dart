@@ -21,19 +21,21 @@ class ChatMessage extends StatefulWidget {
   final int? postId;
   final String? recvUser;
   final List<String>? members;
+  final bool? isInit;
 
-  const ChatMessage({Key? key, this.postId, this.recvUser, this.members}) : super(key: key);
+  const ChatMessage({Key? key, this.postId, this.recvUser, this.members, this.isInit}) : super(key: key);
 
   @override
-  _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members);
+  _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members, isInit);
 }
 
 class _ChatMessageState extends State<ChatMessage> {
   final int? postId;
   final String? recvUserId;
   final List<String>? members;
+  final bool? isInit;
 
-  _ChatMessageState(this.postId, this.recvUserId, this.members);
+  _ChatMessageState(this.postId, this.recvUserId, this.members, this.isInit);
 
   final _chatController = TextEditingController();
 
@@ -57,14 +59,16 @@ class _ChatMessageState extends State<ChatMessage> {
   void initState() {
     super.initState();
     myFocus = FocusNode();
-
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId!.toString());
     _savedChat!.init().then((value) => setState(() {
           spLoaded = true;
           _savedChat!.load();
         }));
     _initDatabases().then((value) => setState(() => dbLoaded = true));
-    _loadProfiles().then((value) => setState(() => profileLoaded = true));
+    _loadProfiles().then((value) => setState(() {
+      if(isInit != null && isInit == true) _sendMessage(isInits: true);
+      profileLoaded = true;
+    }));
   }
 
   @override
@@ -101,12 +105,12 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   // 메시지 전송 메서드
-  Future<void> _sendMessage() async {
+  Future<void> _sendMessage({bool? isInits}) async {
     // 1:1 채팅인 경우, 이름 순서가 바뀐 Document가 있는지 검사 후 해당 Document이름으로 chatDocName 변경.
-
+    bool init = isInits != null && isInits == true;
     if (isFirstChatted) {
       isFirstChatted = false;
-      if (isGroupChat) {
+      if (init || isGroupChat) {
         addChatDataList(true, postId: postId, members: members);
       } else {
         addChatDataList(uid: FirebaseAuth.instance.currentUser!.uid, false, recvUserId: recvUserId!);
@@ -114,15 +118,20 @@ class _ChatMessageState extends State<ChatMessage> {
       }
     }
 
-    final message = _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
+    final message = init ? "모임이 성사되어 채팅방을 만들었어요.\n여기서 자유롭게 대화해보세요!" : _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
     final timestamp = Timestamp.now(); // 전송 시간
     try {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentReference ref = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName);
+        var ds;
+        if ( isGroupChat ) {
+          ds = await FirebaseFirestore.instance.collection("Post").doc(postId.toString()).get();
+        }
         var documentSnapshots = await transaction.get(ref);
         if (!documentSnapshots.exists) {
           // document가 존재하지 않으면 members 초기화 후 삽입
           await ref.set({
+            "roomName" : isGroupChat ? ds.get("head") : "none",
             "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
           });
         }
@@ -140,31 +149,40 @@ class _ChatMessageState extends State<ChatMessage> {
     } catch (e) {
       print("Error updating message: $e");
     }
-    _chatController.clear();
-    myFocus!.requestFocus();
-
     FCMController fcm = FCMController();
     EntityProfiles? profile;
-    if (isGroupChat) {
+    if(init) {
       for (String member in members!) {
         updateChatList(member);
 
         if(member == myUuid!) continue;
         profile = _memberProfiles[member]!;
-        fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
+        fcm.sendMessage(userToken: profile.fcmToken, title: "모임이 성사되었어요 🙌🏻!", body: "지금 바로 모임 채팅을 통해\n먼저 이야기를 나눠보세요 ☺️", type: AlertType.TO_CHAT_ROOM, clickAction: {
           "chat_id" : postId.toString(),
           "is_group_chat" : "true",
-          "type" : "chat",
         }).then((value) => print(value));
       }
     } else {
-      updateChatList(recvUserId!);
-      profile = _memberProfiles[recvUserId!]!;
-      fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {"chat_id" : myProfileEntity!.profileId, "type" : "chat",}).then((value) => print(value));
-    }
+      _chatController.clear();
+      myFocus!.requestFocus();
 
-    //savedChatData.add(MessageModel(senderUid: sendUserId, message: message, timestamp: timestamp.toString(), nickName: myProfileEntity.name).toMap());
-    //_preferences.setString('chat_data_${isGroupChat ? postId : recvUserId}', json.encode(savedChatData));
+      if (isGroupChat) {
+        for (String member in members!) {
+          updateChatList(member);
+
+          if(member == myUuid!) continue;
+          profile = _memberProfiles[member]!;
+          fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
+            "chat_id" : postId.toString(),
+            "is_group_chat" : "true",
+          }).then((value) => print(value));
+        }
+      } else {
+        updateChatList(recvUserId!);
+        profile = _memberProfiles[recvUserId!]!;
+        fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {"chat_id" : myProfileEntity!.profileId,}).then((value) => print(value));
+      }
+    }
     return;
   }
 

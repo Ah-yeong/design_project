@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'package:design_project/chat/chat_screen.dart';
+import 'package:design_project/main.dart';
+import 'package:design_project/meeting/models/location_manager.dart';
 import 'package:design_project/meeting/models/meeting_manager.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/boards/post_list/post_list.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -31,6 +35,8 @@ class _BoardPostPage extends State<BoardPostPage> {
     target: LatLng(36.833068, 127.178419),
     zoom: 17.4746,
   );
+
+  bool? isProcessing = Get.arguments;
 
   var postId;
   EntityPost? postEntity;
@@ -83,6 +89,13 @@ class _BoardPostPage extends State<BoardPostPage> {
     return acceptList;
   }
 
+  List<String> getAcceptUuids(){
+    var acceptProfiles = postEntity!.getUser().where((element) => element['status'] == 1);
+    List<String> acceptUuids = [];
+    acceptProfiles.forEach((element) => acceptUuids.add(element['id']));
+    return acceptUuids;
+  }
+
   @override
   Widget build(BuildContext context) {
     mediaSize = MediaQuery.of(context).size;
@@ -111,7 +124,7 @@ class _BoardPostPage extends State<BoardPostPage> {
         ),
         bottomNavigationBar: !isLoaded
             ? buildLoadingProgress()
-            : Container(
+            : isProcessing! ? SizedBox() : Container(
                 decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
                 width: double.infinity,
                 height: 105,
@@ -128,7 +141,8 @@ class _BoardPostPage extends State<BoardPostPage> {
                             if (!(postEntity!.isFull() &&
                                     (postEntity!.getRequestState(myUuid!) == "none" || postEntity!.getRequestState(myUuid!) == "wait")) ||
                                 isSameId) {
-                              await _loadPost(isReload: true).then((_) async {
+                              await _loadPost(isReload: true).then((loadSuccessful) async {
+                                if (!loadSuccessful) return;
                                 if (isSameId) {
                                   showModalBottomSheet(
                                           isDismissible: false,
@@ -150,7 +164,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                           if (requestSuccess) {
                                             showAlert("신청이 완료되었어요!", context, colorSuccess);
                                           } else {
-                                            showAlert("이미 신청한 적이 있는 게시글이에요!", context, colorError);
+                                            showAlert("신청한 적이 있거나, 만료되었어요!", context, colorError);
                                           }
                                         });
                                       });
@@ -264,36 +278,44 @@ class _BoardPostPage extends State<BoardPostPage> {
   @override
   void initState() {
     super.initState();
+    isProcessing = isProcessing != null && isProcessing == true;
     postId = widget.postId;
-    postEntity = EntityPost(postId);
+    postEntity = EntityPost(postId, isProcessing: isProcessing);
     _loadPost().then((value) {
-      postEntity!.addViewCount(myUuid!);
+      if (!isProcessing!) postEntity!.addViewCount(myUuid!);
       setState(() => isRequestLoading = false);
     });
   }
 
-  Future<void> _loadPost({bool? isReload}) async {
-    await postEntity!.loadPost().then((value) async {
-      if (isReload != true) {
-        profileEntity = EntityProfiles(postEntity!.getWriterId());
-        await profileEntity!.loadProfile().then((value) {
-          _markers.add(Marker(markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
-          _checkWriterId(postEntity!.getWriterId());
-          _loadPostTime();
-        });
+  Future<bool> _loadPost({bool? isReload}) async {
+    try {
+      await postEntity!.loadPost().then((value) async {
+        if (isReload != true) {
+          profileEntity = EntityProfiles(postEntity!.getWriterId());
+          await profileEntity!.loadProfile().then((value) {
+            _markers.add(Marker(markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
+            _checkWriterId(postEntity!.getWriterId());
+            _loadPostTime();
+          });
+        }
+      });
+
+      // 중복 체크
+      if(!isProcessing!) {
+        List<String> loadedProfileList = [];
+        postEntity!.getUser().forEach((element) => loadedProfileList.add(element["id"].toString()));
+        if (_loadedUserList.toString() != postEntity!.getUser().toString()) {
+          await (requestUsers = getRequestProfiles(loadedProfileList));
+          await (acceptUsers = getAcceptProfiles(loadedProfileList));
+          _loadedUserList = postEntity!.getUser();
+        }
       }
-    });
-
-    // 중복 체크
-    List<String> loadedProfileList = [];
-    postEntity!.getUser().forEach((element) => loadedProfileList.add(element["id"].toString()));
-    if (_loadedUserList.toString() != postEntity!.getUser().toString()) {
-      await (requestUsers = getRequestProfiles(loadedProfileList));
-      await (acceptUsers = getAcceptProfiles(loadedProfileList));
-      _loadedUserList = postEntity!.getUser();
+    } catch (e) {
+      Navigator.of(context).pop(false);
+      Future.delayed(Duration(milliseconds: 350), () => showAlert("게시글이 삭제되었거나, 모임이 이미 성사되었어요!", navigatorKey.currentContext!, colorError));
+      return false;
     }
-
-    return;
+    return true;
   }
 
   _setButtonOpacityTimer() {
@@ -399,17 +421,22 @@ class _BoardPostPage extends State<BoardPostPage> {
                     onTap: () async {
                       // 모임 성사
                       if (!_btnClickDelay_startMeeting) {
+                        timer?.cancel();
+                        Navigator.of(context).pop();
                         Navigator.of(context).pop();
                         setState(() {
                           isAllLoading = true;
                         });
                         _btnClickDelay_startMeeting = true;
-                        MeetingManager manager = MeetingManager();
-                        await manager.meetingCreate(postEntity!);
-                        await Future.delayed(Duration(milliseconds: 2000), () =>_btnClickDelay_startMeeting = false);
-                        setState(() {
-                          isAllLoading = false;
-                        });
+                        MeetingManager meetManager = MeetingManager();
+                        await meetManager.meetingCreate(postEntity!);
+                        // if (위치공유 모임이면)
+                        List<String> members = getAcceptUuids()..add(myUuid!);
+                        LocationManager locManager = LocationManager();
+                        await locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members);
+
+                        Get.to(() => ChatScreen(postId: postEntity!.getPostId(), members: members,), arguments: "initMessageSend");
+                        _btnClickDelay_startMeeting = false;
                       }
                     },
                     onDoubleTap: () {},

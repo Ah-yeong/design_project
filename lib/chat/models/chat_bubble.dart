@@ -87,7 +87,7 @@ class ChatBubble extends StatelessWidget {
                           ),
                         ),
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 6.5 / 10,
+                          maxWidth: MediaQuery.of(context).size.width * 7 / 10,
                         ),
                       ),
                       Column(

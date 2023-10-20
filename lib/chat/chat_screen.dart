@@ -117,6 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       postId: postId,
                       recvUser: recvUserId,
                       members: members,
+                      isInit: Get.arguments == "initMessageSend",
                     ),
                     // Align(
                     //   alignment: Alignment.topCenter,

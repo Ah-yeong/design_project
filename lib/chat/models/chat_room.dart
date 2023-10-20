@@ -9,6 +9,7 @@ import 'chat_storage.dart';
 class ChatRoom implements Comparable<ChatRoom> {
   late bool isGroupChat;
   int? postId;
+  String? roomName;
   List<String>? members;
   String? recvUserNick;
   String? recvUserId;
@@ -19,6 +20,7 @@ class ChatRoom implements Comparable<ChatRoom> {
 
   ChatRoom(
       {required this.isGroupChat,
+        this.roomName,
       this.postId,
       this.members,
       this.recvUserId,

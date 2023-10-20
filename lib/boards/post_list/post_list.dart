@@ -27,8 +27,8 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
   Widget build(BuildContext context) {
     return postManager.isLoading
         ? _firstLoadingTimer!.isActive
-          ? SizedBox()
-          : buildLoadingProgress()
+            ? SizedBox()
+            : buildLoadingProgress()
         : CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -71,14 +71,22 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
   }
 
   naviToPost(int index) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) =>
-            BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())))
+        .then((value) {
+      if (value == false) {
+        setState(() {
+          postManager.isLoading = true;
+          _initLoadedPageChecker();
+        });
+        postManager.reloadPages("").then((value) => setState(() {}));
+      }
+    });
   }
 
   void _initLoadedPageChecker() {
     _firstLoadingTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-      if(!postManager.isLoading) {
+      if (!postManager.isLoading) {
         setState(() {});
         timer.cancel();
       }
@@ -105,8 +113,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
               : entity.getPostCurrentPerson() == 2
                   ? CupertinoIcons.person_2_fill
                   : CupertinoIcons.person_3_fill),
-          Text(getMaxPersonText(entity),
-              style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
       const SizedBox(
@@ -202,11 +209,22 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: entity.getPostCurrentPerson() > 8 ? Colors.orangeAccent :entity.isVoluntary() ? Colors.orangeAccent : Colors.cyan),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: entity.getPostCurrentPerson() > 8
+                                ? Colors.orangeAccent
+                                : entity.isVoluntary()
+                                    ? Colors.orangeAccent
+                                    : Colors.cyan),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.getPostCurrentPerson() > 8 ? "자율참여" : entity.isVoluntary() ? "자율 참여" : "위치 공유",
+                            child: Text(
+                                entity.getPostCurrentPerson() > 8
+                                    ? "자율참여"
+                                    : entity.isVoluntary()
+                                        ? "자율 참여"
+                                        : "위치 공유",
                                 style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           // 더 추가해야함, 모집 완료
@@ -219,13 +237,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.getCategory(),
-                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: Text(entity.getCategory(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ),
@@ -237,13 +253,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration:
-                                  BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child: Text(getAgeText(entity),
-                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  child: Text(getAgeText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -256,13 +270,12 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration:
-                                  BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child: Text(getGenderText(entity),
-                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  child:
+                                      Text(getGenderText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -270,19 +283,20 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         : SizedBox(),
                   ],
                 ),
-                Padding(padding: EdgeInsets.only(right: 5),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.remove_red_eye_outlined,
-                      color: const Color(0xFF858585),
-                      size: 11,
-                    ),
-                    Text(" ${entity.getViewCount()}",
-                        style: const TextStyle(color: const Color(0xFF858585), fontSize: 11)),
-                  ],
-                ),),
+                Padding(
+                  padding: EdgeInsets.only(right: 5),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.remove_red_eye_outlined,
+                        color: const Color(0xFF858585),
+                        size: 11,
+                      ),
+                      Text(" ${entity.getViewCount()}", style: const TextStyle(color: const Color(0xFF858585), fontSize: 11)),
+                    ],
+                  ),
+                ),
               ],
             ),
             SizedBox(
