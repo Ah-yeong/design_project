@@ -7,6 +7,7 @@ import 'package:design_project/auth/reset_password.dart';
 import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/icon_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:firebase_admin/firebase_admin.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -56,7 +57,6 @@ Future<void> tokenTimestampCheck() async {
   DocumentReference ref = FirebaseFirestore.instance.collection("Token").doc("accessToken");
   DocumentSnapshot snapshot = await ref.get();
   accessToken = snapshot.get("tokenValue");
-  FirebaseMessaging.instance.subscribeToTopic("notice");
 }
 
 Future<void> main() async {
@@ -516,6 +516,7 @@ class _MyHomePage extends State<MyHomePage> {
     // FCM 토큰 받아오기
     myUuid = FirebaseAuth.instance.currentUser!.uid;
     myToken = await FirebaseMessaging.instance.getToken();
+
     try {
       DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
       await reference.update({"fcmToken" : myToken});
@@ -525,6 +526,23 @@ class _MyHomePage extends State<MyHomePage> {
       }
     }
 
+    // 토큰 만료 확인
+    FCMController fcm = FCMController();
+    await fcm.sendMessage(userToken: myToken!, title: "TestMessaging", body: "TestMessage", type: AlertType.FCM_TEST).then((value) {
+      if (value == "전송 실패") {
+        FirebaseMessaging.instance.deleteToken().then((value) async {
+          myToken = await FirebaseMessaging.instance.getToken();
+          try {
+            DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+            await reference.update({"fcmToken" : myToken});
+          } catch (e) {
+            if ( e.toString().contains("document was not found")) {
+              FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
+            }
+          }
+        });
+      }
+    });
 
     // 토큰 리프레시
     FirebaseMessaging.instance.onTokenRefresh
@@ -532,9 +550,8 @@ class _MyHomePage extends State<MyHomePage> {
       myToken = fcmToken;
       myProfileEntity!.fcmToken = fcmToken;
       DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
-      await reference.get().then((ds) async {
-        await reference.update({"fcmToken" : fcmToken});
-      });
+      await reference.update({"fcmToken" : fcmToken});
+      print("fcmToken 새로고침");
     })
         .onError((err) {
       // Error getting token

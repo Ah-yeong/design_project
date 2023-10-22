@@ -226,8 +226,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                             showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
                                             return;
                                           }
-                                          if (_post!.getTimeRemainInSeconds() > 60 * 15) {
+                                          final int _remain = _post!.getTimeRemainInSeconds();
+                                          if (_remain > 60 * 15) {
                                             showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
+                                            return;
+                                          }
+                                          if (_remain < 60 * 10 * -1) {
+                                            showAlert("이미 모임이 시작되었어요!", context, colorError);
                                             return;
                                           }
                                           try {

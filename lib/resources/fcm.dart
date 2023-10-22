@@ -80,7 +80,7 @@ class FCMController {
       if (_response!.statusCode == 200) {
         return null;
       } else {
-        if(resend == null) {
+        if(resend == null && type != AlertType.FCM_TEST) {
           await tokenTimestampCheck();
           String? result = await sendMessage(userToken: userToken, title: title, body: body, type: type, clickAction: clickAction, resend: true);
           return result;
@@ -157,4 +157,25 @@ class FCMController {
   //     0, 'test title', 'test body', notificationDetails
   //   );
   // }
+
+  Future<String> getFCMTokenFormAPNsToken(String? apnsToken) async {
+    if (apnsToken == null) return "null";
+    _response = await http.post(
+        Uri.parse(
+          "https://iid.googleapis.com/iid/v1:batchImport",
+        ),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'access_token_auth': 'true',
+        },
+        body: json.encode({
+          "application": "com.jongwon.capstone",
+          "sandbox": true,
+          "apns_tokens" : [apnsToken]
+        }));
+    print("aa : $accessToken / $apnsToken");
+    print(_response!.statusCode);
+    print(_response!.body);
+    return _response!.statusCode == 200 ? (_response!.body as Map<String, dynamic>)["result"]["registration_token"] : "null";
+  }
 }

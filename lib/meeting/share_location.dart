@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../boards/post_list/post_list.dart';
 import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 import '../resources/icon_set.dart';
@@ -40,7 +41,9 @@ class _PageShareLocation extends State<PageShareLocation> {
   Timer? _locationUpdateTimer;
   Timer? _myLocationTimer;
   bool isVisibleMembers = true;
+
   EntityPost? _post;
+  int _remainTime = 1500;
 
   final Queue<LatLng> _myLocationQueue = Queue();
   LatLng? myPosition;
@@ -95,7 +98,30 @@ class _PageShareLocation extends State<PageShareLocation> {
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10, bottom: 5),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(200), borderRadius: BorderRadius.circular(6)),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.access_time_filled_rounded,
+                                    size: 20,
+                                    color: Colors.indigoAccent,
+                                  ),
+                                  Text(
+                                    "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작")}",
+                                    style: TextStyle(color: Colors.indigoAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(10, 0, 10, 7),
                             child: GestureDetector(
@@ -172,8 +198,13 @@ class _PageShareLocation extends State<PageShareLocation> {
                                               child: Container(
                                                 width: 70,
                                                 height: 30,
-                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color:
-                                                dist == -1 ? Colors.grey : dist < 30 ? colorSuccess :  Colors.indigoAccent),
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(5),
+                                                    color: dist == -1
+                                                        ? Colors.grey
+                                                        : dist < 30
+                                                            ? colorSuccess
+                                                            : Colors.indigoAccent),
                                                 child: Center(
                                                   child: Text(
                                                     "${dist == -1 ? "미연결" : dist < 30 ? "도착" : "이동중"}",
@@ -203,7 +234,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                             ),
                           )
                         ],
-                      )
+                      ),
                     ],
                   ),
           ),
@@ -224,7 +255,9 @@ class _PageShareLocation extends State<PageShareLocation> {
   void _initPostInfo() async {
     await postManager.getPostById(_meetingId, true).then((value) {
       _post = value;
-      setState(() {_isLoading=false;});
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
@@ -286,8 +319,21 @@ class _PageShareLocation extends State<PageShareLocation> {
   // 위치 자동 업데이트 타이머
   void _initReloadTimer() {
     _locationUpdateTimer = Timer.periodic(Duration(seconds: 7), (timer) {
-      _uploadPositionAndReload();
+      if (_remainTimeChecker()) {
+        _uploadPositionAndReload();
+      }
     });
+  }
+
+  // 시간 제한
+  bool _remainTimeChecker() {
+    _remainTime = _post!.getTimeRemainInSeconds();
+    if ( _remainTime < -600 ) {
+      Navigator.of(context).pop();
+      showAlert("위치 서비스 지원이 종료되었어요!", context, colorGrey);
+      return false;
+    }
+    return true;
   }
 
   void _uploadPositionAndReload() {

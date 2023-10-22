@@ -101,6 +101,7 @@ void showAlert(String message, BuildContext cont, Color color) {
 
   // Find the ScaffoldMessenger in the widget tree
   // and use it to show a SnackBar.
+  ScaffoldMessenger.of(cont).hideCurrentSnackBar();
   ScaffoldMessenger.of(cont).showSnackBar(snackBar);
 } // 메시지 박스 띄우기
 

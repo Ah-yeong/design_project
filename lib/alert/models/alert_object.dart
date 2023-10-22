@@ -151,6 +151,7 @@ enum AlertType {
   TO_CHAT_ROOM,
   TO_PROFILE,
   TO_SHARE_LOCATION_PAGE,
+  FCM_TEST,
   NONE;
 
   String toJson() => name;
