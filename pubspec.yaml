@@ -59,6 +59,7 @@ dependencies:
   googleapis_auth: ^1.4.1
   firebase_admin: ^0.2.0-dev.7
   another_flushbar: ^1.12.30
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:

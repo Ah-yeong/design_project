@@ -147,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   )),
                 ),
-                isGroupChat
+                isGroupChat && _post != null
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -177,82 +177,93 @@ class _ChatScreenState extends State<ChatScreen> {
                                   },
                                 )),
                           ),
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 13, top: 13),
-                                child: Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(color: colorGrey),
-                                      boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(15),
-                                        onTap: () {
-                                          Get.to(() => BoardPostPage(postId: postId), arguments: true);
-                                        },
-                                        overlayColor: MaterialStateProperty.all(colorSuccess),
-                                        child: const Icon(
-                                          Icons.file_copy,
-                                          size: 25,
-                                          color: colorGrey,
+                          StatefulBuilder(
+                            builder: (BuildContext context, StateSetter rowSetState) {
+                              return Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 13, top: 13),
+                                    child: Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: _post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : Colors.white,
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(color: colorGrey),
+                                          boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
                                         ),
-                                      ),
-                                    )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 13, top: 13),
-                                child: Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(color: colorGrey),
-                                      boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(15),
-                                        onTap: () async {
-                                          if (_post!.isVoluntary()) {
-                                            showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
-                                            return;
-                                          }
-                                          final int _remain = _post!.getTimeRemainInSeconds();
-                                          if (_remain > 60 * 15) {
-                                            showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
-                                            return;
-                                          }
-                                          if (_remain < 60 * 10 * -1) {
-                                            showAlert("이미 모임이 시작되었어요!", context, colorError);
-                                            return;
-                                          }
-                                          try {
-                                            LocationManager existTest = LocationManager();
-                                            await existTest.getLocationGroupData(postId!);
-                                            Get.to(() => PageShareLocation(), arguments: postId);
-                                          } catch (e) {
-                                            showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
-                                          }
-                                        },
-                                        overlayColor: MaterialStateProperty.all(colorSuccess),
-                                        child: const Icon(
-                                          Icons.location_on,
-                                          size: 28,
-                                          color: colorGrey,
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(15),
+                                            onTap: () {
+                                              rowSetState(() {});
+                                              final int _remain = _post!.getTimeRemainInSeconds();
+                                              if (_remain < 60 * 10 * -1) {
+                                                showAlert("모임이 완료되었어요!", context, colorError);
+                                                return;
+                                              }
+                                              Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState((){}));
+                                            },
+                                            overlayColor: MaterialStateProperty.all(_post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
+                                            child: const Icon(
+                                              Icons.file_copy,
+                                              size: 25,
+                                              color: colorGrey,
+                                            ),
+                                          ),
+                                        )),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 13, top: 13),
+                                    child: Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: (_post!.isVoluntary() || _post!.getTimeRemainInSeconds() > 60 * 15 || _post!.getTimeRemainInSeconds() < 60 * 10 * -1) ? colorLightGrey : Colors.white,
+                                          borderRadius: BorderRadius.circular(15),
+                                          border: Border.all(color: colorGrey),
+                                          boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
                                         ),
-                                      ),
-                                    )),
-                              ),
-                            ],
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(15),
+                                            onTap: () async {
+                                              rowSetState(() {});
+                                              if (_post!.isVoluntary()) {
+                                                showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
+                                                return;
+                                              }
+                                              final int _remain = _post!.getTimeRemainInSeconds();
+                                              if (_remain > 60 * 15) {
+                                                showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
+                                                return;
+                                              }
+                                              if (_remain < 60 * 10 * -1) {
+                                                showAlert("모임이 완료되었어요!", context, colorError);
+                                                return;
+                                              }
+                                              try {
+                                                LocationManager existTest = LocationManager();
+                                                await existTest.getLocationGroupData(postId!);
+                                                Get.to(() => PageShareLocation(), arguments: postId)!.then((value) => rowSetState((){}));
+                                              } catch (e) {
+                                                showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
+                                              }
+                                            },
+                                            overlayColor: MaterialStateProperty.all((_post!.isVoluntary() || _post!.getTimeRemainInSeconds() > 60 * 15 || _post!.getTimeRemainInSeconds() < 60 * 10 * -1) ? colorLightGrey : colorSuccess),
+                                            child: const Icon(
+                                              Icons.location_on,
+                                              size: 28,
+                                              color: colorGrey,
+                                            ),
+                                          ),
+                                        )),
+                                  ),
+                                ],
+                              );
+                            },
                           )
                         ],
                       )
@@ -264,7 +275,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _initGroupChat() async {
     _post = EntityPost(postId!, isProcessing: true);
-    await _post!.loadPost();
+    try {
+      await _post!.loadPost();
+    } catch (e) {
+      _post = null;
+    }
     await FirebaseFirestore.instance.collection("PostGroupChat").doc(postId.toString()).get().then((ds) {
       members = List.empty(growable: true);
       for (dynamic data in ds.get("members")) {

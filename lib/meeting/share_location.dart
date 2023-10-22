@@ -157,6 +157,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                                     shrinkWrap: true,
                                     itemBuilder: (BuildContext context, int index) {
                                       double dist = _locationGroupList!.getDistance(_memberProfiles[index].profileId);
+                                      bool isArrival = _locationGroupList!.isArrival(_memberProfiles[index].profileId);
                                       return Padding(
                                         padding: EdgeInsets.all(5),
                                         child: Row(
@@ -202,12 +203,12 @@ class _PageShareLocation extends State<PageShareLocation> {
                                                     borderRadius: BorderRadius.circular(5),
                                                     color: dist == -1
                                                         ? Colors.grey
-                                                        : dist < 30
+                                                        : dist < 30 || isArrival
                                                             ? colorSuccess
                                                             : Colors.indigoAccent),
                                                 child: Center(
                                                   child: Text(
-                                                    "${dist == -1 ? "미연결" : dist < 30 ? "도착" : "이동중"}",
+                                                    "${dist == -1 ? "미연결" : dist < 30 || isArrival ? "도착" : "이동중"}",
                                                     style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                                                   ),
                                                 ),
