@@ -18,11 +18,15 @@ Future<Position> determinePosition(LocationAccuracy accuracy) async {
   }
 
   if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
     return Future.error('Location permissions are permanently denied, we cannot request permissions.');
   }
 
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition(desiredAccuracy: accuracy);
 }
+final LocationSettings locationSettings = AppleSettings(
+  accuracy: LocationAccuracy.bestForNavigation,
+  activityType: ActivityType.other,
+  distanceFilter: 3, // 업데이트 이벤트가 생성되는 최소 거리 (m)
+  pauseLocationUpdatesAutomatically: true,
+  showBackgroundLocationIndicator: true,
+);

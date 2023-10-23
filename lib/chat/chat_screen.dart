@@ -9,6 +9,7 @@ import 'package:design_project/entity/profile.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/meeting/share_location.dart';
 import 'package:design_project/resources/fcm.dart';
+import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _chatLoaded = true;
       });
     });
+    isGroupChat = postId != null;
     if (recvUserId != null) {
       recvUser = EntityProfiles(recvUserId);
       recvUser.loadProfile().then((value) {
@@ -80,14 +82,9 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       });
     } else {
-      if (members == null) {
-        FCMController.chatRoomName = "[Post]$postId";
-        _initGroupChat().then((value) => setState(() => _isLoaded = true));
-      } else {
-        _isLoaded = true;
-      }
+      FCMController.chatRoomName = "[Post]$postId";
+      _initGroupChat().then((value) => setState(() => _isLoaded = true));
     }
-    isGroupChat = postId != null;
   }
 
   @override
@@ -112,11 +109,13 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Text(
             _isLoaded == false
                 ? "불러오는 중"
-                : isGroupChat
+                : isGroupChat && _post != null
                     ? "${_post!.getPostHead()}".length > 12
                         ? "${_post!.getPostHead().replaceRange(12, null, "...")} (${members!.length}명)"
                         : "${_post!.getPostHead()} (${members!.length}명)"
-                    : recvUser.name,
+                    : _post != null
+                        ? recvUser.name
+                        : "...",
             style: TextStyle(color: Colors.black, fontSize: 19)),
         backgroundColor: Colors.white,
         leading: BackButton(
@@ -124,9 +123,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       body: (_isLoaded == false || _chatLoaded == false)
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
+          ? buildLoadingProgress()
           : Stack(
               children: [
                 GestureDetector(
@@ -203,9 +200,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                                 showAlert("모임이 완료되었어요!", context, colorError);
                                                 return;
                                               }
-                                              Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState((){}));
+                                              Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState(() {}));
                                             },
-                                            overlayColor: MaterialStateProperty.all(_post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
+                                            overlayColor: MaterialStateProperty.all(
+                                                _post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
                                             child: const Icon(
                                               Icons.file_copy,
                                               size: 25,
@@ -220,7 +218,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                         width: 50,
                                         height: 50,
                                         decoration: BoxDecoration(
-                                          color: (_post!.isVoluntary() || _post!.getTimeRemainInSeconds() > 60 * 15 || _post!.getTimeRemainInSeconds() < 60 * 10 * -1) ? colorLightGrey : Colors.white,
+                                          color: (_post!.isVoluntary() ||
+                                                  _post!.getTimeRemainInSeconds() > 60 * 15 ||
+                                                  _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
+                                              ? colorLightGrey
+                                              : Colors.white,
                                           borderRadius: BorderRadius.circular(15),
                                           border: Border.all(color: colorGrey),
                                           boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
@@ -247,12 +249,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                               try {
                                                 LocationManager existTest = LocationManager();
                                                 await existTest.getLocationGroupData(postId!);
-                                                Get.to(() => PageShareLocation(), arguments: postId)!.then((value) => rowSetState((){}));
+                                                Get.to(() => PageShareLocation(), arguments: postId)!.then((value) => rowSetState(() {}));
                                               } catch (e) {
                                                 showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
                                               }
                                             },
-                                            overlayColor: MaterialStateProperty.all((_post!.isVoluntary() || _post!.getTimeRemainInSeconds() > 60 * 15 || _post!.getTimeRemainInSeconds() < 60 * 10 * -1) ? colorLightGrey : colorSuccess),
+                                            overlayColor: MaterialStateProperty.all((_post!.isVoluntary() ||
+                                                    _post!.getTimeRemainInSeconds() > 60 * 15 ||
+                                                    _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
+                                                ? colorLightGrey
+                                                : colorSuccess),
                                             child: const Icon(
                                               Icons.location_on,
                                               size: 28,
@@ -275,17 +281,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _initGroupChat() async {
     _post = EntityPost(postId!, isProcessing: true);
+    if (Get.arguments == "initMessageSend") {
+      await Future.delayed(Duration(milliseconds: 1000), () {});
+    }
     try {
       await _post!.loadPost();
     } catch (e) {
+      print(e);
+      print("null 처리");
       _post = null;
     }
-    await FirebaseFirestore.instance.collection("PostGroupChat").doc(postId.toString()).get().then((ds) {
-      members = List.empty(growable: true);
-      for (dynamic data in ds.get("members")) {
-        members!.add(data.toString());
-      }
-    });
+    if (members == null) {
+      await FirebaseFirestore.instance.collection("PostGroupChat").doc(postId.toString()).get().then((ds) {
+        members = [];
+        for (dynamic data in ds.get("members")) {
+          members!.add(data.toString());
+        }
+      });
+    }
+
+    return;
   }
 }
 

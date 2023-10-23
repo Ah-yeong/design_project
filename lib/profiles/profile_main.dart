@@ -23,7 +23,7 @@ class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClient
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        title: const Text('프로필', style: TextStyle(fontSize: 18, color: Colors.black)),
+        title: const Text('프로필', style: TextStyle(fontSize: 19, color: Colors.black)),
         backgroundColor: Colors.white,
       ),
       body: myProfile!.isLoading ? Center(

@@ -62,6 +62,14 @@ class LocationGroupData {
     return data.isArrival();
   }
 
+  bool isArrivalAll() {
+    bool arrival = true;
+    _userLocationList!.forEach((location) {
+      arrival = arrival && location.isArrival();
+    });
+    return arrival;
+  }
+
   Marker getMeetingLocationMarker() {
     return Marker(markerId: MarkerId("0"), position: _meetingPosition!.latLng);
   }

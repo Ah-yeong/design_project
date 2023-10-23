@@ -61,7 +61,7 @@ class AlertObject {
           Get.to(() => BoardProfilePage(profileId: _clickAction["profile_id"]!));
         }
         break;
-      case AlertType.TO_SHARE_LOCATION_PAGE:
+      case AlertType.TO_SHARE_LOCATION:
         if (_clickAction["meeting_id"] != null) {
           Get.to(() => ChatScreen(postId: int.parse(_clickAction["meeting_id"]!)));
           try {
@@ -150,7 +150,7 @@ enum AlertType {
   TO_POST,
   TO_CHAT_ROOM,
   TO_PROFILE,
-  TO_SHARE_LOCATION_PAGE,
+  TO_SHARE_LOCATION,
   FCM_TEST,
   NONE;
 

@@ -137,7 +137,7 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
   _onTappedItem(int idx) {
     setState(() {
       _selectedIdx = idx;
-      _pageController.animateToPage(idx, duration: Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+      _pageController.jumpToPage(idx);
     });
   }
 

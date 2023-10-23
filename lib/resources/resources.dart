@@ -84,7 +84,7 @@ SnackBar getAlert(String message, Color color) {
   );
 }
 
-void showAlert(String message, BuildContext cont, Color color) {
+void showAlert(String message, BuildContext cont, Color color, {Duration duration = const Duration(milliseconds: 1300)}) {
   final snackBar = SnackBar(
     behavior: SnackBarBehavior.floating,
     width: MediaQuery.of(cont).size.width - 20,
@@ -95,7 +95,7 @@ void showAlert(String message, BuildContext cont, Color color) {
       style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
       textAlign: TextAlign.center,
     ),
-    duration: Duration(milliseconds: 1300),
+    duration: duration,
     backgroundColor: color,
   );
 
@@ -132,4 +132,59 @@ Future<Uint8List> getBytesFromAsset(String path, int width) async {
   ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
   ui.FrameInfo fi = await codec.getNextFrame();
   return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+}
+
+showConfirmBox(BuildContext context, {Widget? title, Widget? body, Function()? onAccept, Function()? onDeny}) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 20),
+      contentPadding: EdgeInsets.fromLTRB(30, 20, 30, 20),
+      // 다이얼로그의 내용 패딩을 균일하게 조정
+      content: SizedBox(
+        width: 300,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if(title != null) const SizedBox(height: 20),
+            if(title != null) title,
+            if(body != null) const SizedBox(height: 20),
+            if(body != null) body,
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    if (onAccept != null) onAccept();
+                  },
+                  child: Text('예'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    minimumSize: Size(50, 30),
+                    elevation: 1
+                  ),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    if (onDeny != null) onDeny();
+                  },
+                  child: Text('아니오'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    minimumSize: Size(50, 30),
+                    elevation: 1
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

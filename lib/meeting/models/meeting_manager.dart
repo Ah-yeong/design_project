@@ -11,7 +11,7 @@ class MeetingManager {
 
   // 게시물을 모임 객체로 전환
   Meeting convertPostToMeet(EntityPost post) {
-    return Meeting(post.getPostId(), DateTime.parse(post.getTime()), post.getCompletedMembers()..insert(0, post.getWriterId()), post.getLLName(), post.isVoluntary());
+    return Meeting(post.getPostId(), DateTime.parse(post.getTime()), post.getCompletedMembers()..insert(0, post.getWriterId()), post.getLLName(), post.isVoluntary(), post.getWriterId());
   }
 
   // 모임 결성 ( meetingPost 삭제, meetings 추가 )
@@ -76,7 +76,8 @@ class MeetingManager {
             meetingId, (snapshot.get("meetTime") as Timestamp).toDate(),
             snapshot.get("members").cast<String>(),
             LLName.fromJson(snapshot.get("location")),
-            snapshot.get("isVoluntary")
+            snapshot.get("isVoluntary"),
+            snapshot.get("organizerUuid")
         );
       }
     });

@@ -24,8 +24,8 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
       appBar: AppBar(
         elevation: 1,
         title: Text(
-          '알림목록',
-          style: TextStyle(fontSize: 18, color: Colors.black),
+          '알림',
+          style: TextStyle(fontSize: 19, color: Colors.black),
         ),
         backgroundColor: Colors.white,
       ),
@@ -65,27 +65,31 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
                     if (_alertManager!.alertList.length == 0) {
                       return Center(child: Text("표시할 알림이 없어요", style: TextStyle(color: colorGrey, fontSize: 14),),);
                     }
-                    return ListView.separated(
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == 0 || index == _alertManager!.alertList.length + 1) {
-                            // 첫번째와 마지막에 공백 추가.
-                            return const SizedBox();
-                          }
-                          AlertObject alert = _alertManager!.alertList[_alertManager!.alertList.length - index];
-                          return GestureDetector(
-                            onTap: () async {
-                              bool isReading = alert.reading();
-                              if (isReading) {
-                                await _alertManager!.readAlertCount(myUuid!);
-                                await _alertManager!.saveAlert(isSync: true).then((successful) { if(successful) setState(() {});});
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter listViewRefresh) {
+                        return ListView.separated(
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index == 0 || index == _alertManager!.alertList.length + 1) {
+                                // 첫번째와 마지막에 공백 추가.
+                                return const SizedBox();
                               }
-                              alert.onClick();
+                              AlertObject alert = _alertManager!.alertList[_alertManager!.alertList.length - index];
+                              return GestureDetector(
+                                onTap: () async {
+                                  bool isReading = alert.reading();
+                                  if (isReading) {
+                                    await _alertManager!.readAlertCount(myUuid!);
+                                    await _alertManager!.saveAlert(isSync: true).then((successful) { if(successful) listViewRefresh((){});});
+                                  }
+                                  alert.onClick();
+                                },
+                                child: alert.getBanner(),
+                              );
                             },
-                            child: alert.getBanner(),
-                          );
-                        },
-                        itemCount: _alertManager!.alertList.length > 0 ? _alertManager!.alertList.length + 2 : 0,
-                        separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1.5, height: 1.5));
+                            itemCount: _alertManager!.alertList.length > 0 ? _alertManager!.alertList.length + 2 : 0,
+                            separatorBuilder: (BuildContext context, int index) => Divider(thickness: 1.5, height: 1.5));
+                      },
+                    );
                   } else {
                     return SizedBox();
                   }

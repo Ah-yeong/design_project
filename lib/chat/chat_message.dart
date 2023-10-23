@@ -6,8 +6,10 @@ import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../alert/models/alert_manager.dart';
 import '../boards/post_list/page_hub.dart';
 import '../entity/profile.dart';
+import '../main.dart';
 import 'models/chat_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -164,10 +166,11 @@ class _ChatMessageState extends State<ChatMessage> {
 
         if(member == myUuid!) continue;
         profile = _memberProfiles[member]!;
-        fcm.sendMessage(userToken: profile.fcmToken, title: "모임이 성사되었어요 🙌🏻!", body: "지금 바로 모임 채팅을 통해\n먼저 이야기를 나눠보세요 ☺️", type: AlertType.TO_CHAT_ROOM, clickAction: {
+        AlertManager alertManager = AlertManager(LocalStorage!);
+        alertManager.sendAlert(title: "모임이 성사되었어요 🙌🏻!", body: "지금 바로 모임 채팅을 통해\n먼저 이야기를 나눠보세요 ☺️", alertType: AlertType.TO_CHAT_ROOM, userUUID: member, withPushNotifications: true, clickAction: {
           "chat_id" : postId.toString(),
           "is_group_chat" : "true",
-        }).then((value) => print(value));
+        });
       }
     } else {
       _chatController.clear();
@@ -326,7 +329,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         addReadBy = true;
                         _readList.add(chatModel);
                       } else if (!savedBy.contains(user.uid)) {
-                        if (readBy.length == membersCount) {
+                        if (readBy.length >= membersCount) {
                           final bool isSavedAll = savedBy.length + 1 >= membersCount;
                           if (isSavedAll) {
                             _removeList.add(chatModel);

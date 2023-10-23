@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:design_project/boards/post.dart';
+import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/boards/search/search_post_list.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/meeting/models/location_data.dart';
@@ -51,6 +51,9 @@ class _PageShareLocation extends State<PageShareLocation> {
   bool _isLoading = true;
   bool _initFlag = true;
   final List<Marker> _positionMarkers = [];
+  StreamSubscription<Position>? positionStream;
+
+  final ARRIVAL_DISTANCE_BOUNDARY = 30;
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +107,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                             padding: const EdgeInsets.only(left: 10, bottom: 5),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(200), borderRadius: BorderRadius.circular(6)),
+                              decoration: BoxDecoration(color: Colors.white.withAlpha(200), borderRadius: BorderRadius.circular(6)),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -132,8 +134,10 @@ class _PageShareLocation extends State<PageShareLocation> {
                               },
                               child: Container(
                                 width: double.infinity,
-                                decoration:
-                                    BoxDecoration(borderRadius: BorderRadius.circular(7), border: Border.all(), color: colorLightGrey.withAlpha(190)),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(7),
+                                    border: Border.all(color: colorGrey),
+                                    color: colorLightGrey.withAlpha(190)),
                                 height: 35,
                                 child: Center(
                                   child: Icon(isVisibleMembers ? Icons.arrow_downward : Icons.arrow_upward),
@@ -142,7 +146,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 50),
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 7),
                             child: SizedBox(
                               width: double.infinity,
                               child: AnimatedCrossFade(
@@ -203,12 +207,12 @@ class _PageShareLocation extends State<PageShareLocation> {
                                                     borderRadius: BorderRadius.circular(5),
                                                     color: dist == -1
                                                         ? Colors.grey
-                                                        : dist < 30 || isArrival
+                                                        : dist < ARRIVAL_DISTANCE_BOUNDARY || isArrival
                                                             ? colorSuccess
                                                             : Colors.indigoAccent),
                                                 child: Center(
                                                   child: Text(
-                                                    "${dist == -1 ? "미연결" : dist < 30 || isArrival ? "도착" : "이동중"}",
+                                                    "${dist == -1 ? "미연결" : dist < ARRIVAL_DISTANCE_BOUNDARY || isArrival ? "도착" : "이동중"}",
                                                     style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                                                   ),
                                                 ),
@@ -229,10 +233,114 @@ class _PageShareLocation extends State<PageShareLocation> {
                                 ),
                                 secondChild: SizedBox(),
                                 crossFadeState: isVisibleMembers ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-                                duration: Duration(milliseconds: 750),
+                                duration: Duration(milliseconds: 500),
                                 sizeCurve: Curves.decelerate,
                               ),
                             ),
+                          ),
+                          _post != null && myUuid == _post!.getWriterId()
+                              ? Padding(
+                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      if (_locationGroupList!.isArrivalAll()) {
+                                        // 다 도착했을 경우
+                                        showConfirmBox(context,
+                                            title: Text("구성원이 모두 도착했어요!", style: TextStyle(fontWeight: FontWeight.bold)),
+                                            body: Text(
+                                              "모임 완료 시, 일정 시간 뒤에 모임 게시글이 삭제되며, 위치 공유 서비스를 이용할 수 없어요.\n\n지금 모임을 완료할까요?",
+                                              style: TextStyle(color: colorGrey, fontSize: 15),
+                                            ),
+                                            onAccept: () => null,
+                                            onDeny: () => null);
+                                      } else {
+                                        // 다 도착하지 않았을 경우 (강제 성사)
+                                        bool readWarning = false;
+                                        showConfirmBox(context,
+                                            title: Text(
+                                              "구성원이 아직 모두 도착하지 않았어요!",
+                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                            body: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "도착 여부에 관계없이 모두 도착으로 처리되므로, 신중히 선택해주세요.",
+                                                  style: TextStyle(color: colorGrey, fontSize: 15),
+                                                ),
+                                                const SizedBox(
+                                                  height: 15,
+                                                ),
+                                                Text(
+                                                  "이 기능을 고의적 노쇼 및 모임 해체 목적으로 사용 시, 계정 정지 혹은 매너지수 감소 등의 불이익을 받을 수 있으니 주의하세요!",
+                                                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
+                                                ),
+                                                const SizedBox(
+                                                  height: 25,
+                                                ),
+                                                StatefulBuilder(
+                                                  builder: (BuildContext context, StateSetter dialogSetter) {
+                                                    return GestureDetector(
+                                                      child: Row(
+                                                        children: [
+                                                          Transform.scale(
+                                                              scale: 0.9,
+                                                              child: SizedBox(
+                                                                width: 24,
+                                                                height: 24,
+                                                                child: Checkbox(
+                                                                  value: readWarning,
+                                                                  onChanged: (_val) {
+                                                                    dialogSetter(() {
+                                                                      readWarning = _val!;
+                                                                    });
+                                                                  },
+                                                                  activeColor: colorSuccess,
+                                                                ),
+                                                              )),
+                                                          Text(
+                                                            " 위 내용을 읽고, 확인했어요.",
+                                                            style: TextStyle(fontSize: 15),
+                                                          )
+                                                        ],
+                                                      ),
+                                                      behavior: HitTestBehavior.translucent,
+                                                      onTap: () {
+                                                        dialogSetter(() {
+                                                          readWarning = !readWarning;
+                                                        });
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                            onAccept: () {
+                                              if (!readWarning) {
+                                                showAlert("주의 사항 확인 체크가 필요해요!", context, colorError, duration: const Duration(milliseconds: 2000));
+                                                return;
+                                              } else {}
+                                            },
+                                            onDeny: () => null);
+                                      }
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(7), border: Border.all(color: colorGrey), color: Colors.indigoAccent),
+                                      height: 50,
+                                      child: Center(
+                                        child: Text(
+                                          "모임 완료",
+                                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(),
+                          const SizedBox(
+                            height: 50,
                           )
                         ],
                       ),
@@ -249,7 +357,6 @@ class _PageShareLocation extends State<PageShareLocation> {
   void initState() {
     _initPostInfo();
     _initMyLocation();
-    _initMyLocationTimer();
     super.initState();
   }
 
@@ -265,30 +372,44 @@ class _PageShareLocation extends State<PageShareLocation> {
   void _initMyLocation() {
     int i = 0;
     Timer.periodic(Duration(milliseconds: 200), (timer) async {
-      if (i >= 4) timer.cancel();
-      i += 1;
-      await determinePosition(LocationAccuracy.best).then((position) {
-        _myLocationQueue.add(LatLng(position.latitude, position.longitude));
-        if (_myLocationQueue.length >= 5) {
-          _setAveragePosition();
-          _myLocationLoading = false;
-          _uploadPositionAndReload();
+        i += 1;
+        if (i >= 5) {
+          timer.cancel();
         }
-      });
+        await determinePosition(LocationAccuracy.best).then((position) {
+          _myLocationQueue.add(LatLng(position.latitude, position.longitude));
+          if (_myLocationQueue.length >= 5) {
+            _setAveragePosition();
+            _myLocationLoading = false;
+            _uploadPositionAndReload();
+          }
+          if (i == 5) {
+            _initMyLocationUpdate();
+          }
+        });
+
     });
     _initReloadTimer();
   }
 
-  void _initMyLocationTimer() {
-    Timer(Duration(milliseconds: 2000), () {
-      _myLocationTimer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
-        await determinePosition(LocationAccuracy.best).then((position) {
-          _myLocationQueue.removeFirst();
-          _myLocationQueue.add(LatLng(position.latitude, position.longitude));
-          _setAveragePosition();
-        });
-      });
+  void _initMyLocationUpdate() {
+    positionStream = Geolocator.getPositionStream(locationSettings: locationSettings).listen((Position? position) {
+      if (position != null) {
+        _myLocationQueue.removeFirst();
+        _myLocationQueue.add(LatLng(position.latitude, position.longitude));
+        _setAveragePosition();
+      }
     });
+
+    // Timer(Duration(milliseconds: 2000), () {
+    //   _myLocationTimer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
+    //     await determinePosition(LocationAccuracy.best).then((position) {
+    //       _myLocationQueue.removeFirst();
+    //       _myLocationQueue.add(LatLng(position.latitude, position.longitude));
+    //       _setAveragePosition();
+    //     });
+    //   });
+    // });
   }
 
   void _setAveragePosition() {
@@ -329,9 +450,14 @@ class _PageShareLocation extends State<PageShareLocation> {
   // 시간 제한
   bool _remainTimeChecker() {
     _remainTime = _post!.getTimeRemainInSeconds();
-    if ( _remainTime < -600 ) {
+    if (_remainTime < -600) {
       Navigator.of(context).pop();
       showAlert("위치 서비스 지원이 종료되었어요!", context, colorGrey);
+      Future.delayed(Duration(milliseconds: 400), () {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
       return false;
     }
     return true;
@@ -388,5 +514,6 @@ class _PageShareLocation extends State<PageShareLocation> {
     super.deactivate();
     _locationUpdateTimer?.cancel();
     _myLocationTimer?.cancel();
+    positionStream?.cancel();
   }
 }

@@ -143,7 +143,7 @@ class EntityPost {
         throw Exception("게시물을 찾을 수 없음");
       }
       try {
-        _loadField(ds);
+        await _loadField(ds);
       } catch (e) {
         Map<String, dynamic> map = ds.data() as Map<String, dynamic>;
         await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -153,10 +153,11 @@ class EntityPost {
             }
           }
         });
-        _loadField(ds);
+        await _loadField(ds);
         print("오류 발생");
       }
     });
+    return;
   }
 
   Future<void> postMoveToProcess() async {

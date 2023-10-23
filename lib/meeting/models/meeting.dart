@@ -10,6 +10,7 @@ import '../../boards/post_list/post_list.dart';
 
 class Meeting {
   int _meetingId;
+  String _organizerUuid;
   DateTime _meetTime;
   List<String> _memberUuids;
   LLName _meetLocation;
@@ -18,7 +19,7 @@ class Meeting {
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("Meetings");
   CollectionReference _userInstance = FirebaseFirestore.instance.collection("UserMeetings");
 
-  Meeting(this._meetingId, this._meetTime, this._memberUuids, this._meetLocation, this._isVoluntary);
+  Meeting(this._meetingId, this._meetTime, this._memberUuids, this._meetLocation, this._isVoluntary, this._organizerUuid);
 
   DocumentReference getMeetingDocument() {
     return _meetingInstance.doc(_meetingId.toString());
@@ -27,7 +28,7 @@ class Meeting {
   Future<void> upload({required bool? init}) async {
     if (init!) {
       await getMeetingDocument()
-          .set({"id": _meetingId, "meetTime": _meetTime, "members": _memberUuids, "location": _meetLocation.toJson(), "isVoluntary": _isVoluntary});
+          .set({"id": _meetingId, "meetTime": _meetTime, "members": _memberUuids, "location": _meetLocation.toJson(), "isVoluntary": _isVoluntary, "organizerUuid" : _organizerUuid});
     }
     await uploadMembers();
   }

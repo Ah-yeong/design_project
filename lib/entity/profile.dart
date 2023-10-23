@@ -89,5 +89,14 @@ class EntityProfiles {
   Future<void> addGroupId(postId) async {
     await MeetingManager().addMeetingPost(profileId.toString(), postId);
   }
+
+  Future<void> removeMyPost(postId) async {
+    DocumentReference ref = FirebaseFirestore.instance.collection("UserProfile").doc(profileId);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.get(ref).then((value) {
+        transaction.update(ref, {"post" : FieldValue.arrayRemove([postId])});
+      });
+    });
+  }
 }
 

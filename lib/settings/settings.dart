@@ -5,7 +5,10 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/alert/models/alert_manager.dart';
 import 'package:design_project/meeting/share_location.dart';
+import 'package:design_project/resources/resources.dart';
+import 'package:design_project/settings/reset.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../alert/models/alert_object.dart';
@@ -62,9 +65,14 @@ class PageSettings extends StatelessWidget {
             endIndent: 16,
           ),
           ListTile(
-            title: Text('위치 공유 화면'),
+            title: Text('채팅 로컬데이터 삭제'),
             onTap: () {
-              Get.to(() => PageShareLocation(), arguments: 43);
+              LocalStorage!.getKeys().forEach((element) {
+                if (element.contains("_ChatData_")) {
+                  LocalStorage!.remove(element);
+                  print("삭제 완료 : $element");
+                }
+              });
             },
           ),
           Divider(
@@ -82,11 +90,11 @@ class PageSettings extends StatelessWidget {
                   title: "DB테스트",
                   body: rd.toString(),
                   time: DateTime.now(),
-                  alertType: AlertType.TO_SHARE_LOCATION_PAGE,
+                  alertType: AlertType.TO_SHARE_LOCATION,
                   clickAction: {"meeting_id": "47"},
                   isRead: false);
               var manager = AlertManager(LocalStorage!);
-              manager.sendAlert(title: "DB테스트1", body: rd.toString(), alertType: AlertType.NONE, userUUID: myUuid!, withPushNotifications: false);
+              manager.sendAlert(title: "DB테스트1", body: rd.toString(), alertType: AlertType.TO_CHAT_ROOM, userUUID: myUuid!, withPushNotifications: false, clickAction: {"meeting_id": "63"});
               print("완료");
             },
           ),
@@ -98,49 +106,10 @@ class PageSettings extends StatelessWidget {
             endIndent: 16,
           ),
           ListTile(
-            title: Text('알림 보내기 : test3'),
-            onTap: () async {
-              String title = "테스트 알림이에요!";
-              String body = "히히";
-              int rd = Random().nextInt(1000);
-              AlertManager manager = AlertManager(LocalStorage!);
-              bool result = await manager.sendAlert(
-                  title: title,
-                  body: rd.toString(),
-                  alertType: AlertType.NONE,
-                  userUUID: "ki654uiWotZTum8GetnSC7HTgIk2",
-                  withPushNotifications: true);
-            },
-          ),
-          ListTile(
-            title: Text('위치 업데이트 시작'),
-            onTap: () async {
-              if (tempTimer != null) {
-                tempTimer!.cancel();
-              }
-              tempTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
-                a++;
-                DocumentReference _locationInstance = FirebaseFirestore.instance.collection("updateTest").doc("test");
-                await FirebaseFirestore.instance.runTransaction((transaction) => transaction.get(_locationInstance).then((snapshot) async {
-                      transaction.update(_locationInstance, {
-                        myUuid!: {"nickname": a}
-                      });
-                    }));
-              });
-            },
-          ),
-          Divider(
-            color: Colors.grey[400],
-            height: 1,
-            thickness: 1,
-            indent: 16,
-            endIndent: 16,
-          ),
-          ListTile(
-            title: Text('json 출력'),
-            onTap: () async {
-              print(jsonEncode(AlertObject(title: "aa", body: "body", time: DateTime.now(), alertType: AlertType.NONE, isRead: false, clickAction: {"aa": "bb", "cc": "dd"})));
-            },
+            title: Text('전체 데이터 초기화'),
+            onTap: () {
+              Get.to(() => PageReset());
+            }
           ),
           Divider(
             color: Colors.grey[400],

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:design_project/alert/models/alert_manager.dart';
+import 'package:design_project/alert/models/alert_object.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/meeting/models/location_manager.dart';
@@ -56,7 +58,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   late Future<List<EntityProfiles>> acceptUsers;
   List<dynamic> _loadedUserList = [];
   double _completeButtonOpacity = 1;
-  Timer? timer;
+  Timer? buttonEffectTimer;
   StateSetter? modalSetter;
 
   Future<List<EntityProfiles>> getRequestProfiles(List<String> uuids) async {
@@ -152,7 +154,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                                           builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
                                           backgroundColor: Colors.transparent)
                                       .then((value) => reloadButtonState(() {
-                                            timer!.cancel();
+                                            buttonEffectTimer!.cancel();
                                           }));
                                 } else if (postEntity!.getRequestState(myUuid!) == "none") {
                                   if (postEntity!.isFull()) {
@@ -287,7 +289,7 @@ class _BoardPostPage extends State<BoardPostPage> {
       setState(() => isRequestLoading = false);
     });
   }
-
+  
   Future<bool> _loadPost({bool? isReload}) async {
     try {
       await postEntity!.loadPost().then((value) async {
@@ -320,13 +322,13 @@ class _BoardPostPage extends State<BoardPostPage> {
   }
 
   _setButtonOpacityTimer() {
-    if (modalSetter != null && (timer == null || !timer!.isActive)) {
+    if (modalSetter != null && (buttonEffectTimer == null || !buttonEffectTimer!.isActive)) {
       Timer(Duration(milliseconds: 100), () {
         modalSetter!(() {
           _completeButtonOpacity == 0.7 ? _completeButtonOpacity = 1 : _completeButtonOpacity = 0.7;
         });
       });
-      timer = Timer.periodic(Duration(milliseconds: 1100), (timer) {
+      buttonEffectTimer = Timer.periodic(Duration(milliseconds: 1100), (timer) {
         if (mounted)
           modalSetter!(() {
             _completeButtonOpacity == 0.7 ? _completeButtonOpacity = 1 : _completeButtonOpacity = 0.7;
@@ -422,7 +424,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                     onTap: () async {
                       // 모임 성사
                       if (!_btnClickDelay_startMeeting) {
-                        timer?.cancel();
+                        buttonEffectTimer?.cancel();
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
                         setState(() {
@@ -430,12 +432,15 @@ class _BoardPostPage extends State<BoardPostPage> {
                         });
                         _btnClickDelay_startMeeting = true;
                         MeetingManager meetManager = MeetingManager();
-                        await meetManager.meetingCreate(postEntity!);
                         // if (위치공유 모임이면)
                         List<String> members = getAcceptUuids()..add(myUuid!);
                         LocationManager locManager = LocationManager();
-                        await locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members);
-                        await postEntity!.postMoveToProcess();
+                        Future.wait([
+                          meetManager.meetingCreate(postEntity!),
+                          locManager.createShareLocation(postEntity!.getPostId(),
+                              postEntity!.getLLName(), members), postEntity!.postMoveToProcess(),
+                          myProfileEntity!.removeMyPost(postEntity!.getPostId())
+                        ]);
                         Get.to(() => ChatScreen(postId: postEntity!.getPostId(), members: members,), arguments: "initMessageSend");
                         _btnClickDelay_startMeeting = false;
                       }
@@ -796,7 +801,9 @@ class _BoardPostPage extends State<BoardPostPage> {
 
   @override
   void dispose() {
-    if (timer != null && mounted) timer!.cancel();
+    if (mounted) {
+      if (buttonEffectTimer != null) buttonEffectTimer!.cancel();
+    }
     super.dispose();
   }
 }
