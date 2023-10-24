@@ -135,10 +135,14 @@ app.*.symbols
 !.vscode/settings.json
 
 #etc
-keystore/
 test/
 web/
 linux/
 li
 windows/
 macos/
+
+#private
+**/ios/Runner/Info.plist
+**/ios/Runner/AppDelegate.swift
+**/ios/Runner/GoogleService-Info.plist

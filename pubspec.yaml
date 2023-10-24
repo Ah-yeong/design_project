@@ -84,7 +84,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - keystore/service-account.json
     - assets/images/userImage.png
     - assets/images/hobbyMarker.png
     - assets/images/foodMarker.png

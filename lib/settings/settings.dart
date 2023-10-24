@@ -106,10 +106,23 @@ class PageSettings extends StatelessWidget {
             endIndent: 16,
           ),
           ListTile(
-            title: Text('전체 데이터 초기화'),
-            onTap: () {
-              Get.to(() => PageReset());
-            }
+              title: Text('전체 데이터 초기화'),
+              onTap: () {
+                Get.to(() => PageReset());
+              }
+          ),
+          Divider(
+            color: Colors.grey[400],
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
+          ),
+          ListTile(
+              title: Text('remove'),
+              onTap: () async {
+                myProfileEntity!.removeMyPost(5);
+              }
           ),
           Divider(
             color: Colors.grey[400],

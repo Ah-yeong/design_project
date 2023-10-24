@@ -206,19 +206,21 @@ class EntityPost {
     return userStatus["status"] == 0
         ? "wait"
         : userStatus["status"] == 1
-            ? "accept"
-            : "reject";
+        ? "accept"
+        : "reject";
   }
 
   addViewCount(String uuid) async {
-    const PREFIX_COOL = "[PCD]_";
-    int? coolDown = LocalStorage!.getInt("${PREFIX_COOL}$_postId");
-    int standardTime = 1000 * 60 * 30; // milliseconds.
-    if (coolDown == null || DateTime.now().millisecondsSinceEpoch - coolDown > standardTime) {
-      _viewCount += 1;
-      _postDocRef!.update({"viewCount": FieldValue.increment(1)});
-      LocalStorage!.setInt("${PREFIX_COOL}$_postId", DateTime.now().millisecondsSinceEpoch);
-    }
+    try {
+      const PREFIX_COOL = "[PCD]_";
+      int? coolDown = LocalStorage!.getInt("${PREFIX_COOL}$_postId");
+      int standardTime = 1000 * 60 * 30; // milliseconds.
+      if (coolDown == null || DateTime.now().millisecondsSinceEpoch - coolDown > standardTime) {
+        _viewCount += 1;
+        _postDocRef!.update({"viewCount": FieldValue.increment(1)});
+        LocalStorage!.setInt("${PREFIX_COOL}$_postId", DateTime.now().millisecondsSinceEpoch);
+      }
+    } catch (e) {}
   }
 
   // Getter, (ReadOnly)
@@ -296,20 +298,20 @@ String getTimeBefore(String upTime) {
 
 Future<bool> addPost(
     {required String writerId,
-    required String head,
-    required String body,
-    required int gender,
-    required int maxPerson,
-    required String time,
-    required LLName llName,
-    required String upTime,
-    required String category,
-    required int minAge,
-    required int maxAge,
-    required String writerNick,
-    required bool isVoluntary,
-    bool? isProcessingPost,
-    int? postId}) async {
+      required String head,
+      required String body,
+      required int gender,
+      required int maxPerson,
+      required String time,
+      required LLName llName,
+      required String upTime,
+      required String category,
+      required int minAge,
+      required int maxAge,
+      required String writerNick,
+      required bool isVoluntary,
+      bool? isProcessingPost,
+      int? postId}) async {
   try {
     bool processingPost = isProcessingPost != null && isProcessingPost && postId != null;
     int? new_post_id;

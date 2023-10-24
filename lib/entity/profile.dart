@@ -31,24 +31,24 @@ class EntityProfiles {
     // 포스팅 로드
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
-          birth = ds.get("birth");
-          age = ds.get("age");
-          profileImagePath = "assets/images/userImage.png";
-          commute = ds.get("commute");
-          gender = ds.get("gender");
-          hobby = ds.get("hobby");
-          hobbyIndex = ds.get("hobbyIndex");
-          mbtiIndex = ds.get("mbtiIndex");
-          name = ds.get("nickName");
-          major = "소프트웨어학과";
-          textInfo = ds.get("textInfo");
-          mannerGroup = ds.get("mannerGroup");
-          post = ds.get("post");
-          addr1 = ds.get("addr1");
-          addr2 = ds.get("addr2");
-          addr3 = ds.get("addr3");
-          fcmToken = ds.get("fcmToken");
-        });
+      birth = ds.get("birth");
+      age = ds.get("age");
+      profileImagePath = "assets/images/userImage.png";
+      commute = ds.get("commute");
+      gender = ds.get("gender");
+      hobby = ds.get("hobby");
+      hobbyIndex = ds.get("hobbyIndex");
+      mbtiIndex = ds.get("mbtiIndex");
+      name = ds.get("nickName");
+      major = "소프트웨어학과";
+      textInfo = ds.get("textInfo");
+      mannerGroup = ds.get("mannerGroup");
+      post = ds.get("post");
+      addr1 = ds.get("addr1");
+      addr2 = ds.get("addr2");
+      addr3 = ds.get("addr3");
+      fcmToken = ds.get("fcmToken");
+    });
     isLoading = false;
   }
 
@@ -90,12 +90,10 @@ class EntityProfiles {
     await MeetingManager().addMeetingPost(profileId.toString(), postId);
   }
 
-  Future<void> removeMyPost(postId) async {
+  Future<void> removeMyPost(int postId) async {
     DocumentReference ref = FirebaseFirestore.instance.collection("UserProfile").doc(profileId);
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      transaction.get(ref).then((value) {
-        transaction.update(ref, {"post" : FieldValue.arrayRemove([postId])});
-      });
+      transaction.update(ref, {"post" : FieldValue.arrayRemove([postId])});
     });
   }
 }
