@@ -27,7 +27,7 @@ class MeetingManager {
     DocumentReference reference = _userInstance.doc(uuid);
     await reference.get().then((snapshot) async {
       if (!snapshot.exists) {
-        await reference.set({"meetings" : [], "meetingPost" : [postId]});
+        await reference.set({"meetings" : [], "meetingPost" : [postId], "endMeetings" : []});
       } else {
         await reference.update({"meetingPost" : FieldValue.arrayUnion([postId])});
       }
