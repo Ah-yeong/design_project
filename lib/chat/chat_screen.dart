@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
-//import 'package:cloud_firestore/cloud_firestore.dart';
 import '../boards/post_list/page_hub.dart';
 import '../meeting/models/location_manager.dart';
 import 'chat_message.dart';
@@ -115,7 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         : "${_post!.getPostHead()} (${members!.length}명)"
                     : _post != null
                         ? recvUser.name
-                        : "...",
+                        : "종료된 모임 (${members!.length}명)",
             style: TextStyle(color: Colors.black, fontSize: 19)),
         backgroundColor: Colors.white,
         leading: BackButton(
