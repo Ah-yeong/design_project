@@ -16,7 +16,7 @@ class _PageReset extends State<PageReset> {
 
   /** 0 :  [POST]
    *
-   * 1 : [POST\_GROUP_CHAT]
+   * 1 : [POST\_GROUP_CoHAT]
    *
    * 2 : [PROCESSING_POST]
    *

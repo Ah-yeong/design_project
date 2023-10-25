@@ -362,11 +362,11 @@ class _MyHomePage extends State<MyHomePage> {
         }
       }
     });
-    Timer(const Duration(milliseconds: 2400), () {
+    Timer(const Duration(milliseconds: 2000), () {
       if (FirebaseAuth.instance.currentUser != null) {
         // 로고 페이드 아웃 및 메인으로 넘어가기
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
-          Timer.periodic(const Duration(milliseconds: 100), (timer) {
+          Timer.periodic(const Duration(milliseconds: 200), (timer) {
             if (!postManager.isLoading && myToken != null) {
               timer.cancel();
               setState(() {
@@ -513,6 +513,7 @@ class _MyHomePage extends State<MyHomePage> {
   _initializeFCM() async {
     // FCM 토큰 받아오기
     myUuid = FirebaseAuth.instance.currentUser!.uid;
+
     myToken = await FirebaseMessaging.instance.getToken();
 
     try {
