@@ -59,7 +59,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                 heroTag: "fab1",
                 backgroundColor: const Color(0xDD00CC88),
                 onPressed: () async {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardWritingPage()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardWritingPage())).then((value) => setState((){}));
                 },
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(color: Colors.grey, width: 0.7),

@@ -17,11 +17,13 @@ class BoardPostListPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
 
-class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAliveClientMixin {
+class _BoardGroupListPage extends State<BoardPostListPage>
+    with AutomaticKeepAliveClientMixin {
   var count = 10;
 
   Timer? _firstLoadingTimer;
   ScrollController _scrollController = ScrollController();
+  bool isScrollTop = true;
 
   @override
   Widget build(BuildContext context) {
@@ -29,28 +31,68 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
         ? _firstLoadingTimer!.isActive
             ? SizedBox()
             : buildLoadingProgress()
-        : CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              /*SliverToBoxAdapter(
+        : Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  /*SliverToBoxAdapter(
           child: Container(
             height: 400,
             color: Colors.grey,
           ),
         ),*/
-              SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                      (context, index) => GestureDetector(
-                            onTap: () {
-                              naviToPost(index);
-                            },
-                            child: Card(
-                                elevation: 0.5,
-                                child: Padding(
-                                    padding: const EdgeInsets.all(7),
-                                    child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
-                          ),
-                      childCount: postManager.loadedCount)),
+                  SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                          (context, index) => GestureDetector(
+                                onTap: () {
+                                  naviToPost(index);
+                                },
+                                child: Card(
+                                    elevation: 0.5,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(7),
+                                        child: buildFriendRow(
+                                            postManager.list[postManager.list.length - index - 1], 0.0))),
+                              ),
+                          childCount: postManager.loadedCount)),
+                ],
+              ),
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: FittedBox(
+                    child: FloatingActionButton.small(
+                      heroTag: "fab2",
+                      backgroundColor: const Color(0xCCFFFFFF),
+                      onPressed: () {
+                        if(isScrollTop && !postManager.isLoading) {
+                          postManager.isLoading = true;
+                          setState(() {});
+                          postManager.reloadPages("").then((value) => setState(() {}));
+                        } else {
+                          _scrollController.animateTo(
+                            0,
+                            duration: const Duration(milliseconds: 750),
+                            curve: Curves.decelerate,
+                          );
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(color: Colors.grey, width: 0.7),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(
+                        isScrollTop ? Icons.refresh : Icons.arrow_upward,
+                        color: Color(0xFF888888),
+                      ),
+                    ),
+                  ),
+                ),
+              )
             ],
           );
   }
@@ -60,19 +102,29 @@ class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAli
     super.initState();
     _initLoadedPageChecker();
     _scrollController.addListener(() {
-      setState(() {
-        if (_scrollController.offset + 100 < _scrollController.position.minScrollExtent &&
-            _scrollController.position.outOfRange &&
-            !postManager.isLoading) {
-          postManager.reloadPages("").then((value) => setState(() {}));
+      if (_scrollController.offset <=
+          _scrollController.position.minScrollExtent) {
+        if (isScrollTop == false) {
+          setState(() {
+            isScrollTop = true;
+          });
         }
-      });
+      } else {
+        if (isScrollTop == true) {
+          setState(() {
+            isScrollTop = false;
+          });
+        }
+      }
     });
   }
 
   naviToPost(int index) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())))
+        .push(MaterialPageRoute(
+            builder: (context) => BoardPostPage(
+                postId: postManager.list[postManager.list.length - index - 1]
+                    .getPostId())))
         .then((value) {
       if (value == false) {
         setState(() {
@@ -113,7 +165,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
               : entity.getPostCurrentPerson() == 2
                   ? CupertinoIcons.person_2_fill
                   : CupertinoIcons.person_3_fill),
-          Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(getMaxPersonText(entity),
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
         ],
       ),
       const SizedBox(
@@ -133,7 +189,8 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                 children: [
                   Text(
                     '${entity.getPostHead()}', // 글 제목
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.start,
                   ),
                   Padding(
@@ -159,7 +216,10 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                       ),
                       Text(
                         " ${getDistanceString(entity.distance)}",
-                        style: TextStyle(fontSize: 11, color: colorSuccess, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: colorSuccess,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   )
@@ -225,7 +285,10 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                                     : entity.isVoluntary()
                                         ? "자율 참여"
                                         : "위치 공유",
-                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold)),
                           ),
                           // 더 추가해야함, 모집 완료
                         ),
@@ -237,11 +300,17 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color(0xFFB0B0B0)),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.getCategory(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: Text(entity.getCategory(),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ),
@@ -253,11 +322,17 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child: Text(getAgeText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  child: Text(getAgeText(entity),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -270,12 +345,17 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child:
-                                      Text(getGenderText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  child: Text(getGenderText(entity),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -293,7 +373,9 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         color: const Color(0xFF858585),
                         size: 11,
                       ),
-                      Text(" ${entity.getViewCount()}", style: const TextStyle(color: const Color(0xFF858585), fontSize: 11)),
+                      Text(" ${entity.getViewCount()}",
+                          style: const TextStyle(
+                              color: const Color(0xFF858585), fontSize: 11)),
                     ],
                   ),
                 ),

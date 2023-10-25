@@ -15,12 +15,8 @@ class BoardHomePage extends StatefulWidget {
 
 class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController? controller;
-  ScrollController? scrollController;
-  bool isScrollTop = true;
-
   @override
   void dispose() {
-    scrollController!.dispose();
     super.dispose();
   }
 
@@ -33,7 +29,6 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
           child: Stack(
             children: [
               NestedScrollView(
-                  controller: scrollController,
                   headerSliverBuilder: (context, innerBoxIsScrolled) {
                     return [
                       SliverAppBar(
@@ -85,37 +80,7 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
                       BoardLocationPage(),
                     ],
                   )),
-              isScrollTop
-                  ? const SizedBox()
-                  : Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: FittedBox(
-                          child: FloatingActionButton.small(
-                            heroTag: "fab2",
-                            backgroundColor: const Color(0xCCFFFFFF),
-                            onPressed: () {
-                              scrollController!.animateTo(
-                                0,
-                                duration: const Duration(milliseconds: 750),
-                                curve: Curves.decelerate,
-                              );
-                            },
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(color: Colors.grey, width: 0.7),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_upward,
-                              color: Color(0xFF888888),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
+
             ],
           ),
         ),
@@ -127,17 +92,6 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
   void initState() {
     super.initState();
     controller = TabController(length: 2, vsync: this);
-    scrollController = ScrollController();
-    scrollController!.addListener(() {
-      setState(() {
-        if (scrollController!.offset == scrollController!.position.maxScrollExtent &&
-            !scrollController!.position.outOfRange) {
-          isScrollTop = false;
-        } else {
-          isScrollTop = true;
-        }
-      });
-    });
   }
 
   @override

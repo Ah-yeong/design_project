@@ -38,8 +38,8 @@ class ChatRoom implements Comparable<ChatRoom> {
         lastTimeStamp = timestamp;
         return getTimeBefore(timestamp.toFormattedString());
       } else {
-        lastTimeStamp = Timestamp.now();
-        return "Error#[오류] 정보를 불러올 수 없음";
+        lastTimeStamp = Timestamp(0, 0);
+        return "-#정보 없음";
       }
     }
     Timestamp? localStamp = _savedChat.savedChatList.last.ts;
