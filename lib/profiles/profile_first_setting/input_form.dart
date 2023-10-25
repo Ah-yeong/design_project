@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:design_project/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:design_project/resources/resources.dart';
@@ -151,12 +152,10 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 //
   Future<void> _getImage(ImageSource imageSource) async {
     XFile? pickedFile;
-    await picker.pickImage(source: imageSource).then((value) => pickedFile = value);
-    print(pickedFile);
+    pickedFile = await picker.pickImage(source: imageSource);
     if (pickedFile != null) {
       setState(() {
         _image = XFile(pickedFile!.path);
-        print(pickedFile?.path);
       });
     }
   }
@@ -557,10 +556,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
                 SizedBox(height: 20),
                 _buildPhotoArea(),
                 SizedBox(
-                  height: 26,
-                ),
-                SizedBox(
-                  height: 10,
+                  height: 35,
                 ),
                 Text(
                     '사진은 필수가 아닌 선택사항입니다.',
@@ -1086,6 +1082,11 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         selectedHobby.add(hobby[i]);
       }
     }
+    if (_image != null) {
+      final storageInstance = FirebaseStorage.instance;
+      Reference storageRef = storageInstance.ref("profile_image/${myUuid}");
+      await storageRef.putFile(File(_image!.path));
+    }
     try {
       await FirebaseFirestore.instance
           .collection('UserProfile')
@@ -1104,7 +1105,6 @@ class _NicknameFormState extends State<NameSignUpScreen> {
         'post': FieldValue.arrayUnion([]),
         'group': FieldValue.arrayUnion([]),
         'endGroup': FieldValue.arrayUnion([]),
-        'profileImagePath': _image,
         'addr1': selectedSiDo,
         'addr2': selectedSiGunGu,
         'addr3': selectedDong,

@@ -1,7 +1,9 @@
+import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/profiles/completed_group.dart';
 import 'package:design_project/profiles/my_group.dart';
 import 'package:design_project/profiles/my_post.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import '../entity/profile.dart';
 import '../entity/entity_post.dart';
@@ -16,6 +18,7 @@ class PageProfile extends StatefulWidget {
 class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClientMixin {
   EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
+  Future<String> getProfileImageFuture = FirebaseStorage.instance.ref().child("profile_image/${myUuid!}").getDownloadURL();
   MannerTemperatureWidget? mannerWidget;
 
   @override
@@ -42,11 +45,20 @@ class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClient
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     SizedBox(width: 10),
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(
-                          'https://picsum.photos/id/237/200/300'),
-                    ),
+                    FutureBuilder(future: getProfileImageFuture, builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return SizedBox(width: 100, height: 100, child: buildLoadingProgress(),);
+                        }
+                        String imagePath = 'https://picsum.photos/id/237/200/300';
+                        if (snapshot.hasData) {
+                         imagePath = snapshot.data!;
+                        }
+                        return CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage(imagePath),
+                          backgroundColor: Colors.white,
+                        );
+                    }),
                     SizedBox(width: 25),
                     Expanded(
                       child:Column(
@@ -79,7 +91,9 @@ class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClient
                                 Navigator.push(context,
                                     MaterialPageRoute(builder: (context) => PageProfileEdit()))
                                     .then((value) {
-                                  _reloadProfile();
+                                  _reloadProfile().then((value) => setState((){
+                                    getProfileImageFuture = FirebaseStorage.instance.ref().child("profile_image/${myUuid!}").getDownloadURL();
+                                  }));
                                 });
                               },
                               style: ElevatedButton.styleFrom(

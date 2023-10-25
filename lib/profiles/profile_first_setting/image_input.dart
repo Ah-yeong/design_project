@@ -11,14 +11,14 @@ class ImageSignUpScreen extends StatefulWidget {
 
 class _ImageSignUpScreenState extends State<ImageSignUpScreen> {
   final _picker = ImagePicker();
-  File? _image;
+  XFile? _image;
 
   Future<void> _getImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
 
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _image = XFile(pickedFile.path);
       });
     }
   }
@@ -98,13 +98,10 @@ class _ImageSignUpScreenState extends State<ImageSignUpScreen> {
                               },
                               child: CircleAvatar(
                                 radius: 100,
-                                backgroundImage: _image != null ? FileImage(_image!) : null,
-                                child: _image == null
-                                    ? Icon(
+                                child: _image != null ? Image.file(File(_image!.path)) : Icon(
                                         Icons.person,
                                         size: 80,
                                       )
-                                    : null,
                               ),
                             ),
                             SizedBox(
