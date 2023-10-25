@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/main.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 
+import '../boards/post_list/page_hub.dart';
 import '../meeting/models/meeting_manager.dart';
 
 class EntityProfiles {
@@ -24,11 +28,22 @@ class EntityProfiles {
   var addr2;
   var addr3;
   var fcmToken;
+  String? _imagePath;
+
+  String? get imagePath => _imagePath;
 
   EntityProfiles(var this.profileId) {}
 
   Future<void> loadProfile() async {
     // 포스팅 로드
+    if (userTempImage[profileId] == null) {
+      try {
+        _imagePath = await FirebaseStorage.instance.ref().child("profile_image/${profileId}").getDownloadURL();
+      } catch (e) {
+        _imagePath = null;
+      }
+    }
+
     await FirebaseFirestore.instance.collection("UserProfile").doc(
         profileId.toString()).get().then((ds) {
       birth = ds.get("birth");

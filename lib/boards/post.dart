@@ -811,6 +811,7 @@ class _BoardPostPage extends State<BoardPostPage> {
 Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
+    behavior: HitTestBehavior.translucent,
     onTap: () {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
     },
@@ -819,11 +820,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
       children: [
         Row(
           children: [
-            Image.asset(
-              profileEntity.profileImagePath,
-              width: 45,
-              height: 45,
-            ),
+            getAvatar(profileEntity, 22.5),
             const Padding(padding: EdgeInsets.only(left: 10)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

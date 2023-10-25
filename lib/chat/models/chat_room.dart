@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/entity_post.dart';
+import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/resources.dart';
 
 import 'chat_storage.dart';
@@ -17,6 +18,7 @@ class ChatRoom implements Comparable<ChatRoom> {
   String lastTimeStampString = "<Timestamp zone>";
   Timestamp? lastTimeStamp;
   int? unreadCount = 0;
+  EntityProfiles? profile;
 
   ChatRoom(
       {required this.isGroupChat,
@@ -26,7 +28,8 @@ class ChatRoom implements Comparable<ChatRoom> {
       this.recvUserId,
       this.recvUserNick,
       this.lastChat,
-      this.unreadCount});
+      this.unreadCount,
+      this.profile});
 
   Future<String> getLastChatting(Timestamp? timestamp) async {
     ChatStorage? _savedChat;

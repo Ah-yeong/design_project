@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/entity/profile.dart';
+import 'package:design_project/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -63,6 +65,42 @@ Color getColorForScore(int score) {
     return Colors.green;
   } else {
     return Colors.blue;
+  }
+}
+
+Widget getAvatar(EntityProfiles? profile, double radius, {Icon? nullIcon, Color? backgroundColor}) {
+  if (profile == null) {
+    if (nullIcon != null) {
+      return CircleAvatar(
+          radius: radius,
+          backgroundColor: backgroundColor ?? colorLightGrey,
+          child: Center(child: nullIcon)
+      );
+    } else {
+      return Image.asset("assets/images/userImage.png", width: radius * 2, height: radius * 2);
+    }
+  } else {
+    if (userTempImage[profile.profileId] != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: backgroundColor ?? colorLightGrey,
+        backgroundImage: userTempImage[profile.profileId],
+      );
+    }
+    if (profile.imagePath == null) {
+      return CircleAvatar(
+          radius: radius,
+          backgroundColor: backgroundColor ?? colorLightGrey,
+          child: Center(child: nullIcon ?? const SizedBox())
+      );
+    } else {
+      userTempImage[profile.profileId] = NetworkImage(profile.imagePath!);
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: backgroundColor ?? colorLightGrey,
+        backgroundImage: userTempImage[profile.profileId],
+      );
+    }
   }
 }
 

@@ -61,7 +61,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   Future<void> _getImage(ImageSource source) async {
     XFile? pickedFile;
-    pickedFile = await _picker.pickImage(source: source);
+    pickedFile = await _picker.pickImage(source: source, imageQuality: 25, maxHeight: 300, maxWidth: 300);
     if (pickedFile != null) {
       setState(() {
         _image = XFile(pickedFile!.path);

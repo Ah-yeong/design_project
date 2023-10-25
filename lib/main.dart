@@ -31,6 +31,7 @@ NotificationSettings? notificationSettings;
 StateSetter? bAppbarStateSetter;
 bool newChat = false;
 bool newAlert = false;
+Map<String, NetworkImage> userTempImage = {};
 
 String? myToken;
 String? accessToken;

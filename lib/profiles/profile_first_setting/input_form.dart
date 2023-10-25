@@ -152,7 +152,7 @@ class _NicknameFormState extends State<NameSignUpScreen> {
 //
   Future<void> _getImage(ImageSource imageSource) async {
     XFile? pickedFile;
-    pickedFile = await picker.pickImage(source: imageSource);
+    pickedFile = await picker.pickImage(source: imageSource, imageQuality: 25, maxHeight: 300, maxWidth: 300);
     if (pickedFile != null) {
       setState(() {
         _image = XFile(pickedFile!.path);

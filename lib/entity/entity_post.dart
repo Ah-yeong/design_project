@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/latlng.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../boards/post_list/page_hub.dart';
 import '../resources/resources.dart';
 import '../main.dart';
 
@@ -136,7 +139,6 @@ class EntityPost {
   }
 
   Future<void> loadPost() async {
-    _isLoaded = true;
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot ds = await transaction.get(_postDocRef!);
       if (!ds.exists) {

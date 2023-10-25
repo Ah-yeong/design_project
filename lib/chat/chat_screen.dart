@@ -112,7 +112,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ? "${_post!.getPostHead()}".length > 12
                         ? "${_post!.getPostHead().replaceRange(12, null, "...")} (${members!.length}명)"
                         : "${_post!.getPostHead()} (${members!.length}명)"
-                    : _post != null
+                    : !isGroupChat
                         ? recvUser.name
                         : "종료된 모임 (${members!.length}명)",
             style: TextStyle(color: Colors.black, fontSize: 19)),

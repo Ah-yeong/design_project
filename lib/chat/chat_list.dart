@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../entity/entity_post.dart';
@@ -15,7 +16,7 @@ class ChatRoomListScreen extends StatefulWidget {
   _ChatRoomListScreenState createState() => _ChatRoomListScreenState();
 }
 
-class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticKeepAliveClientMixin{
+class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticKeepAliveClientMixin {
   bool isLoaded = false;
   Stream<List<ChatRoom>>? chatStream;
 
@@ -24,11 +25,8 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
 
   @override
   void initState() {
-    chatStream = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid).snapshots().asyncMap((chats) =>
-        Future.wait([
-          for (var room in chats['chat']) _loadRooms(false, room),
-          for (var room in chats['group_chat']) _loadRooms(true, room)
-        ]));
+    chatStream = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid).snapshots().asyncMap(
+        (chats) => Future.wait([for (var room in chats['chat']) _loadRooms(false, room), for (var room in chats['group_chat']) _loadRooms(true, room)]));
     super.initState();
   }
 
@@ -37,8 +35,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
     final String chatDocName = isGroupChat ? receiveId.toString() : receiveId;
     final ChatRoom room = ChatRoom(isGroupChat: isGroupChat, unreadCount: 0);
     List<QueryDocumentSnapshot> chatDocs = List.empty(growable: true);
-    CollectionReference _collection =
-        FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).collection("messages");
+    CollectionReference _collection = FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).collection("messages");
     await _collection.get().then((QuerySnapshot qs) {
       chatDocs = qs.docs;
     });
@@ -52,6 +49,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       await _profile.loadProfile();
       room.recvUserId = receiveId;
       room.recvUserNick = _profile.name;
+      room.profile = _profile;
     }
     // 읽지 않은 채팅이 있을 경우 (1:1의 경우만 해당)
     if (chatDocs.length != 0) {
@@ -68,9 +66,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       }
       // 메시지 및 타임스탬프 설정
       room.lastChat = chatDocs.last.get('message');
-      await room
-          .getLastChatting(chatDocs.last.get('timestamp'))
-          .then((value) => room.lastTimeStampString = value.split("#")[0]);
+      await room.getLastChatting(chatDocs.last.get('timestamp')).then((value) => room.lastTimeStampString = value.split("#")[0]);
     } else {
       // 새로 온 메시지가 없을 경우
       await room.getLastChatting(null).then((value) {
@@ -124,30 +120,30 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                             child: GestureDetector(
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                                    isInChat = true;
-                                    if (list[index].isGroupChat) {
-                                      return ChatScreen(
-                                        postId: list[index].postId,
-                                      );
-                                    } else {
-                                      return ChatScreen(
-                                        recvUserId: list[index].recvUserId,
-                                      );
-                                    }
-                                  }, settings: ModalRoute.of(context)!.settings)).then((_) => isInChat = false);
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(
+                                          builder: (context) {
+                                            isInChat = true;
+                                            if (list[index].isGroupChat) {
+                                              return ChatScreen(
+                                                postId: list[index].postId,
+                                              );
+                                            } else {
+                                              return ChatScreen(
+                                                recvUserId: list[index].recvUserId,
+                                              );
+                                            }
+                                          },
+                                          settings: ModalRoute.of(context)!.settings))
+                                      .then((_) => isInChat = false);
                                 },
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     // 프로필 이미지 (구현 필요)
-                                    Image.asset(
-                                      "assets/images/userImage.png",
-                                      width: 45,
-                                      height: 45,
-                                    ),
-                                    SizedBox(
-                                      width: 20,
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(3, 0, 15, 0),
+                                      child: getAvatar(list[index].profile, 22.5, nullIcon: const Icon(CupertinoIcons.person_3_fill, color: Colors.white, size: 35,), backgroundColor: colorGrey),
                                     ),
                                     Expanded(
                                       child: Column(
@@ -157,8 +153,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               // 닉네임 표시
-                                              Text(
-                                                  '${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
+                                              Text('${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
                                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                                               // 마지막 내용 표시
                                               Text("${list[index].lastTimeStampString}"),
@@ -177,22 +172,16 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                                           : "${list[index].lastChat}",
                                                       style: TextStyle(
                                                           fontSize: 14,
-                                                          color: (list[index].unreadCount! > 0
-                                                              ? Colors.black
-                                                              : Colors.grey),
-                                                          fontWeight: (list[index].unreadCount! > 0
-                                                              ? FontWeight.bold
-                                                              : FontWeight.normal)),
+                                                          color: (list[index].unreadCount! > 0 ? Colors.black : Colors.grey),
+                                                          fontWeight: (list[index].unreadCount! > 0 ? FontWeight.bold : FontWeight.normal)),
                                                     )
                                                   : SizedBox(),
                                               // 읽지 않은 메시지 개수 표시
                                               list[index].unreadCount! > 0
                                                   ? Container(
-                                                      width:
-                                                          (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
+                                                      width: (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
                                                       height: 18,
-                                                      decoration: BoxDecoration(
-                                                          color: colorSuccess, borderRadius: BorderRadius.circular(18)),
+                                                      decoration: BoxDecoration(color: colorSuccess, borderRadius: BorderRadius.circular(18)),
                                                       child: Center(
                                                         child: Text(
                                                           "${list[index].unreadCount}",
