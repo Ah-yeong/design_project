@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../entity/entity_post.dart';
 import '../resources/resources.dart';
@@ -34,51 +36,82 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
     final String chatColName = isGroupChat ? "PostGroupChat" : "Chat";
     final String chatDocName = isGroupChat ? receiveId.toString() : receiveId;
     final ChatRoom room = ChatRoom(isGroupChat: isGroupChat, unreadCount: 0);
-    List<QueryDocumentSnapshot> chatDocs = List.empty(growable: true);
-    CollectionReference _collection = FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).collection("messages");
-    await _collection.get().then((QuerySnapshot qs) {
-      chatDocs = qs.docs;
-    });
-    if (isGroupChat) {
-      var ds = await FirebaseFirestore.instance.collection(chatColName).doc(chatDocName).get();
-      room.roomName = ds.get("roomName");
-      room.postId = receiveId;
-    } else {
-      receiveId = receiveId.replaceAll("-", "").replaceAll(myUuid!, "");
-      EntityProfiles _profile = EntityProfiles(receiveId);
-      await _profile.loadProfile();
-      room.recvUserId = receiveId;
-      room.recvUserNick = _profile.name;
-      room.profile = _profile;
-    }
-    // 읽지 않은 채팅이 있을 경우 (1:1의 경우만 해당)
-    if (chatDocs.length != 0) {
-      // 읽은 메시지 카운트
-      int checkCount = 0;
-      for (QueryDocumentSnapshot readBy in chatDocs) {
-        List<dynamic> readByList = readBy.get("readBy");
-        if (!readByList.contains(myUuid!)) {
-          // 읽지 않은 index에 도착한다면 전체 길이에서 index 값을 뺀 만큼이 읽지 않은 메시지의 개수
-          room.unreadCount = chatDocs.length - checkCount;
-          break;
+
+    try {
+      var ref = FirebaseDatabase.instance.ref(chatColName).child(chatDocName);
+      var snapshot = await ref.get();
+      if (snapshot.exists) {
+        Map<String, dynamic> roomDoc = Map<String, dynamic>.from(snapshot.value as Map);
+        if (isGroupChat) {
+          room.roomName = roomDoc["roomName"];
+          room.postId = receiveId;
+        } else {
+          receiveId = receiveId.replaceAll("-", "").replaceAll(myUuid!, "");
+          EntityProfiles _profile = EntityProfiles(receiveId);
+          await _profile.loadProfile();
+          room.recvUserId = receiveId;
+          room.recvUserNick = _profile.name;
+          room.profile = _profile;
         }
-        checkCount += 1;
+        Map<String, dynamic> chatDocs = {};
+        if ( roomDoc["messages"] != null ) {
+          chatDocs = Map<String, dynamic>.from(roomDoc["messages"]);
+        }
+        if (chatDocs.length != 0) {
+          // 읽은 메시지 카운트
+          int checkCount = 0;
+          for (var key in chatDocs.keys) {
+            List<dynamic> readByList = chatDocs[key]["readBy"];
+            if (!readByList.contains(myUuid!)) {
+              // 읽지 않은 index에 도착한다면 전체 길이에서 index 값을 뺀 만큼이 읽지 않은 메시지의 개수
+              room.unreadCount = chatDocs.length - checkCount;
+              break;
+            }
+            checkCount += 1;
+          }
+          // 메시지 및 타임스탬프 설정
+          room.lastChat = chatDocs[chatDocs.keys.last]["message"];
+          await room
+              .getLastChatting(Timestamp.fromMillisecondsSinceEpoch(chatDocs[chatDocs.keys.last]["timestamp"]))
+              .then((value) => room.lastTimeStampString = value.split("#")[0]);
+        } else {
+          // 새로 온 메시지가 없을 경우
+          await room.getLastChatting(null).then((value) {
+            room.lastTimeStampString = value.split("#")[0]; // 타임스탬프
+            room.lastChat = value.split("#")[1]; // 로컬 저장 마지막 채팅
+          });
+        }
+      } else {
+        if (isGroupChat) {
+          room.roomName = "(알 수 없음)";
+          room.postId = receiveId;
+        } else {
+          receiveId = receiveId.replaceAll("-", "").replaceAll(myUuid!, "");
+          EntityProfiles _profile = EntityProfiles(receiveId);
+          await _profile.loadProfile();
+          room.recvUserId = receiveId;
+          room.recvUserNick = _profile.name;
+          room.profile = _profile;
+        }
+        room.lastTimeStamp = Timestamp(0, 0);
+        room.lastTimeStampString = "-"; // 타임스탬프
+        room.lastChat = ""; // 로컬 저장 마지막 채팅
       }
-      // 메시지 및 타임스탬프 설정
-      room.lastChat = chatDocs.last.get('message');
-      await room.getLastChatting(chatDocs.last.get('timestamp')).then((value) => room.lastTimeStampString = value.split("#")[0]);
-    } else {
-      // 새로 온 메시지가 없을 경우
-      await room.getLastChatting(null).then((value) {
-        room.lastTimeStampString = value.split("#")[0]; // 타임스탬프
-        room.lastChat = value.split("#")[1]; // 로컬 저장 마지막 채팅
-      });
+    } catch (e) {
+      print("error : ${e.toString()}");
+      room.lastTimeStamp = Timestamp(0, 0);
+      room.lastTimeStampString = "-"; // 타임스탬프
+      room.lastChat = "(알 수 없음)"; // 로컬 저장 마지막 채팅
     }
-    return room;
+
+    return Future.value(room);
   }
+  
+  bool _isDeleting = false;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
@@ -103,106 +136,143 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                 }
 
                 return list.length != 0
-                    ? ListView.separated(
-                        itemCount: list.length,
-                        separatorBuilder: (context, index) => Padding(
-                          padding: EdgeInsets.only(left: 10, right: 10),
-                          child: Divider(
+                    ? SlidableAutoCloseBehavior(
+                        child: ListView.separated(
+                          itemCount: list.length + 2,
+                          separatorBuilder: (context, index) => Divider(
                             //구분선
-                            color: colorGrey,
+                            color: colorLightGrey,
                             thickness: 0.7,
                             height: 0.7,
                           ),
-                        ),
-                        itemBuilder: (context, index) {
-                          return Container(
-                            padding: EdgeInsets.fromLTRB(15, 17, 15, 17),
-                            child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(
-                                          builder: (context) {
-                                            isInChat = true;
-                                            if (list[index].isGroupChat) {
-                                              return ChatScreen(
-                                                postId: list[index].postId,
-                                              );
-                                            } else {
-                                              return ChatScreen(
-                                                recvUserId: list[index].recvUserId,
-                                              );
-                                            }
-                                          },
-                                          settings: ModalRoute.of(context)!.settings))
-                                      .then((_) => isInChat = false);
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    // 프로필 이미지 (구현 필요)
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(3, 0, 15, 0),
-                                      child: getAvatar(list[index].profile, 22.5, nullIcon: const Icon(CupertinoIcons.person_3_fill, color: Colors.white, size: 35,), backgroundColor: colorGrey),
+                          itemBuilder: (context, index) {
+                            if (index == 0 || index == list.length + 1) return const SizedBox();
+                            index = index - 1;
+                            return Slidable(
+                              groupTag: '0',
+                              endActionPane: ActionPane(
+                                motion: ScrollMotion(),
+                                children: [
+                                  CustomSlidableAction(
+                                    flex: 1,
+                                    onPressed: (context) async {
+                                      setState(() {
+                                        _isDeleting = true;
+                                      });
+                                      DocumentReference doc = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid!);
+                                      if (list[index].isGroupChat) {
+                                        doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) => setState(() => _isDeleting = false));
+                                      } else {
+                                        doc.update({"chat": FieldValue.arrayRemove([list[index].recvUserId])}).then((value) => setState(() => _isDeleting = false));
+                                      }
+                                    },
+                                    autoClose: true,
+                                    backgroundColor: colorError,
+                                    child: Icon(
+                                      Icons.delete,
+                                      size: 28,
+                                      color: Colors.white,
                                     ),
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
+                                  )
+                                ],
+                                extentRatio: 0.2,
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(15, 17, 15, 17),
+                                child: GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (context) {
+                                                isInChat = true;
+                                                if (list[index].isGroupChat) {
+                                                  return ChatScreen(
+                                                    postId: list[index].postId,
+                                                  );
+                                                } else {
+                                                  return ChatScreen(
+                                                    recvUserId: list[index].recvUserId,
+                                                  );
+                                                }
+                                              },
+                                              settings: ModalRoute.of(context)!.settings))
+                                          .then((_) => isInChat = false);
+                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        // 프로필 이미지 (구현 필요)
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(3, 0, 15, 0),
+                                          child: getAvatar(list[index].profile, 22.5,
+                                              nullIcon: const Icon(
+                                                CupertinoIcons.person_3_fill,
+                                                color: Colors.white,
+                                                size: 35,
+                                              ),
+                                              backgroundColor: colorGrey),
+                                        ),
+                                        Expanded(
+                                          child: Column(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              // 닉네임 표시
-                                              Text('${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
-                                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                              // 마지막 내용 표시
-                                              Text("${list[index].lastTimeStampString}"),
-                                            ],
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                          ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              // 마지막 채팅 시간 표시
-                                              list[index].lastChat != null
-                                                  ? Text(
-                                                      list[index].lastChat!.length > 15
-                                                          ? "${list[index].lastChat!.substring(0, 15)}..."
-                                                          : "${list[index].lastChat}",
-                                                      style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: (list[index].unreadCount! > 0 ? Colors.black : Colors.grey),
-                                                          fontWeight: (list[index].unreadCount! > 0 ? FontWeight.bold : FontWeight.normal)),
-                                                    )
-                                                  : SizedBox(),
-                                              // 읽지 않은 메시지 개수 표시
-                                              list[index].unreadCount! > 0
-                                                  ? Container(
-                                                      width: (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
-                                                      height: 18,
-                                                      decoration: BoxDecoration(color: colorSuccess, borderRadius: BorderRadius.circular(18)),
-                                                      child: Center(
-                                                        child: Text(
-                                                          "${list[index].unreadCount}",
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  // 닉네임 표시
+                                                  Text('${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
+                                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                                  // 마지막 내용 표시
+                                                  Text("${list[index].lastTimeStampString}"),
+                                                ],
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                              ),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  // 마지막 채팅 시간 표시
+                                                  list[index].lastChat != null
+                                                      ? Text(
+                                                          list[index].lastChat!.length > 15
+                                                              ? "${list[index].lastChat!.substring(0, 15)}..."
+                                                              : "${list[index].lastChat}",
                                                           style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight: FontWeight.bold,
-                                                            fontSize: 12,
+                                                              fontSize: 14,
+                                                              color: (list[index].unreadCount! > 0 ? Colors.black : Colors.grey),
+                                                              fontWeight: (list[index].unreadCount! > 0 ? FontWeight.bold : FontWeight.normal)),
+                                                        )
+                                                      : SizedBox(),
+                                                  // 읽지 않은 메시지 개수 표시
+                                                  list[index].unreadCount! > 0
+                                                      ? Container(
+                                                          width: (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
+                                                          height: 18,
+                                                          decoration: BoxDecoration(color: colorSuccess, borderRadius: BorderRadius.circular(18)),
+                                                          child: Center(
+                                                            child: Text(
+                                                              "${list[index].unreadCount}",
+                                                              style: TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.bold,
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : SizedBox(),
+                                                        )
+                                                      : SizedBox(),
+                                                ],
+                                              )
                                             ],
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          );
-                        },
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            );
+                          },
+                        ),
                       )
                     : Center(
                         child: Text(
@@ -211,6 +281,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                         ),
                       );
               }),
+          if (_isDeleting) buildContainerLoading(100)
         ],
       ),
     );

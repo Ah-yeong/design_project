@@ -1,8 +1,10 @@
+import 'package:design_project/main.dart';
+import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
 
 class ChatBubble extends StatelessWidget {
   const ChatBubble(this.message, this.isMe, this.userName, this.time,
-      {Key? key, this.longBubble, this.isDayDivider, this.invisibleTime, this.unreadUserCount})
+      {Key? key, this.longBubble, this.isDayDivider, this.invisibleTime, this.unreadUserCount, this.uuid})
       : super(key: key);
 
   final int? unreadUserCount;
@@ -13,6 +15,7 @@ class ChatBubble extends StatelessWidget {
   final String message;
   final String? userName;
   final bool isMe;
+  final String? uuid;
 
   @override
   Widget build(BuildContext context) {
@@ -23,126 +26,158 @@ class ChatBubble extends StatelessWidget {
     int _unreadUserCount = unreadUserCount ?? 0;
     Color textColor = !isMe ? Colors.black : Colors.white;
     return !_isDayDivider
-        ? Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        ? Row(
+           mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              if (!isMe && !_longBubble)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    userName ?? 'Unknown',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[900],
+              SizedBox(
+                width: 50,
+                child: !_longBubble && !isMe ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: colorLightGrey,
+                      backgroundImage: userTempImage[uuid],
                     ),
                   ),
-                ),
-              Row(
-                mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                ) : const SizedBox(),
+              ),
+              Column(
+                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
+                  if (!isMe && !_longBubble)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        userName ?? 'Unknown',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[900],
+                        ),
+                      ),
+                    ),
                   Row(
                     mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.max,
+                      Row(
+                        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (isMe && _unreadUserCount != 0)
-                            Text(
-                              _unreadUserCount.toString(),
-                              style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
-                            ),
-                          if (isMe && !_invisibleTime)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(
-                                time,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey,
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (isMe && _unreadUserCount != 0)
+                                Text(
+                                  _unreadUserCount.toString(),
+                                  style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
                                 ),
+                              if (isMe && !_invisibleTime)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Text(
+                                    time,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: bubbleColor,
+                              borderRadius: BorderRadius.only(
+                                topRight: isMe && !_longBubble ? Radius.circular(0) : Radius.circular(12),
+                                topLeft: !isMe && !_longBubble ? Radius.circular(0) : Radius.circular(12),
+                                bottomRight: Radius.circular(12),
+                                bottomLeft: Radius.circular(12),
                               ),
                             ),
-                        ],
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: bubbleColor,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(12),
-                            topLeft: Radius.circular(12),
-                            bottomRight: isMe ? Radius.circular(0) : Radius.circular(12),
-                            bottomLeft: isMe ? Radius.circular(12) : Radius.circular(0),
-                          ),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                        margin: EdgeInsets.fromLTRB(8, 3, 8, _invisibleTime ? 0 : 5),
-                        child: Text(
-                          message,
-                          style: TextStyle(
-                            color: textColor,
-                          ),
-                        ),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 7 / 10,
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          if (!isMe && _unreadUserCount != 0)
-                            Text(
-                              _unreadUserCount.toString(),
-                              style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
-                            ),
-                          if (!isMe && !_invisibleTime)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(
-                                time,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey,
-                                ),
+                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                            margin: EdgeInsets.fromLTRB(8, 3, 8, _invisibleTime ? 0 : 2.5),
+                            child: Text(
+                              message,
+                              style: TextStyle(
+                                color: textColor,
                               ),
                             ),
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 7 / 10,
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (!isMe && _unreadUserCount != 0)
+                                Text(
+                                  _unreadUserCount.toString(),
+                                  style: TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.bold),
+                                ),
+                              if (!isMe && !_invisibleTime)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Text(
+                                    time,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          )
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ],
-              ),
+              )
             ],
           )
         : Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  time
-                      .replaceAll("Mon", "월요일")
-                      .replaceAll("Tue", "화요일")
-                      .replaceAll("Wed", "수요일")
-                      .replaceAll("Thu", "목요일")
-                      .replaceAll("Fri", "금요일")
-                      .replaceAll("Sat", "토요일")
-                      .replaceAll("Sun", "일요일"),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(8.0),
               ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(child: Padding(
+                    padding: const EdgeInsets.only(right: 14),
+                    child: const Divider(thickness: 1,),
+                  )),
+                  Text(
+                    time
+                        .replaceAll("Mon", "월요일")
+                        .replaceAll("Tue", "화요일")
+                        .replaceAll("Wed", "수요일")
+                        .replaceAll("Thu", "목요일")
+                        .replaceAll("Fri", "금요일")
+                        .replaceAll("Sat", "토요일")
+                        .replaceAll("Sun", "일요일"),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: colorGrey
+                    ),
+                  ),
+                  Expanded(child: Padding(
+                    padding: const EdgeInsets.only(left: 14),
+                    child: const Divider(thickness: 1,),
+                  )),
+                ],
+              )
             ),
           );
   }

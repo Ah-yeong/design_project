@@ -424,18 +424,18 @@ class _BoardPostPage extends State<BoardPostPage> {
               onTap: () async {
                 // 모임 성사
                 if (!_btnClickDelay_startMeeting) {
+                  _btnClickDelay_startMeeting = true;
                   buttonEffectTimer?.cancel();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                   setState(() {
                     isAllLoading = true;
                   });
-                  _btnClickDelay_startMeeting = true;
                   MeetingManager meetManager = MeetingManager();
                   // if (위치공유 모임이면)
                   List<String> members = getAcceptUuids()..add(myUuid!);
                   LocationManager locManager = LocationManager();
-                  Future.wait([
+                  await Future.wait([
                     meetManager.meetingCreate(postEntity!),
                     if(!postEntity!.isVoluntary()) locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members),
                     postEntity!.postMoveToProcess(),

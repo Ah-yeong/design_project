@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/alert/models/alert_object.dart';
@@ -8,11 +9,13 @@ import 'package:design_project/resources/fcm.dart';
 import 'package:design_project/resources/icon_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/signup.dart';
 import 'entity/post_page_manager.dart';
@@ -35,6 +38,7 @@ Map<String, NetworkImage> userTempImage = {};
 
 String? myToken;
 String? accessToken;
+PackageInfo? appInfo;
 
 bool isInChat = false;
 bool nestedChatOpenSignal = false;
@@ -61,6 +65,8 @@ Future<void> tokenTimestampCheck() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  appInfo = await PackageInfo.fromPlatform();
 
   // 알림 설정 상태
   notificationSettings = await FirebaseMessaging.instance.requestPermission(
@@ -353,7 +359,49 @@ class _MyHomePage extends State<MyHomePage> {
     );
   }
 
-  _auth() {
+  _auth() async {
+    try {
+      var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get();
+      if (snapshot.exists) {
+        if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))){
+          await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+              title: Text("최신 버전이 있습니다"),
+              content: Column(
+                children: [
+                  Text("\n현재 버전 : ${appInfo!.version}", style: TextStyle(fontSize: 14),),
+                  Text("최신 버전 : ${snapshot.get("version")}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                ],
+              ),
+              actions: [
+                CupertinoDialogAction(child: Text("확인"), onPressed: () {Navigator.pop(context);},)
+            ],
+          ));
+          exit(0);
+        }
+      } else {
+        await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+            title: Text("버전 확인 불가"),
+            content: Column(
+              children: [
+                Text("네트워크 상태를 확인하세요."),
+              ],
+            )
+        ));
+        exit(0);
+      }
+    } catch (e) {
+      await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: Text("버전 확인 불가"),
+          content: Column(
+            children: [
+              Text("네트워크 상태를 확인하세요."),
+            ],
+          )
+      ));
+      exit(0);
+    }
+
+
     Future.delayed(const Duration(milliseconds: 100), () async {
       if (FirebaseAuth.instance.currentUser != null) {
         // postManager 로딩
