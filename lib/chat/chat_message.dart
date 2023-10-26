@@ -167,7 +167,7 @@ class _ChatMessageState extends State<ChatMessage> {
         if(member == myUuid!) continue;
         profile = _memberProfiles[member]!;
         AlertManager alertManager = AlertManager(LocalStorage!);
-        alertManager.sendAlert(title: "모임이 성사되었어요 🙌🏻!", body: "지금 바로 모임 채팅을 통해\n먼저 이야기를 나눠보세요 ☺️", alertType: AlertType.TO_CHAT_ROOM, userUUID: member, withPushNotifications: true, clickAction: {
+        alertManager.sendAlert(title: "모임이 성사되었어요 🙌🏻", body: "지금 바로 모임 채팅방을 통해 이야기를 나눠보세요!", alertType: AlertType.TO_CHAT_ROOM, userUUID: member, withPushNotifications: true, clickAction: {
           "chat_id" : postId.toString(),
           "is_group_chat" : "true",
         });

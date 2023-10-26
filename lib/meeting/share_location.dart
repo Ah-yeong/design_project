@@ -117,7 +117,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                                     color: Colors.indigoAccent,
                                   ),
                                   Text(
-                                    "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작")}",
+                                    "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작").replaceAll("잠시 전에", "방금 ")}",
                                     style: TextStyle(color: Colors.indigoAccent, fontSize: 14, fontWeight: FontWeight.bold),
                                   )
                                 ],

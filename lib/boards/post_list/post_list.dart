@@ -10,9 +10,11 @@ import 'package:http/http.dart';
 import '../../resources/resources.dart';
 import '../../main.dart';
 
+StateSetter? listStateSetter;
+
 class BoardPostListPage extends StatefulWidget {
   const BoardPostListPage({super.key});
-
+  static StateSetter? listStateSetter;
   @override
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
@@ -20,15 +22,17 @@ class BoardPostListPage extends StatefulWidget {
 class _BoardGroupListPage extends State<BoardPostListPage>
     with AutomaticKeepAliveClientMixin {
   var count = 10;
-
-  Timer? _firstLoadingTimer;
+  Timer? _postLoadingTimer;
   ScrollController _scrollController = ScrollController();
   bool isScrollTop = true;
 
   @override
   Widget build(BuildContext context) {
-    return postManager.isLoading
-        ? _firstLoadingTimer!.isActive
+    super.build(context);
+    return StatefulBuilder(builder: (BuildContext context, StateSetter _listStateSetter) {
+      listStateSetter = _listStateSetter;
+      return postManager.isLoading
+        ? _postLoadingTimer!.isActive
             ? SizedBox()
             : buildLoadingProgress()
         : Stack(
@@ -36,12 +40,6 @@ class _BoardGroupListPage extends State<BoardPostListPage>
               CustomScrollView(
                 controller: _scrollController,
                 slivers: [
-                  /*SliverToBoxAdapter(
-          child: Container(
-            height: 400,
-            color: Colors.grey,
-          ),
-        ),*/
                   SliverList(
                       delegate: SliverChildBuilderDelegate(
                           (context, index) => GestureDetector(
@@ -95,6 +93,9 @@ class _BoardGroupListPage extends State<BoardPostListPage>
               )
             ],
           );
+    },
+    );
+
   }
 
   @override
@@ -137,9 +138,11 @@ class _BoardGroupListPage extends State<BoardPostListPage>
   }
 
   void _initLoadedPageChecker() {
-    _firstLoadingTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+    _postLoadingTimer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
       if (!postManager.isLoading) {
-        setState(() {});
+        if ( listStateSetter != null ) {
+          listStateSetter!(() {});
+        }
         timer.cancel();
       }
     });

@@ -87,7 +87,7 @@ class EntityProfiles {
       await FirebaseFirestore.instance.collection("Post").doc("postData");
       await ref.get().then((DocumentSnapshot ds) {
         new_post_id = ds.get("last_id");
-        if (new_post_id == -1) return false; // 업로드 실패
+        if (new_post_id == -1) return -1; // 업로드 실패
       });
       await FirebaseFirestore.instance.collection("UserProfile").doc(profileId.toString())
           .update({

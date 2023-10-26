@@ -319,7 +319,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                             actions: [
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.pop(context, ImageSource.camera);
+                                                  Navigator.pop(context,ImageSource.camera );
                                                 },
                                                 child: Text('카메라로 직접 촬영'),
                                               ),
@@ -334,7 +334,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                         },
                                       );
 
-                                      if (source != null && source == ImageSource.gallery) {
+                                      if (source != null) {
                                         await _getImage(source);
                                       }
                                     },

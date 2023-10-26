@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/boards/post_list/bottom_appbar.dart';
+import 'package:design_project/boards/post_list/post_list.dart';
 import 'package:design_project/chat/chat_list.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/entity/profile.dart';
@@ -59,7 +60,11 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
                 heroTag: "fab1",
                 backgroundColor: const Color(0xDD00CC88),
                 onPressed: () async {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardWritingPage())).then((value) => setState((){}));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardWritingPage())).then((value) => setState((){
+                    if (listStateSetter != null) {
+                      listStateSetter!(() {});
+                    }
+                  }));
                 },
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(color: Colors.grey, width: 0.7),
@@ -100,7 +105,11 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
 
     _myProfileLoad().then((value) => setupGetMessages());
 
-    if (postManager.isLoading) postManager.loadPages("").then((_) => setState(() {}));
+    if (postManager.isLoading) postManager.loadPages("").then((_) => setState(() {
+      if (listStateSetter != null) {
+        listStateSetter!(() {});
+      }
+    }));
     _pageController = PageController();
   }
 

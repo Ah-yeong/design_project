@@ -5,6 +5,7 @@ import 'package:design_project/boards/write/select_position.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:super_tooltip/super_tooltip.dart';
@@ -28,7 +29,7 @@ class BoardWritingPage extends StatefulWidget {
 }
 
 class _BoardWritingPage extends State<BoardWritingPage> {
-  DateTime _selectedDate = DateTime.now(); // 초기값 할당
+  DateTime? _selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -47,7 +48,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
           child: child!,
         );
       },
-      initialDate: _selectedDate,
+      initialDate: _selectedDate!,
       firstDate: DateTime.now().subtract(Duration(days: 0)),
       lastDate: DateTime(2100),
     );
@@ -59,9 +60,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     }
   }
 
-  TimeOfDay _selectedTime = (TimeOfDay.now().hour + ((TimeOfDay.now().minute / 5).round() * 5 == 60 ? 1 : 0)) < 23
-      ? TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1 + ((TimeOfDay.now().minute / 5).round() * 5 == 60 ? 1 : 0), minute: (TimeOfDay.now().minute / 5).round() * 5 == 60 ? 0 : (TimeOfDay.now().minute / 5).round() * 5)
-      : TimeOfDay(hour: 23, minute: 59);
+  TimeOfDay? _selectedTime;
 
   Future<void> _selectTime(BuildContext context) async {
     TimeOfDay? newSelectedTime = await showTimePicker(
@@ -83,7 +82,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         },
         initialEntryMode: TimePickerEntryMode.inputOnly,
         context: context,
-        initialTime: _selectedTime);
+        initialTime: _selectedTime!);
     if (newSelectedTime != null) {
       if (newSelectedTime.minute % 5 != 0) {
         newSelectedTime = newSelectedTime.replacing(minute: (newSelectedTime.minute / 5).round() * 5);
@@ -212,7 +211,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                                 shape: RoundedRectangleBorder(side: BorderSide(), borderRadius: BorderRadius.circular(5))),
                                             child: Row(
                                               children: [
-                                                Text('${dateFormatter.format(_selectedDate)}  ', style: TextStyle(fontSize: 15, color: Colors.black)),
+                                                Text('${dateFormatter.format(_selectedDate!)}  ', style: TextStyle(fontSize: 15, color: Colors.black)),
                                                 SizedBox(
                                                   width: 15,
                                                   child: Icon(
@@ -234,7 +233,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                                 shape: RoundedRectangleBorder(side: BorderSide(), borderRadius: BorderRadius.circular(5))),
                                             child: Row(
                                               children: [
-                                                Text('${_selectedTime.format(context)}  ', style: TextStyle(fontSize: 15, color: Colors.black)),
+                                                Text('${_selectedTime!.format(context)}  ', style: TextStyle(fontSize: 15, color: Colors.black)),
                                                 SizedBox(
                                                   width: 15,
                                                   child: Icon(
@@ -350,8 +349,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                   GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () async {
-                                      var modify =
-                                          await Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardSelectPositionPage()));
+                                      var modify = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardSelectPositionPage()));
                                       setState(() {
                                         _llName = modify ?? _llName;
                                       });
@@ -362,8 +360,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                         Text('모임 장소 ', style: TextStyle(fontSize: 16, color: colorGrey)),
                                         Row(
                                           children: [
-                                            Text(_llName == null ? '미지정' : _llName!.AddressName,
-                                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                            Text(_llName == null ? '미지정' : _llName!.AddressName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                             SizedBox(width: 10),
                                             Icon(
                                               Icons.arrow_forward_ios,
@@ -391,8 +388,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                         Text('인원 수', style: TextStyle(fontSize: 16, color: colorGrey)),
                                         Row(
                                           children: [
-                                            Text('${_selectedPerson}',
-                                                style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
+                                            Text('${_selectedPerson}', style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.bold)),
                                             SizedBox(
                                               width: 10,
                                             ),
@@ -575,33 +571,38 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                                           ),
                                         ],
                                       ),
-                                      _selectedPerson != "무제한" ? CustomRadioButton(
-                                        buttonLables: const [
-                                          "위치공유 모임",
-                                          "자율적인 모임",
-                                        ],
-                                        buttonValues: const [
-                                          "withGPS",
-                                          "voluntary",
-                                        ],
-                                        radioButtonValue: (value) {
-                                          _selectVoluntary(value);
-                                        },
-                                        unSelectedColor: Colors.white,
-                                        selectedColor: Colors.white,
-                                        buttonTextStyle: ButtonTextStyle(
-                                          selectedColor: Colors.black,
-                                          unSelectedColor: colorGrey,
-                                        ),
-                                        elevation: 0,
-                                        width: 114,
-                                        height: 30,
-                                        enableShape: true,
-                                        radius: 5,
-                                        selectedBorderColor: Colors.green,
-                                        unSelectedBorderColor: colorLightGrey,
-                                        defaultSelected: "withGPS",
-                                      ) : Text("참여 인원수에 따른 자동 설정 ", style: TextStyle(color: colorGrey, fontSize: 16),)
+                                      _selectedPerson != "무제한"
+                                          ? CustomRadioButton(
+                                              buttonLables: const [
+                                                "위치공유 모임",
+                                                "자율적인 모임",
+                                              ],
+                                              buttonValues: const [
+                                                "withGPS",
+                                                "voluntary",
+                                              ],
+                                              radioButtonValue: (value) {
+                                                _selectVoluntary(value);
+                                              },
+                                              unSelectedColor: Colors.white,
+                                              selectedColor: Colors.white,
+                                              buttonTextStyle: ButtonTextStyle(
+                                                selectedColor: Colors.black,
+                                                unSelectedColor: colorGrey,
+                                              ),
+                                              elevation: 0,
+                                              width: 114,
+                                              height: 30,
+                                              enableShape: true,
+                                              radius: 5,
+                                              selectedBorderColor: Colors.green,
+                                              unSelectedBorderColor: colorLightGrey,
+                                              defaultSelected: "withGPS",
+                                            )
+                                          : Text(
+                                              "참여 인원수에 따른 자동 설정 ",
+                                              style: TextStyle(color: colorGrey, fontSize: 16),
+                                            )
                                     ],
                                   ),
 
@@ -675,8 +676,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
                               child: GestureDetector(
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () {
-                                  _scrollController!.position.moveTo(_scrollController!.position.maxScrollExtent,
-                                      duration: Duration(milliseconds: 500), curve: Curves.easeOutQuart);
+                                  _scrollController!.position
+                                      .moveTo(_scrollController!.position.maxScrollExtent, duration: Duration(milliseconds: 500), curve: Curves.easeOutQuart);
                                 },
                                 child: Container(
                                     decoration: BoxDecoration(color: colorGrey.withAlpha(200), borderRadius: BorderRadius.circular(5)),
@@ -854,6 +855,11 @@ class _BoardWritingPage extends State<BoardWritingPage> {
     super.initState();
     _head = TextEditingController();
     _body = TextEditingController();
+
+    _selectedDate = DateTime.now();
+    _selectedDate = _selectedDate!.add(Duration(hours: 1, minutes: _selectedDate!.minute % 5 <= 2 ? -_selectedDate!.minute % 5 : 5 - _selectedDate!.minute % 5));
+    _selectedTime = TimeOfDay(hour: _selectedDate!.hour, minute: _selectedDate!.minute);
+
     _minAgeItems = _buildDropdownItems(19, 45);
     _maxAgeItems = _buildDropdownItems(19, 45);
     _scrollController = ScrollController();
@@ -907,7 +913,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
         body: _body!.text,
         gender: _selectedGender!,
         maxPerson: _selectedPerson == "무제한" ? -1 : int.parse(_selectedPerson),
-        time: "${dateFormatter.format(_selectedDate)} ${_selectedTime.to24hours()}:00",
+        time: "${dateFormatter.format(_selectedDate!)} ${_selectedTime!.to24hours()}:00",
         llName: _llName!,
         upTime:
             "${dateFormatter.format(dt)} ${dt.hour.toString().padLeft(2, "0")}:${dt.minute.toString().padLeft(2, "0")}:${dt.second.toString().padLeft(2, "0")}",
@@ -931,8 +937,8 @@ class _BoardWritingPage extends State<BoardWritingPage> {
 
   String _checkIsInputEmpty() {
     String msg = "Success";
-    int selectTime = _selectedTime.hour * 60 + _selectedTime.minute;
-    int nowTime = TimeOfDay.now().hour * 60 + TimeOfDay.now().minute;
+    DateTime selected = DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day, _selectedTime!.hour, _selectedTime!.minute);
+    bool isInvalidTime = selected.difference(DateTime.now()).inMinutes < 30;
     if (_head!.text.isEmpty) {
       msg = "제목을 입력해주세요!";
     } else if (_head!.text.trim().length < 2) {
@@ -949,7 +955,7 @@ class _BoardWritingPage extends State<BoardWritingPage> {
       msg = "모임 인원을 선택해주세요!";
     } else if (_minAge != -1 && _maxAge != -1 && _maxAge - _minAge < 0) {
       msg = "연령대 범위가 잘못되었습니다!";
-    } else if (selectTime - nowTime < 30 && _selectedDate.day - DateTime.now().day == 0) {
+    } else if (isInvalidTime) {
       msg = "모임 시간은 최소 30분 이후입니다!";
     }
     return msg;

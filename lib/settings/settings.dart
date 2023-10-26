@@ -108,7 +108,8 @@ class PageSettings extends StatelessWidget {
           ListTile(
               title: Text('전체 데이터 초기화'),
               onTap: () {
-                Get.to(() => PageReset());
+                if(myUuid == "dBfF9GPpQqVvxY3SxNmWpdT1er43" || myUuid == "ki654uiWotZTum8GetnSC7HTgIk2")
+                  Get.to(() => PageReset());
               }
           ),
           Divider(
