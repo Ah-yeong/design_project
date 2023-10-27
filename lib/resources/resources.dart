@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/main.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -65,6 +66,26 @@ Color getColorForScore(int score) {
     return Colors.green;
   } else {
     return Colors.blue;
+  }
+}
+
+Future<void> preloadAvatar({EntityProfiles? profile, String? uuid}) async {
+  if (profile == null && uuid == null) return;
+  String id = uuid == null ? profile!.profileId : uuid;
+  if (userTempImage[id] != null) return;
+  if (profile != null) {
+    if(profile.imagePath != null) {
+      userTempImage[id] = NetworkImage(profile.imagePath!);
+    } else {
+      String url = await FirebaseStorage.instance.ref().child("profile_image/${profile.profileId}").getDownloadURL();
+      userTempImage[id] = NetworkImage(url);
+    }
+    return;
+  }
+  else {
+    String url = await FirebaseStorage.instance.ref().child("profile_image/${uuid}").getDownloadURL();
+    userTempImage[id] = NetworkImage(url);
+    return;
   }
 }
 
