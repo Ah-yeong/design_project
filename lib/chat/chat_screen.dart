@@ -113,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
           await preloadAvatar(uuid: uuid);
         }).then((value) {
           setState(() {
-            _isLoaded = true;
+            _loadProfiles().then((value) => setState(() {_isLoaded = true;}));
           });
           _sendInitMessage();
         });
@@ -396,7 +396,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }
 
-    final message = init ? "모임이 성사되어 채팅방을 만들었어요.\n여기서 자유롭게 대화해보세요!" : _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
+    final message = init ? "모임 채팅방이 개설되었어요.\n여기서 자유롭게 대화해보세요!" : _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
     final timestamp = Timestamp.now(); // 전송 시간
     try {
       final _chatDB = FirebaseDatabase.instance.ref(chatColName).child(chatDocName!);
@@ -478,7 +478,6 @@ class _ChatScreenState extends State<ChatScreen> {
         profile = EntityProfiles(uuid);
         await profile.loadProfile();
         _memberProfiles[profile.profileId] = profile;
-        ;
       });
     } else {
       profile = EntityProfiles(recvUserId);

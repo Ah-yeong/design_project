@@ -61,19 +61,27 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
         if (chatDocs.length != 0) {
           // 읽은 메시지 카운트
           int checkCount = 0;
-          for (var key in chatDocs.keys) {
+          var keys = chatDocs.keys.toList()..sort();
+          for (var key in keys) {
             List<dynamic> readByList = chatDocs[key]["readBy"];
             if (!readByList.contains(myUuid!)) {
               // 읽지 않은 index에 도착한다면 전체 길이에서 index 값을 뺀 만큼이 읽지 않은 메시지의 개수
-              room.unreadCount = chatDocs.length - checkCount;
+              room.unreadCount = keys.length - checkCount;
               break;
             }
             checkCount += 1;
           }
+
           // 메시지 및 타임스탬프 설정
-          room.lastChat = chatDocs[chatDocs.keys.last]["message"];
+
+          room.lastChat = chatDocs[keys.last]["message"];
+          if(room.recvUserId == "dBfF9GPpQqVvxY3SxNmWpdT1er43") {
+
+            print(keys.last);
+            print(room.lastChat);
+          }
           await room
-              .getLastChatting(Timestamp.fromMillisecondsSinceEpoch(chatDocs[chatDocs.keys.last]["timestamp"]))
+              .getLastChatting(Timestamp.fromMillisecondsSinceEpoch(chatDocs[keys.last]["timestamp"]))
               .then((value) => room.lastTimeStampString = value.split("#")[0]);
         } else {
           // 새로 온 메시지가 없을 경우
@@ -104,7 +112,6 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       room.lastTimeStampString = "-"; // 타임스탬프
       room.lastChat = "(알 수 없음)"; // 로컬 저장 마지막 채팅
     }
-
     return Future.value(room);
   }
   
