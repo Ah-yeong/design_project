@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:design_project/main.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../boards/post_list/page_hub.dart';
@@ -19,16 +21,37 @@ class PageProfileEdit extends StatefulWidget {
 }
 
 final List<String> mbtiList = [
-  'ENFP', 'ENFJ', 'ENTP', 'ENTJ',
-  'ESFP', 'ESFJ', 'ESTP', 'ESTJ',
-  'INFP', 'INFJ', 'INTP', 'INTJ',
-  'ISFP', 'ISFJ', 'ISTP', 'ISTJ',
+  'ENFP',
+  'ENFJ',
+  'ENTP',
+  'ENTJ',
+  'ESFP',
+  'ESFJ',
+  'ESTP',
+  'ESTJ',
+  'INFP',
+  'INFJ',
+  'INTP',
+  'INTJ',
+  'ISFP',
+  'ISFJ',
+  'ISTP',
+  'ISTJ',
 ];
 
 final List<String> hobby = [
-  '영화', '노래', '술', '책',
-  '춤', '축구', '여행', '공연',
-  '공예', '요리', '게임', '쇼핑',
+  '영화',
+  '노래',
+  '술',
+  '책',
+  '춤',
+  '축구',
+  '여행',
+  '공연',
+  '공예',
+  '요리',
+  '게임',
+  '쇼핑',
 ];
 
 class _PageProfileEditState extends State<PageProfileEdit> {
@@ -38,9 +61,6 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   int _mbtiIndex = 0;
   bool selectMbti = false;
-  bool _mbtiIsExpanded = false;
-  Color _selectedColor = Color(0xFF6ACA9A);
-  Color _unSelectedColor = Colors.grey;
 
   String? selectedCommute = null;
   List<String> sigKorNames = [];
@@ -56,6 +76,14 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   bool isSaving = false;
 
+  OverlayEntry? _MBTIEntry;
+  bool _MBTIEntryIsOpened = false;
+  final _MBTILink = LayerLink();
+
+  OverlayEntry? _hobbyEntry;
+  bool _hobbyEntryIsOpened = false;
+  final _hobbyLink = LayerLink();
+
   Future<void> _getImage(ImageSource source) async {
     XFile? pickedFile;
     pickedFile = await _picker.pickImage(source: source, imageQuality: 25, maxHeight: 300, maxWidth: 300);
@@ -67,7 +95,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
   }
 
   Future<void> fetchData(int page) async {
-    String? url = 'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADEMD_INFO&page=';
+    String? url =
+        'https://api.vworld.kr/req/data?key=BFE41CE4-26A0-3EB2-BE6D-6EAECB1FC4C2&domain=http://localhost:8080&service=data&version=2.0&request=getfeature&format=json&size=1000&geometry=false&attribute=true&crs=EPSG:3857&geomfilter=BOX(13663271.680031825,3894007.9689600193,14817776.555251127,4688953.0631258525)&data=LT_C_ADEMD_INFO&page=';
     String? pageUrl = url + page.toString();
     final response = await http.get(Uri.parse(pageUrl));
 
@@ -122,7 +151,10 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height / 3,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height / 3,
           child: Column(
             children: <Widget>[
               Expanded(
@@ -142,14 +174,16 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                       );
                     }),
-                  )
-              ),
+                  )),
               CupertinoButton(
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(sido==''){selectedSiDo = siDoList[0];}
-                    else{selectedSiDo = sido;}
+                    if (sido == '') {
+                      selectedSiDo = siDoList[0];
+                    } else {
+                      selectedSiDo = sido;
+                    }
                     selectedSiGunGu = null;
                     selectedDong = null;
                   });
@@ -172,7 +206,10 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height / 3,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height / 3,
           child: Column(
             children: <Widget>[
               Expanded(
@@ -192,14 +229,16 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                       );
                     }),
-                  )
-              ),
+                  )),
               CupertinoButton(
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(siGunGu==''){selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];}
-                    else{selectedSiGunGu = siGunGu;}
+                    if (siGunGu == '') {
+                      selectedSiGunGu = siGunGuMap[selectedSiDo!]?[0];
+                    } else {
+                      selectedSiGunGu = siGunGu;
+                    }
                     selectedDong = null;
                   });
                   Navigator.of(context).pop();
@@ -221,7 +260,10 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height / 3,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height / 3,
           child: Column(
             children: <Widget>[
               Expanded(
@@ -241,14 +283,16 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                         ),
                       );
                     }),
-                  )
-              ),
+                  )),
               CupertinoButton(
                 child: Text('저장'),
                 onPressed: () {
                   setState(() {
-                    if(dong == ''){selectedDong = dongMap[selectedSiGunGu!]![0];}
-                    else{selectedDong = dong;}
+                    if (dong == '') {
+                      selectedDong = dongMap[selectedSiGunGu!]![0];
+                    } else {
+                      selectedDong = dong;
+                    }
                   });
                   Navigator.of(context).pop();
                 },
@@ -262,13 +306,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   TextEditingController? _nicknameController;
   TextEditingController? _textInfoController;
-
-  Color ButtonColor1 = Colors.grey;
-  Color ButtonColor2 = Colors.grey;
-  Color ButtonColor3 = Colors.grey;
-
-  bool _hobbyIsExpanded = false;
-  List<bool> _selectedHobby = List.generate(24, (index) => false);
+  List<bool> _selectedHobby = List.generate(12, (index) => false);
 
   void _onPressed(int index) {
     setState(() {
@@ -283,14 +321,19 @@ class _PageProfileEditState extends State<PageProfileEdit> {
             backgroundColor: Colors.white,
             elevation: 1,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black,),
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.black,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             title: Text(
-              '프로필 수정', style: TextStyle(fontSize: 18, color: Colors.black),)
-        ),
+              '프로필 수정',
+              style: TextStyle(fontSize: 18, color: Colors.black),
+            )),
+        backgroundColor: Colors.white,
         body: Stack(
           children: [
             SingleChildScrollView(
@@ -306,6 +349,12 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                           Center(
                               child: Column(
                                 children: [
+                                  Text('내 프로필 사진',
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        color: Colors.black,
+                                      )),
+                                  const SizedBox(height: 15,),
                                   InkWell(
                                     onTap: () async {
                                       final source = await showDialog<ImageSource>(
@@ -316,7 +365,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                             actions: [
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.pop(context,ImageSource.camera );
+                                                  Navigator.pop(context, ImageSource.camera);
                                                 },
                                                 child: Text('카메라로 직접 촬영'),
                                               ),
@@ -335,291 +384,214 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                         await _getImage(source);
                                       }
                                     },
-                                    child: CircleAvatar(
+                                    child: userTempImage[myUuid] == null ? CircleAvatar(
                                       radius: 70,
                                       backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
                                       child: _image == null ? Icon(Icons.person, size: 80) : null,
-                                    ),
+                                    ) : getAvatar(myProfile!, 70),
                                   ),
-                                  SizedBox(
-                                    height: 16,
+                                  const SizedBox(
+                                    height: 6,
                                   ),
-                                  Text(
-                                      '[위의 아이콘 클릭]',
+                                  Text('[위의 아이콘 클릭]',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.grey,
-                                      )
-                                  ),
+                                      )),
                                 ],
-                              )
+                              )),
+                          const SizedBox(height: 25),
+                          Row(
+                            children: [
+                              Text(' 닉네임 (최대 8자)',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  )),
+                              Text('  한글, 숫자, 영문만 입력 가능',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorGrey,
+                                  )),
+                            ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                              ' 닉네임',
-                              style: TextStyle(
-                                fontSize: 14,
-                              )
-                          ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 2),
                           TextFormField(
                             controller: _nicknameController,
                             decoration: InputDecoration(
+                              counterText: '',
                               labelStyle: TextStyle(fontSize: 14),
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.only(left:10 ,top: 10, bottom: 10),
+                              contentPadding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                             ),
+                            maxLength: 8,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9a-zA-Zㄱ-ㅎ가-힣]'))
+                            ],
                           ),
-                          SizedBox(height: 15),
-                          Text(
-                              ' 한줄소개',
+
+                          const SizedBox(height: 15),
+                          Text(' 한줄소개 (최대 50자)',
                               style: TextStyle(
                                 fontSize: 14,
-                              )
-                          ),
-                          SizedBox(height: 5),
+                              )),
+                          const SizedBox(height: 4),
                           TextFormField(
                             controller: _textInfoController,
                             decoration: InputDecoration(
+                              counterText: '',
                               labelStyle: TextStyle(fontSize: 14),
                               border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.only(left:10 ,top: 10, bottom: 10),
+                              contentPadding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                             ),
+                            maxLength: 50,
                           ),
-                          SizedBox(height: 15),
-                          Text(
-                              ' MBTI',
-                              style: TextStyle(
-                                fontSize: 14,
-                              )
-                          ),
-                          SizedBox(height: 7.0),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey, // 테두리 색상을 변경하고자 하는 색상으로 변경하세요.
-                                width: 1.0, // 테두리 두께를 지정할 수 있습니다.
+                          const SizedBox(height: 15),
+                          Text(' MBTI', style: TextStyle(fontSize: 14)),
+                          const SizedBox(height: 5),
+                          CompositedTransformTarget(
+                            link: _MBTILink,
+                            child: InkWell(
+                              onTap: () {
+                                if (_MBTIEntry != null && _MBTIEntryIsOpened) {
+                                  _MBTIEntry!.remove();
+                                  _MBTIEntryIsOpened = false;
+                                } else {
+                                  if (_hobbyEntry != null && _hobbyEntryIsOpened) {
+                                    _hobbyEntry!.remove();
+                                    _hobbyEntryIsOpened = false;
+                                  }
+                                  _MBTIEntry = _MBTIDropDown();
+                                  Overlay.of(context).insert(_MBTIEntry!);
+                                  _MBTIEntryIsOpened = true;
+                                }
+                              },
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), border: Border.all(), color: Colors.white),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const SizedBox(
+                                      width: 40,
+                                    ),
+                                    Text(_mbtiIndex == -1 ? "선택" : mbtiList[_mbtiIndex]),
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: Icon(
+                                        Icons.keyboard_arrow_down_sharp,
+                                        size: 30,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
-                            child: ExpansionPanelList(
-                              expansionCallback: (int index, bool isExpanded) {
-                                setState(() {
-                                  _mbtiIsExpanded = !isExpanded;
-                                });
+                          ),
+                          const SizedBox(height: 15),
+                          Text(' 취미', style: TextStyle(fontSize: 14)),
+                          const SizedBox(height: 5),
+                          CompositedTransformTarget(
+                            link: _hobbyLink,
+                            child: InkWell(
+                              onTap: () {
+                                if (_hobbyEntry != null && _hobbyEntryIsOpened) {
+                                  _hobbyEntry!.remove();
+                                  _hobbyEntryIsOpened = false;
+                                } else {
+                                  if (_MBTIEntry != null && _MBTIEntryIsOpened) {
+                                    _MBTIEntry!.remove();
+                                    _MBTIEntryIsOpened = false;
+                                  }
+                                  _hobbyEntry = _hobbyDropDown();
+                                  Overlay.of(context).insert(_hobbyEntry!);
+                                  _hobbyEntryIsOpened = true;
+                                }
                               },
-                              children: [
-                                ExpansionPanel(
-                                  headerBuilder: (BuildContext context, bool isExpanded) {
-                                    return ListTile(
-                                      title: Row(
-                                        children: [
-                                          Icon(Icons.mood),
-                                          SizedBox(width: 12),
-                                          selectMbti == false? Text("mbti", style: TextStyle(fontSize: 14)):Text(mbtiList[_mbtiIndex], style: TextStyle(fontSize: 14)),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  body:
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                                    child: Container(
-                                      height: _mbtiIsExpanded ? 180 : 0,
-                                      child: GridView.count(
-                                        crossAxisCount: 4,
-                                        crossAxisSpacing: 5,
-                                        mainAxisSpacing: 5,
-                                        childAspectRatio: 2.0,
-                                        children: List.generate(
-                                          16,
-                                              (index) =>
-                                              ElevatedButton(
-                                                style: ButtonStyle(
-                                                  backgroundColor: (_mbtiIndex == index && selectMbti == true)
-                                                      ? MaterialStateProperty.all(_selectedColor)
-                                                      : MaterialStateProperty.all(_unSelectedColor),
-                                                ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    if (_mbtiIndex != index) {_mbtiIndex = index; selectMbti = true;}
-                                                    else { selectMbti = false;  _mbtiIndex = -1;}
-                                                  });
-                                                },
-                                                child: Text(
-                                                  mbtiList[index],
-                                                  style: TextStyle(fontSize: 14),
-                                                ),
-                                              ),
-                                        ),
-                                      ),
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), border: Border.all(), color: Colors.white),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const SizedBox(
+                                      width: 40,
                                     ),
-                                  ),
-                                  isExpanded: _mbtiIsExpanded,
+                                    SizedBox(width: MediaQuery.of(context).size.width-130, child: Text(_getHobbyString(), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,)),
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: Icon(
+                                        Icons.keyboard_arrow_down_sharp,
+                                        size: 30,
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          Text(
-                              ' 취미',
-                              style: TextStyle(
-                                fontSize: 14,
-                              )
-                          ),
-                          SizedBox(height: 7.0),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey, // 테두리 색상을 변경하고자 하는 색상으로 변경하세요.
-                                width: 1.0, // 테두리 두께를 지정할 수 있습니다.
                               ),
                             ),
-                            child: ExpansionPanelList(
-                              expansionCallback: (int index, bool isExpanded) {
-                                setState(() {
-                                  _hobbyIsExpanded = !isExpanded;
-                                });
-                              },
-                              children: [
-                                ExpansionPanel(
-                                  headerBuilder: (BuildContext context, bool isExpanded) {
-                                    return ListTile(
-                                      title: Row(
-                                        children: [
-                                          Icon(Icons.mood),
-                                          SizedBox(width: 12),
-                                          Text('취미', style: TextStyle(fontSize: 14)),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  body: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                                    child: Container(
-                                      height: _hobbyIsExpanded ? 180 : 0,
-                                      child: GridView.count(
-                                        crossAxisCount: 4, // 4열
-                                        crossAxisSpacing: 5, // 열 사이의 간격 5
-                                        mainAxisSpacing: 5, // 행 사이의 간격 5
-                                        childAspectRatio: 2.0,
-                                        children: List.generate(
-                                          24,
-                                              (index) => ElevatedButton(
-                                            style: ButtonStyle(
-                                              backgroundColor: MaterialStateProperty.all(
-                                                _selectedHobby[index] ? _selectedColor : Colors.grey,
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              _onPressed(index);
-                                            },
-                                            child: Text(hobby[index],
-                                              style: TextStyle(fontSize: 14),
-                                            ), // 취미 텍스트 설정
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  isExpanded: _hobbyIsExpanded,
-                                ),
-                              ],
-                            ),
                           ),
                           SizedBox(height: 15),
-                          Text(
-                              ' 통학 여부',
+                          Text(' 통학 여부',
                               style: TextStyle(
                                 fontSize: 14,
-                              )
-                          ),
+                              )),
                           SizedBox(height: 5.0),
                           Row(
                             children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: ButtonColor1,
-                                      padding: EdgeInsets.all(10),
-                                      fixedSize: Size.fromWidth(80)
-                                  ),
+                                  style: ElevatedButton.styleFrom(backgroundColor: selectedCommute == '통학' ? colorSuccess : colorGrey, padding: EdgeInsets.all(10), fixedSize: Size.fromWidth(80)),
                                   onPressed: () {
                                     setState(() {
-                                      ButtonColor1 = _selectedColor;
-                                      ButtonColor2 = _unSelectedColor;
-                                      ButtonColor3 = _unSelectedColor;
                                       selectedCommute = '통학';
                                     });
                                   },
-                                  child: Text(
-                                      '통학',
+                                  child: Text('통학',
                                       style: TextStyle(
-                                        fontSize: 14,
-                                      )
-                                  ),
+                                        fontSize: 15,
+                                      )),
                                 ),
                               ),
                               SizedBox(width: 5.0),
                               Expanded(
                                 child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: ButtonColor2,
-                                      padding: EdgeInsets.all(10),
-                                      fixedSize: Size.fromWidth(80)
-                                  ),
+                                  style: ElevatedButton.styleFrom(backgroundColor: selectedCommute == '자취' ? colorSuccess : colorGrey, padding: EdgeInsets.all(10), fixedSize: Size.fromWidth(80)),
                                   onPressed: () {
                                     setState(() {
-                                      ButtonColor1 = _unSelectedColor;
-                                      ButtonColor2 = _selectedColor;
-                                      ButtonColor3 = _unSelectedColor;
                                       selectedCommute = '자취';
                                     });
                                   },
-                                  child: Text(
-                                      '자취',
+                                  child: Text('자취',
                                       style: TextStyle(
-                                        fontSize: 14,
-                                      )
-                                  ),
+                                        fontSize: 15,
+                                      )),
                                 ),
                               ),
                               SizedBox(width: 5.0),
                               Expanded(
                                 child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: ButtonColor3,
-                                      padding: EdgeInsets.all(10),
-                                      fixedSize: Size.fromWidth(80)
-                                  ),
+                                  style: ElevatedButton.styleFrom(backgroundColor: selectedCommute == '기숙사' ? colorSuccess : colorGrey, padding: EdgeInsets.all(10), fixedSize: Size.fromWidth(80)),
                                   onPressed: () {
                                     setState(() {
-                                      ButtonColor1 = _unSelectedColor;
-                                      ButtonColor2 = _unSelectedColor;
-                                      ButtonColor3 = _selectedColor;
                                       selectedCommute = '기숙사';
                                     });
                                   },
-                                  child: Text(
-                                      '기숙사',
+                                  child: Text('기숙사',
                                       style: TextStyle(
-                                        fontSize: 14,
-                                      )
-                                  ),
+                                        fontSize: 15,
+                                      )),
                                 ),
                               ),
                             ],
                           ),
                           SizedBox(height: 15),
-                          Text(
-                              ' 거주지',
+                          Text(' 거주지',
                               style: TextStyle(
                                 fontSize: 14,
-                              )
-                          ),
+                              )),
                           ElevatedButton(
                             onPressed: _showSidoPicker,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedSiDo == null ? _unSelectedColor : _selectedColor,
+                              backgroundColor: selectedSiDo == null ? colorGrey : colorSuccess,
                               padding: EdgeInsets.only(left: 6.0),
                               // fixedSize: Size.fromWidth(110),
                             ),
@@ -639,11 +611,15 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
-                              else{_showSiGunGuPicker();};
+                              if (selectedSiDo == null) {
+                                showAlert("시/도 먼저 선택해주세요", context, colorError);
+                              } else {
+                                _showSiGunGuPicker();
+                              }
+                              ;
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedSiGunGu == null ? _unSelectedColor : _selectedColor,
+                              backgroundColor: selectedSiGunGu == null ? colorGrey : colorSuccess,
                               padding: EdgeInsets.only(left: 6.0),
                             ),
                             child: Row(
@@ -662,12 +638,16 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              if(selectedSiDo == null){ showAlert("시/도 먼저 선택해주세요", context, colorError); }
-                              else if(selectedSiGunGu == null){ showAlert("시/군/구 먼저 선택해주세요", context, colorError); }
-                              else{ _showDongPicker(); }
+                              if (selectedSiDo == null) {
+                                showAlert("시/도 먼저 선택해주세요", context, colorError);
+                              } else if (selectedSiGunGu == null) {
+                                showAlert("시/군/구 먼저 선택해주세요", context, colorError);
+                              } else {
+                                _showDongPicker();
+                              }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: selectedDong == null ? _unSelectedColor : _selectedColor,
+                              backgroundColor: selectedDong == null ? colorGrey : colorSuccess,
                               padding: EdgeInsets.only(left: 6.0),
                             ),
                             child: Row(
@@ -695,27 +675,34 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                             child: ElevatedButton(
                               child: Text('저장'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF6ACA9A),
+                                backgroundColor: colorSuccess,
                               ),
                               onPressed: () async {
                                 setState(() {
+                                  if (_hobbyEntry != null && _hobbyEntry!.mounted) _hobbyEntry!.remove();
+                                  if (_MBTIEntry != null && _MBTIEntry!.mounted) _MBTIEntry!.remove();
                                   isSaving = true;
                                 });
                                 await _updateProfile();
                                 isSaving = false;
                                 Navigator.pop(context);
                               },
-                            )
-                        )
-                    ),
+                            ))),
                   ],
-                )
-
-            ),
+                )),
             if (isSaving) buildContainerLoading(135)
           ],
-        )
-    );
+        ));
+  }
+
+  String _getHobbyString() {
+    List<String> result = [];
+    for (int i = 0; i < _selectedHobby.length; i++) {
+      if(_selectedHobby[i]) {
+        result.add(hobby[i]);
+      }
+    }
+    return result.length == 0 ? "없음 (비공개)" : result.join(", ");
   }
 
   void initState() {
@@ -725,17 +712,8 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       _nicknameController = TextEditingController(text: '${myProfile!.name}');
       _textInfoController = TextEditingController(text: '${myProfile!.textInfo}');
 
-      if(myProfile!.commute == '통학'){
-        ButtonColor1 = _selectedColor;
-      }
-      if(myProfile!.commute == '자취'){
-        ButtonColor2 = _selectedColor;
-      }
-      if(myProfile!.commute == '기숙사'){
-        ButtonColor3 = _selectedColor;
-      }
-      _mbtiIndex = myProfile!.mbtiIndex;
-      if (_mbtiIndex != -1) { selectMbti = true; }
+      if (myProfile!.commute != null) selectedCommute = myProfile!.commute;
+      if (myProfile!.mbtiIndex != null) _mbtiIndex = myProfile!.mbtiIndex;
 
       for (int i = 0; i < myProfile!.hobbyIndex.length; i++) {
         _selectedHobby[myProfile!.hobbyIndex[i]] = true;
@@ -747,6 +725,132 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       setState(() {});
     });
     fetchData(currentPage);
+  }
+
+
+  @override
+  void deactivate() {
+    if (_hobbyEntry != null && _hobbyEntry!.mounted) _hobbyEntry!.remove();
+    if (_MBTIEntry != null && _MBTIEntry!.mounted) _MBTIEntry!.remove();
+    super.deactivate();
+  }
+
+  OverlayEntry _MBTIDropDown() {
+    return OverlayEntry(
+      builder: (BuildContext context) {
+        return CompositedTransformFollower(
+          targetAnchor: Alignment.bottomLeft,
+          link: _MBTILink,
+          child: GestureDetector(child: Align(alignment: AlignmentDirectional.topStart, child: _MBTITile())),
+        );
+      },
+    );
+  }
+
+  OverlayEntry _hobbyDropDown() {
+    return OverlayEntry(
+      builder: (BuildContext context) {
+        return CompositedTransformFollower(
+          targetAnchor: Alignment.bottomLeft,
+          link: _hobbyLink,
+          child: GestureDetector(child: Align(alignment: AlignmentDirectional.topStart, child: _hobbyTile())),
+        );
+      },
+    );
+  }
+
+  Widget _MBTITile() {
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: Container(
+        width: MediaQuery
+            .of(context)
+            .size
+            .width - 40,
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(5), border: Border.all()),
+        child: GridView.count(
+          padding: EdgeInsets.all(10),
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          crossAxisCount: 4,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+          childAspectRatio: 2.0,
+          children: List.generate(
+            16,
+                (index) =>
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                    (_mbtiIndex == index) ? MaterialStateProperty.all(colorSuccess) : MaterialStateProperty.all(colorGrey),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (_mbtiIndex != index) {
+                        _mbtiIndex = index;
+                        selectMbti = true;
+                      } else {
+                        selectMbti = false;
+                        _mbtiIndex = -1;
+                      }
+                      _MBTIEntryIsOpened = false;
+                      _MBTIEntry!.remove();
+                    });
+                  },
+                  child: Text(
+                    mbtiList[index],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _hobbyTile() {
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: StatefulBuilder(
+          builder: (BuildContext context, void Function(void Function()) setStates) {
+            return Container(
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width - 40,
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(5), border: Border.all()),
+              child: GridView.count(
+                padding: EdgeInsets.all(10),
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                crossAxisCount: 4,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
+                childAspectRatio: 2.0,
+                children: List.generate(
+                  12,
+                      (index) =>
+                      ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            _selectedHobby[index] ? colorSuccess : colorGrey,
+                          ),
+                        ),
+                        onPressed: () {
+                          setStates(() {});
+                          _onPressed(index);
+                        },
+                        child: Text(
+                          hobby[index],
+                          style: TextStyle(fontSize: 14),
+                        ), // 취미 텍스트 설정
+                      ),
+                ),
+              ),
+            );
+          }
+      ),
+    );
   }
 
   _updateProfile() async {
@@ -764,19 +868,16 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       await storageRef.putFile(File(_image!.path));
     }
     try {
-      await FirebaseFirestore.instance
-          .collection('UserProfile')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({
-        'nickName' : _nicknameController!.value.text,
-        'textInfo' : _textInfoController!.value.text,
+      await FirebaseFirestore.instance.collection('UserProfile').doc(FirebaseAuth.instance.currentUser!.uid).update({
+        'nickName': _nicknameController!.value.text,
+        'textInfo': _textInfoController!.value.text,
         'mbtiIndex': _mbtiIndex,
-        'hobbyIndex' : hobbyIndex,
+        'hobbyIndex': hobbyIndex,
         'hobby': selectedHobby,
-        'commute' : selectedCommute,
-        'addr1' : selectedSiDo,
-        'addr2' : selectedSiGunGu,
-        'addr3' : selectedDong
+        'commute': selectedCommute,
+        'addr1': selectedSiDo,
+        'addr2': selectedSiGunGu,
+        'addr3': selectedDong
       });
       print('Profile data updated successfully.');
     } catch (e) {

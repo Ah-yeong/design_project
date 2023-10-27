@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
-const Color colorSuccess = const Color(0xFF6ACA89);
+const Color colorSuccess = const Color(0xFF6ACA8B);
 const Color colorGrey = const Color(0xFF777777);
 const Color colorWarning = const Color(0xFFFFae69);
 const Color colorError = const Color(0xFFEE7070);
@@ -57,15 +57,15 @@ var CategoryList = List.of([
 
 Color getColorForScore(int score) {
   if (score < 20) {
-    return Colors.red;
+    return Colors.redAccent;
   } else if (score < 40) {
-    return Colors.orange;
+    return Colors.orangeAccent;
   } else if (score < 60) {
-    return Colors.lime;
+    return Colors.amberAccent;
   } else if (score < 80) {
-    return Colors.green;
+    return Colors.greenAccent;
   } else {
-    return Colors.blue;
+    return Colors.lightBlueAccent;
   }
 }
 
