@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/chat/models/chat_storage.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -162,8 +163,10 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                       DocumentReference doc = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid!);
                                       if (list[index].isGroupChat) {
                                         doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) => setState(() => _isDeleting = false));
+                                        ChatStorage(list[index].postId.toString())..remove();
                                       } else {
                                         doc.update({"chat": FieldValue.arrayRemove([list[index].recvUserId])}).then((value) => setState(() => _isDeleting = false));
+                                        ChatStorage(list[index].recvUserId!)..remove();
                                       }
                                     },
                                     autoClose: true,

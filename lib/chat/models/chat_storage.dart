@@ -31,6 +31,13 @@ class ChatStorage {
     savedChatList = listDataFromJson(_storage!.getString("${myUuid}_ChatData_$id")!);
   }
 
+  remove() {
+    if (_storage!.getString("${myUuid}_ChatData_$id") == null) {
+      return;
+    }
+    _storage!.remove("${myUuid}_ChatData_$id");
+  }
+
   List<ChatDataModel> listDataFromJson(String json) {
     List<dynamic> parsedJson = jsonDecode(json);
     List<ChatDataModel> listdatas = [];
