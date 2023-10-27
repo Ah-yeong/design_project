@@ -1,4 +1,5 @@
 import 'package:design_project/boards/post_list/page_hub.dart';
+import 'package:design_project/profiles/profile_edit.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import '../chat/chat_screen.dart';
@@ -69,7 +70,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               SizedBox(width: 10),
-                              getAvatar(profileEntity!, 50),
+                              getAvatar(profileEntity!, 45),
                               SizedBox(width: 25),
                               Expanded(
                                 child: Column(
@@ -172,13 +173,10 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                     ),
                                     Expanded(
-                                        child: Text(
-                                      textAlign: TextAlign.right,
-                                      "${profileEntity!.mbti}",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ))
+                                        child: Text(myProfileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[myProfileEntity!.mbtiIndex],
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(fontSize: 14, color: myProfileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black))
+                                    )
                                   ]),
                                   SizedBox(
                                     height: 14,
@@ -194,12 +192,10 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                     ),
                                     Expanded(
                                         child: Text(
-                                      textAlign: TextAlign.right,
-                                      "${profileEntity!.commute}",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ))
+                                          myProfileEntity!.commute ?? "비공개",
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(fontSize: 14, color: myProfileEntity!.commute == null ? Colors.grey : Colors.black),
+                                        ))
                                   ]),
                                   SizedBox(
                                     height: 14,

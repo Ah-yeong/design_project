@@ -506,11 +506,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                       children: [
                         Row(
                           children: [
-                            Image.asset(
-                              userProfile.profileImagePath,
-                              width: 45,
-                              height: 45,
-                            ),
+                            getAvatar(userProfile, 22.5),
                             const Padding(padding: EdgeInsets.only(left: 10)),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -633,11 +629,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Image.asset(
-                                userProfile.profileImagePath,
-                                width: 45,
-                                height: 45,
-                              ),
+                              getAvatar(userProfile, 22.5),
                               const Padding(padding: EdgeInsets.only(left: 10)),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

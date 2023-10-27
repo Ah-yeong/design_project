@@ -89,14 +89,13 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _chatLoaded = true;
         _sendInitMessage();
-
       });
     });
 
     _loadProfiles().then((value) => setState(() {
-      profileLoaded = true;
-      _sendInitMessage();
-    }));
+          profileLoaded = true;
+          _sendInitMessage();
+        }));
 
     if (recvUserId != null) {
       recvUser = EntityProfiles(recvUserId);
@@ -109,19 +108,21 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     } else {
       FCMController.chatRoomName = "[Post]$postId";
-      _initGroupChat().then((value) => setState(() {
+      _initGroupChat().then((value) {
         Future.forEach(members!, (uuid) async {
           await preloadAvatar(uuid: uuid);
         }).then((value) {
-          _isLoaded = true;
+          setState(() {
+            _isLoaded = true;
+          });
           _sendInitMessage();
         });
-      }));
+      });
     }
   }
 
   _sendInitMessage() {
-    if ( _isLoaded && _chatLoaded && profileLoaded && isInit ) {
+    if (_isLoaded && _chatLoaded && profileLoaded && isInit) {
       _sendMessage(isInits: true);
     }
   }
@@ -134,7 +135,6 @@ class _ChatScreenState extends State<ChatScreen> {
     chatColName = isGroupChat ? "PostGroupChat" : "Chat";
     return;
   }
-
 
   @override
   void dispose() {
@@ -167,8 +167,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     : !isGroupChat
                         ? recvUser.name
                         : members == null
-                ? "알 수 없음"
-                :"종료된 모임 (${members!.length}명)",
+                            ? "알 수 없음"
+                            : "종료된 모임 (${members!.length}명)",
             style: TextStyle(color: Colors.black, fontSize: 19)),
         backgroundColor: Colors.white,
         leading: BackButton(
@@ -178,9 +178,8 @@ class _ChatScreenState extends State<ChatScreen> {
       body: (_isLoaded == false || _chatLoaded == false)
           ? buildLoadingProgress()
           : SafeArea(
-
-        bottom: true,
-            child: Stack(
+              bottom: true,
+              child: Stack(
                 children: [
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -198,10 +197,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                         ),
                         Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 0.8, spreadRadius: 0.5)]
-                          ),
+                            decoration: BoxDecoration(
+                                color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 0.8, spreadRadius: 0.5)]),
                             width: double.infinity,
                             height: 50,
                             margin: const EdgeInsets.only(bottom: 16.0),
@@ -303,8 +300,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                                 }
                                                 Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState(() {}));
                                               },
-                                              overlayColor: MaterialStateProperty.all(
-                                                  _post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
+                                              overlayColor:
+                                                  MaterialStateProperty.all(_post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
                                               child: const Icon(
                                                 Icons.file_copy,
                                                 size: 25,
@@ -377,7 +374,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       : SizedBox(),
                 ],
               ),
-          ),
+            ),
     );
   }
 
@@ -402,18 +399,17 @@ class _ChatScreenState extends State<ChatScreen> {
     final message = init ? "모임이 성사되어 채팅방을 만들었어요.\n여기서 자유롭게 대화해보세요!" : _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
     final timestamp = Timestamp.now(); // 전송 시간
     try {
-
       final _chatDB = FirebaseDatabase.instance.ref(chatColName).child(chatDocName!);
 
       var ds;
-      if ( init && isGroupChat ) {
+      if (init && isGroupChat) {
         ds = await FirebaseFirestore.instance.collection("ProcessingPost").doc(postId.toString()).get();
       }
 
       DataSnapshot _roomRef = await _chatDB.get();
       if (!_roomRef.exists) {
         _chatDB.set({
-          "roomName" : isGroupChat && init ? ds.get("head") : "none",
+          "roomName": isGroupChat && init ? ds.get("head") : "none",
           "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
         });
       }
@@ -432,15 +428,21 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     FCMController fcm = FCMController();
     EntityProfiles? profile;
-    if(init) {
+    if (init) {
       for (String member in members!) {
         updateChatList(member);
-        if(member == myUuid!) continue;
+        if (member == myUuid!) continue;
         AlertManager alertManager = AlertManager(LocalStorage!);
-        alertManager.sendAlert(title: "모임이 성사되었어요 🙌🏻", body: "지금 바로 모임 채팅방을 통해 이야기를 나눠보세요!", alertType: AlertType.TO_CHAT_ROOM, userUUID: member, withPushNotifications: true, clickAction: {
-          "chat_id" : postId.toString(),
-          "is_group_chat" : "true",
-        });
+        alertManager.sendAlert(
+            title: "모임이 성사되었어요 🙌🏻",
+            body: "지금 바로 모임 채팅방을 통해 이야기를 나눠보세요!",
+            alertType: AlertType.TO_CHAT_ROOM,
+            userUUID: member,
+            withPushNotifications: true,
+            clickAction: {
+              "chat_id": postId.toString(),
+              "is_group_chat": "true",
+            });
       }
     } else {
       _chatController.clear();
@@ -450,17 +452,19 @@ class _ChatScreenState extends State<ChatScreen> {
         for (String member in members!) {
           updateChatList(member);
 
-          if(member == myUuid!) continue;
+          if (member == myUuid!) continue;
           profile = _memberProfiles[member]!;
           fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
-            "chat_id" : postId.toString(),
-            "is_group_chat" : "true",
+            "chat_id": postId.toString(),
+            "is_group_chat": "true",
           }).then((value) => print(value));
         }
       } else {
         updateChatList(recvUserId!);
         profile = _memberProfiles[recvUserId!]!;
-        fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {"chat_id" : myProfileEntity!.profileId,}).then((value) => print(value));
+        fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
+          "chat_id": myProfileEntity!.profileId,
+        }).then((value) => print(value));
       }
     }
     return;
@@ -468,12 +472,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadProfiles() async {
     EntityProfiles profile;
-    if ( isGroupChat ) {
+    if (isGroupChat) {
       if (members == null) return;
       await Future.forEach(members!, (uuid) async {
         profile = EntityProfiles(uuid);
         await profile.loadProfile();
-        _memberProfiles[profile.profileId] = profile;;
+        _memberProfiles[profile.profileId] = profile;
+        ;
       });
     } else {
       profile = EntityProfiles(recvUserId);
@@ -496,7 +501,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     if (members == null) {
       var dataSnapshot = await FirebaseDatabase.instance.ref("PostGroupChat").child(postId.toString()).child("members").get();
-      if ( dataSnapshot.exists ) {
+      if (dataSnapshot.exists) {
         members = [];
         List<dynamic> dataList = dataSnapshot.value as List<dynamic>;
         for (dynamic data in dataList) {

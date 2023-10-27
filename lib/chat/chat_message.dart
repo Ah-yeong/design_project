@@ -319,6 +319,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         userName,
                         formattedTime,
                         unreadUserCount: unreadCount,
+                        uuid: sender,
                       ));
                     } else if (isFirst) {
                       bubbles.add(ChatBubble(text, isMe, userName, formattedTime,

@@ -19,6 +19,7 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
   AlertManager? _alertManager;
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

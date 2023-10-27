@@ -18,7 +18,7 @@ class PageProfileEdit extends StatefulWidget {
   _PageProfileEditState createState() => _PageProfileEditState();
 }
 
-final List<String> mbti = [
+final List<String> mbtiList = [
   'ENFP', 'ENFJ', 'ENTP', 'ENTJ',
   'ESFP', 'ESFJ', 'ESTP', 'ESTJ',
   'INFP', 'INFJ', 'INTP', 'INTJ',
@@ -29,9 +29,6 @@ final List<String> hobby = [
   '영화', '노래', '술', '책',
   '춤', '축구', '여행', '공연',
   '공예', '요리', '게임', '쇼핑',
-  '영화2', '노래2', '술2', '책2',
-  '춤2', '축구2', '여행2', '공연2',
-  '공예2', '요리2', '게임2', '쇼핑2'
 ];
 
 class _PageProfileEditState extends State<PageProfileEdit> {
@@ -418,7 +415,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                         children: [
                                           Icon(Icons.mood),
                                           SizedBox(width: 12),
-                                          selectMbti == false? Text("mbti", style: TextStyle(fontSize: 14)):Text(mbti[_mbtiIndex], style: TextStyle(fontSize: 14)),
+                                          selectMbti == false? Text("mbti", style: TextStyle(fontSize: 14)):Text(mbtiList[_mbtiIndex], style: TextStyle(fontSize: 14)),
                                         ],
                                       ),
                                     );
@@ -449,7 +446,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                                   });
                                                 },
                                                 child: Text(
-                                                  mbti[index],
+                                                  mbtiList[index],
                                                   style: TextStyle(fontSize: 14),
                                                 ),
                                               ),

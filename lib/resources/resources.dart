@@ -76,15 +76,15 @@ Future<void> preloadAvatar({EntityProfiles? profile, String? uuid}) async {
   if (profile != null) {
     if(profile.imagePath != null) {
       userTempImage[id] = NetworkImage(profile.imagePath!);
-    } else {
-      String url = await FirebaseStorage.instance.ref().child("profile_image/${profile.profileId}").getDownloadURL();
-      userTempImage[id] = NetworkImage(url);
     }
     return;
-  }
-  else {
-    String url = await FirebaseStorage.instance.ref().child("profile_image/${uuid}").getDownloadURL();
-    userTempImage[id] = NetworkImage(url);
+  } else {
+    try {
+      String url = await FirebaseStorage.instance.ref().child("profile_image/${uuid}").getDownloadURL();
+      userTempImage[id] = NetworkImage(url);
+    } catch (e) {
+      print("Preload image error : $e");
+    }
     return;
   }
 }
