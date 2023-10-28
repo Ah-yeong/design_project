@@ -75,11 +75,6 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
           // 메시지 및 타임스탬프 설정
 
           room.lastChat = chatDocs[keys.last]["message"];
-          if(room.recvUserId == "dBfF9GPpQqVvxY3SxNmWpdT1er43") {
-
-            print(keys.last);
-            print(room.lastChat);
-          }
           await room
               .getLastChatting(Timestamp.fromMillisecondsSinceEpoch(chatDocs[keys.last]["timestamp"]))
               .then((value) => room.lastTimeStampString = value.split("#")[0]);

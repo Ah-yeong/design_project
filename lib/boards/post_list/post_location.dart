@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:design_project/boards/post.dart';
+import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/icon_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
@@ -110,7 +111,7 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
                       child: Center(
                         child: Text("${nowPosition ?? "불러오는 중"}"),
                       ),
-                    )
+                    ),
                   ],
                 )));
   }
@@ -179,9 +180,15 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
         Marker(
             markerId: MarkerId("$markerid"),
             position: postManager.list[i].getLLName().latLng,
-            onTap: () {
+            onTap: () async {
+              hubLoadingStateSetter!(() {
+                hubLoadingContainerVisible = true;
+              });
               profileEntity = EntityProfiles(postManager.list[i].getWriterId());
-              profileEntity!.makeTestingProfile();
+              await profileEntity!.loadProfile();
+              hubLoadingStateSetter!(() {
+                hubLoadingContainerVisible = false;
+              });
               showModalBottomSheet(
                   context: context, builder: (BuildContext context) => _buildModalSheet(context, i), backgroundColor: Colors.transparent);
               //postLoad(ep.getPostId());

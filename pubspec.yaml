@@ -63,6 +63,7 @@ dependencies:
   firebase_storage: 11.2.5
   flutter_slidable: ^3.0.0
   package_info_plus: ^4.2.0
+  pull_down_button: ^0.9.3
 
 dev_dependencies:
   flutter_test:

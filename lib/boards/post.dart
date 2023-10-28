@@ -8,8 +8,10 @@ import 'package:design_project/meeting/models/meeting_manager.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/boards/post_list/post_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,12 +34,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   User? loggedUser; // loggedUser 변수 선언
 
   final List<Marker> _markers = [];
-  bool isSameId = false;
-  static const CameraPosition _kSeoul = CameraPosition(
-    target: LatLng(36.833068, 127.178419),
-    zoom: 17.4746,
-  );
-
+  bool isWriter = false;
   bool? isProcessing = Get.arguments;
 
   var postId;
@@ -91,7 +88,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     return acceptList;
   }
 
-  List<String> getAcceptUuids(){
+  List<String> getAcceptUuids() {
     var acceptProfiles = postEntity!.getUser().where((element) => element['status'] == 1);
     List<String> acceptUuids = [];
     acceptProfiles.forEach((element) => acceptUuids.add(element['id']));
@@ -100,182 +97,237 @@ class _BoardPostPage extends State<BoardPostPage> {
 
   @override
   Widget build(BuildContext context) {
-    mediaSize = MediaQuery.of(context).size;
-    return Stack(
-        children: [
-          Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                "게시글",
-                style: TextStyle(color: Colors.black, fontSize: 16),
+    mediaSize = MediaQuery
+        .of(context)
+        .size;
+    return Stack(children: [
+      Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            " 게시글",
+            style: TextStyle(color: Colors.black, fontSize: 16),
+          ),
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: const SizedBox(
+              height: 55,
+              width: 55,
+              child: Icon(
+                Icons.close_rounded,
+                color: Colors.black,
               ),
-              leading: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const SizedBox(
-                  height: 55,
-                  width: 55,
-                  child: Icon(
-                    Icons.close_rounded,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              backgroundColor: Colors.white,
-              toolbarHeight: 40,
-              elevation: 1,
             ),
-            bottomNavigationBar: !isLoaded
-                ? buildLoadingProgress()
-                : isProcessing! ? SizedBox() : Container(
-              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
-              width: double.infinity,
-              height: 105,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: StatefulBuilder(builder: (context, reloadButtonState) {
-                    return InkWell(
-                      onDoubleTap: () {},
-                      onTap: () async {
-                        if (!_btnClickDelay) {
-                          _btnClickDelay = true;
-                          if (!(postEntity!.isFull() &&
-                              (postEntity!.getRequestState(myUuid!) == "none" || postEntity!.getRequestState(myUuid!) == "wait")) ||
-                              isSameId) {
-                            await _loadPost(isReload: true).then((loadSuccessful) async {
-                              if (!loadSuccessful) return;
-                              if (isSameId) {
-                                showModalBottomSheet(
-                                    isDismissible: false,
-                                    context: context,
-                                    isScrollControlled: true,
-                                    enableDrag: false,
-                                    builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
-                                    backgroundColor: Colors.transparent)
-                                    .then((value) => reloadButtonState(() {
+          ),
+          actions: [
+            SizedBox(width: 55, height: 55, child: PullDownButton(
+              itemBuilder: (context) =>
+              [
+                const PullDownMenuTitle(title: Text("게시글 옵션")),
+                if (isWriter) PullDownMenuItem.selectable(
+                  iconWidget: const Icon(CupertinoIcons.trash),
+                  title: '게시글 삭제',
+                  itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color:Colors.redAccent)),
+                  onTap: () {
+                    _showRemovePostPopup();
+                  },
+                ),
+                if (!isWriter) PullDownMenuItem.selectable(
+                  iconWidget: const Icon(CupertinoIcons.exclamationmark_triangle),
+                  title: '게시글 신고',
+                  onTap: () {
+                    showAlert("지원되지 않는 기능입니다.", context, colorError);
+                  },
+                )
+              ],
+              buttonBuilder: (context, showMenu) =>
+                  CupertinoButton(
+                    onPressed: showMenu,
+                    padding: EdgeInsets.zero,
+                    child: const Icon(CupertinoIcons.ellipsis, color: Colors.black,),
+                  ),
+            )
+            )
+
+          ],
+          backgroundColor: Colors.white,
+          toolbarHeight: 40,
+          elevation: 1,
+        ),
+        bottomNavigationBar: !isLoaded
+            ? buildLoadingProgress()
+            : isProcessing!
+            ? SizedBox()
+            : Container(
+          decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
+          width: double.infinity,
+          height: 105,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 15),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: StatefulBuilder(builder: (context, reloadButtonState) {
+                return InkWell(
+                  onDoubleTap: () {},
+                  onTap: () async {
+                    if (!_btnClickDelay) {
+                      _btnClickDelay = true;
+                      if (!(postEntity!.isFull() &&
+                          (postEntity!.getRequestState(myUuid!) == "none" || postEntity!.getRequestState(myUuid!) == "wait")) ||
+                          isWriter) {
+                        await _loadPost(isReload: true).then((loadSuccessful) async {
+                          if (!loadSuccessful) return;
+                          if (isWriter) {
+                            showModalBottomSheet(
+                                isDismissible: false,
+                                context: context,
+                                isScrollControlled: true,
+                                enableDrag: false,
+                                builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
+                                backgroundColor: Colors.transparent)
+                                .then((value) =>
+                                reloadButtonState(() {
                                   buttonEffectTimer!.cancel();
                                 }));
-                              } else if (postEntity!.getRequestState(myUuid!) == "none") {
-                                if (postEntity!.isFull()) {
-                                  showAlert("더 이상 참여할 수 없어요!", context, colorGrey);
+                          } else if (postEntity!.getRequestState(myUuid!) == "none") {
+                            if (postEntity!.isFull()) {
+                              showAlert("더 이상 참여할 수 없어요!", context, colorGrey);
+                            } else {
+                              await postEntity!.applyToPost(userID).then((requestSuccess) async {
+                                await _loadPost(isReload: true);
+                                if (requestSuccess) {
+                                  showAlert("신청이 완료되었어요!", context, colorSuccess);
+                                  var alertManager = AlertManager(LocalStorage!);
+                                  await alertManager.sendAlert(
+                                      title: "새로운 모임 신청자가 있어요",
+                                      body: "어플을 열어 확인해보세요!",
+                                      alertType: AlertType.TO_POST,
+                                      userUUID: postEntity!.getWriterId(),
+                                      withPushNotifications: true,
+                                      clickAction: {"post_id": postId.toString()});
                                 } else {
-                                  await postEntity!.applyToPost(userID).then((requestSuccess) async {
-                                    await _loadPost(isReload: true).then((_) {
-                                      setState(() {
-                                        if (requestSuccess) {
-                                          showAlert("신청이 완료되었어요!", context, colorSuccess);
-                                        } else {
-                                          showAlert("신청한 적이 있거나, 만료되었어요!", context, colorError);
-                                        }
-                                      });
-                                    });
-                                  });
+                                  showAlert("신청한 적이 있거나, 만료되었어요!", context, colorError);
                                 }
-                              } else if (postEntity!.getRequestState(myUuid!) == "wait") {
-                                if (postEntity!.isFull()) {
-                                  showAlert("이미 인원이 모두 찼어요!", context, colorGrey);
-                                } else {
-                                  showAlert("아직 참가 요청이 처리되지 않았어요!", context, colorGrey);
-                                }
-                              } else if (postEntity!.getRequestState(myUuid!) == "accept") {
-                                showAlert("참여자를 봅니다.", context, Colors.lightBlueAccent);
-                              } else if (postEntity!.getRequestState(myUuid!) == "reject") {
-                                Navigator.of(context).pop();
-                              }
-                            });
+                                setState(() {});
+                              });
+                            }
+                          } else if (postEntity!.getRequestState(myUuid!) == "wait") {
+                            if (postEntity!.isFull()) {
+                              showAlert("이미 인원이 모두 찼어요!", context, colorGrey);
+                            } else {
+                              showAlert("아직 참가 요청이 처리되지 않았어요!", context, colorGrey);
+                            }
+                          } else if (postEntity!.getRequestState(myUuid!) == "accept") {
+                            showModalBottomSheet(
+                                isDismissible: false,
+                                context: context,
+                                isScrollControlled: true,
+                                enableDrag: false,
+                                builder: (BuildContext context) => _buildModalSheet(postEntity!.getPostId()),
+                                backgroundColor: Colors.transparent);
+                          } else if (postEntity!.getRequestState(myUuid!) == "reject") {
+                            Navigator.of(context).pop();
                           }
-                          reloadButtonState(() {});
-                          Timer(Duration(seconds: 2), () => _btnClickDelay = false);
-                        }
-                      },
-                      child: SizedBox(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width - 30,
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              color: isSameId
-                                  ? Colors.indigoAccent
-                                  : postEntity!.getRequestState(myUuid!) == "none"
-                                  ? postEntity!.isFull()
-                                  ? colorGrey
-                                  : colorSuccess
-                                  : postEntity!.getRequestState(myUuid!) == "wait"
-                                  ? postEntity!.isFull()
-                                  ? colorGrey
-                                  : colorWarning
-                                  : postEntity!.getRequestState(myUuid!) == "accept"
-                                  ? Colors.indigoAccent
-                                  : colorGrey,
-                              boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                !isSameId && postEntity!.getRequestState(myUuid!) == "none" && !postEntity!.isFull()
-                                    ? Icon(
-                                  Icons.emoji_people,
-                                  color: Colors.white,
-                                )
-                                    : SizedBox(),
-                                Text(
-                                  _getRequestButtonText(),
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                        });
+                      }
+                      reloadButtonState(() {});
+                      Timer(Duration(seconds: 2), () => _btnClickDelay = false);
+                    }
+                  },
+                  child: SizedBox(
+                    height: 50,
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width - 30,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: isWriter
+                              ? Colors.indigoAccent
+                              : postEntity!.getRequestState(myUuid!) == "none"
+                              ? postEntity!.isFull()
+                              ? colorGrey
+                              : colorSuccess
+                              : postEntity!.getRequestState(myUuid!) == "wait"
+                              ? postEntity!.isFull()
+                              ? colorGrey
+                              : colorWarning
+                              : postEntity!.getRequestState(myUuid!) == "accept"
+                              ? Colors.indigoAccent
+                              : colorGrey,
+                          boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            !isWriter && postEntity!.getRequestState(myUuid!) == "none" && !postEntity!.isFull()
+                                ? Icon(
+                              Icons.emoji_people,
+                              color: Colors.white,
+                            )
+                                : SizedBox(),
+                            Text(
+                              _getRequestButtonText(),
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    );
-                  }),
-                ),
-              ),
-            ),
-            backgroundColor: Colors.white,
-            body: !isLoaded
-                ? buildLoadingProgress()
-                : Stack(children: [
-              SingleChildScrollView(
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 3 / 8,
-                          child: GoogleMap(
-                            markers: Set.from(_markers),
-                            mapType: MapType.normal,
-                            myLocationButtonEnabled: false,
-                            initialCameraPosition: CameraPosition(
-                              target: postEntity!.getLLName().latLng,
-                              zoom: 17.4746,
-                            ),
-                            onMapCreated: (GoogleMapController controller) {
-                              if (!_controller.isCompleted) _controller.complete(controller);
-                            },
-                          ),
-                        ),
-                        // 지도 표시 구간
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 16, 0, 4),
-                        ),
-
-                        // 제목 및 카테고리
-                        buildPostContext(postEntity!, profileEntity!, context),
-                        // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
-                        // Text("Gender Limit : ${postEntity!.getPostGender()}"),
-                      ]),
                     ),
-                  )),
-              isRequestLoading ? buildLoadingProgress() : SizedBox(),
-            ]),
+                  ),
+                );
+              }),
+            ),
           ),
-          if(isAllLoading) buildContainerLoading(135)
-        ]
-    );
+        ),
+        backgroundColor: Colors.white,
+        body: !isLoaded
+            ? buildLoadingProgress()
+            : Stack(children: [
+          SingleChildScrollView(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    SizedBox(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width,
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height * 3 / 8,
+                      child: GoogleMap(
+                        markers: Set.from(_markers),
+                        mapType: MapType.normal,
+                        myLocationButtonEnabled: false,
+                        initialCameraPosition: CameraPosition(
+                          target: postEntity!.getLLName().latLng,
+                          zoom: 17.4746,
+                        ),
+                        onMapCreated: (GoogleMapController controller) {
+                          if (!_controller.isCompleted) _controller.complete(controller);
+                        },
+                      ),
+                    ),
+                    // 지도 표시 구간
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 4),
+                    ),
+
+                    // 제목 및 카테고리
+                    buildPostContext(postEntity!, profileEntity!, context),
+                    // Text("Max Person : ${postEntity!.getPostMaxPerson()}"),
+                    // Text("Gender Limit : ${postEntity!.getPostGender()}"),
+                  ]),
+                ),
+              )),
+          isRequestLoading ? buildLoadingProgress() : SizedBox(),
+        ]),
+      ),
+      if (isAllLoading) buildContainerLoading(135)
+    ]);
   }
 
   @override
@@ -304,7 +356,7 @@ class _BoardPostPage extends State<BoardPostPage> {
       });
 
       // 중복 체크
-      if(!isProcessing!) {
+      if (!isProcessing!) {
         List<String> loadedProfileList = [];
         postEntity!.getUser().forEach((element) => loadedProfileList.add(element["id"].toString()));
         if (postEntity!.getUser().length == 0 || _loadedUserList.toString() != postEntity!.getUser().toString()) {
@@ -348,13 +400,13 @@ class _BoardPostPage extends State<BoardPostPage> {
 
   _checkWriterId(writerId) {
     if (writerId != Null) {
-      if (FirebaseAuth.instance.currentUser!.uid == writerId) isSameId = true;
+      if (FirebaseAuth.instance.currentUser!.uid == writerId) isWriter = true;
     }
   }
 
   String _getRequestButtonText() {
     String text = "";
-    if (isSameId) {
+    if (isWriter) {
       text += "[신청자 관리, 모임 성사]  현재 ${postEntity!.getPostCurrentPerson()}";
       if (postEntity!.getPostMaxPerson() != -1) {
         text += "/${postEntity!.getPostMaxPerson()}";
@@ -397,12 +449,12 @@ class _BoardPostPage extends State<BoardPostPage> {
   Widget _buildModalSheet(int postId) {
     return StatefulBuilder(builder: (BuildContext context, StateSetter modalState) {
       modalSetter = modalState;
-      _setButtonOpacityTimer();
+      if (isWriter) _setButtonOpacityTimer();
       return Column(
-        mainAxisAlignment: postEntity!.isFull() ? MainAxisAlignment.center : MainAxisAlignment.end,
+        mainAxisAlignment: postEntity!.isFull() && isWriter ? MainAxisAlignment.center : MainAxisAlignment.end,
         children: [
           SizedBox(
-            height: postEntity!.isFull() ? 40 : 0,
+            height: postEntity!.isFull() && isWriter ? 40 : 0,
           ),
           Container(
             constraints: BoxConstraints(minHeight: 0, maxHeight: 532),
@@ -415,7 +467,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                 padding: EdgeInsets.only(top: 13, right: 13, left: 13, bottom: postEntity!.isFull() ? 0 : 13),
                 child: buildPostMember(profileEntity!, postEntity!, context, modalState)),
           ),
-          postEntity!.isFull()
+          postEntity!.isFull() && isWriter
               ? AnimatedOpacity(
             opacity: _completeButtonOpacity,
             duration: Duration(milliseconds: 1000),
@@ -433,22 +485,32 @@ class _BoardPostPage extends State<BoardPostPage> {
                   });
                   MeetingManager meetManager = MeetingManager();
                   // if (위치공유 모임이면)
-                  List<String> members = getAcceptUuids()..add(myUuid!);
+                  List<String> members = getAcceptUuids()
+                    ..add(myUuid!);
                   LocationManager locManager = LocationManager();
                   await Future.wait([
                     meetManager.meetingCreate(postEntity!),
-                    if(!postEntity!.isVoluntary()) locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members),
+                    if (!postEntity!.isVoluntary()) locManager.createShareLocation(postEntity!.getPostId(), postEntity!.getLLName(), members),
                     postEntity!.postMoveToProcess(),
                     myProfileEntity!.removeMyPost(postEntity!.getPostId())
                   ]);
-                  Get.to(() => ChatScreen(postId: postEntity!.getPostId(), members: members,), arguments: "initMessageSend");
+                  Get.to(
+                          () =>
+                          ChatScreen(
+                            postId: postEntity!.getPostId(),
+                            members: members,
+                          ),
+                      arguments: "initMessageSend");
                   _btnClickDelay_startMeeting = false;
                 }
               },
               onDoubleTap: () {},
               child: Container(
                 height: 50,
-                width: MediaQuery.of(context).size.width - 16,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width - 16,
                 margin: EdgeInsets.fromLTRB(8, 8, 8, 0),
                 decoration: BoxDecoration(
                     color: colorSuccess,
@@ -582,7 +644,11 @@ class _BoardPostPage extends State<BoardPostPage> {
     )
         : Column(
       children: [
-        Divider(thickness: 1,height: 2, color: colorLightGrey,),
+        Divider(
+          thickness: 1,
+          height: 2,
+          color: colorLightGrey,
+        ),
         Padding(
           padding: const EdgeInsets.all(20),
           child: Text("신청자가 없어요", style: TextStyle(color: Colors.grey, fontSize: 14)),
@@ -606,8 +672,11 @@ class _BoardPostPage extends State<BoardPostPage> {
             return buildLoadingProgress();
           }
           List<EntityProfiles> acceptList = snapshot.data!;
-          if (!acceptList.contains(myProfileEntity!)) {
+          if (isWriter && !acceptList.contains(myProfileEntity!)) {
             acceptList.add(myProfileEntity!);
+          }
+          if (!isWriter && !acceptList.contains(profileEntity!)) {
+            acceptList.add(profileEntity!);
           }
           return ListView.builder(
             padding: EdgeInsets.symmetric(vertical: 5),
@@ -665,61 +734,96 @@ class _BoardPostPage extends State<BoardPostPage> {
   _showDialog(String name, String profileId, String status, int postId, StateSetter modalStateSetter) {
     return showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        contentPadding: EdgeInsets.fromLTRB(30, 20, 20, 30),
-        // 다이얼로그의 내용 패딩을 균일하게 조정
-        content: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 20),
-              Text(status == 'accept' ? '${name}님의 모임 참가를 수락하시겠습니까 ?' : '${name}님의 모임 참가를 거절하시겠습니까 ?', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      builder: (BuildContext context) =>
+          AlertDialog(
+            contentPadding: EdgeInsets.fromLTRB(30, 20, 20, 30),
+            // 다이얼로그의 내용 패딩을 균일하게 조정
+            content: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (isRequestLoading) return;
-                      isRequestLoading = true;
-                      Navigator.of(context).pop();
-                      if (status == 'accept') {
-                        await _acceptRequest(profileId, postId);
-                      }
-                      if (status == 'reject') {
-                        await _rejectRequest(profileId, postId);
-                      }
-                      await _loadPost(isReload: true).then((value) {
-                        modalStateSetter(() {
-                          isRequestLoading = false;
-                        });
-                      });
-                    },
-                    child: Text('예'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      minimumSize: Size(50, 30),
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('아니오'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      minimumSize: Size(50, 30),
-                    ),
+                  SizedBox(height: 20),
+                  Text(status == 'accept' ? '${name}님의 모임 참가를 수락하시겠습니까 ?' : '${name}님의 모임 참가를 거절하시겠습니까 ?', style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (isRequestLoading) return;
+                          isRequestLoading = true;
+                          Navigator.of(context).pop();
+                          if (status == 'accept') {
+                            await _acceptRequest(profileId, postId);
+                          }
+                          if (status == 'reject') {
+                            await _rejectRequest(profileId, postId);
+                          }
+                          await _loadPost(isReload: true).then((value) {
+                            modalStateSetter(() {
+                              isRequestLoading = false;
+                            });
+                          });
+                        },
+                        child: Text('예'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          minimumSize: Size(50, 30),
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('아니오'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          minimumSize: Size(50, 30),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
+    );
+  }
+
+  Future<void> _showRemovePostPopup() async {
+    final action = CupertinoActionSheet(
+      title: Text(
+        "게시물을 정말로 삭제할까요?",
+        style: TextStyle(fontSize: 15),
+      ),
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("게시글 삭제"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.pop(context);
+            setState(() {
+              isAllLoading = true;
+            });
+            await postEntity!.removePost();
+            await postManager.reloadPages("");
+            showAlert("게시글이 삭제되었습니다", context, colorSuccess);
+            if ( listStateSetter != null ) listStateSetter!(() {});
+            Navigator.of(context).pop();
+          },
         ),
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("취소"),
+        onPressed: () {
+          Navigator.pop(context);
+        },
       ),
     );
+    await showCupertinoModalPopup(
+        context: context, builder: (context) => action);
   }
 
   Future<void> _acceptRequest(String profileId, int postId) async {
@@ -730,6 +834,13 @@ class _BoardPostPage extends State<BoardPostPage> {
 
     var meetingManager = MeetingManager();
     await meetingManager.addMeetingPost(profileId, postId);
+
+    AlertManager manager = AlertManager(LocalStorage!);
+    await manager.sendAlert(title: "모임 참여가 승인되었어요!",
+        body: "모임이 성사될 때 다시 알려드릴게요!",
+        alertType: AlertType.NONE,
+        userUUID: profileId,
+        withPushNotifications: true);
 
     return;
   }
@@ -763,7 +874,11 @@ class _BoardPostPage extends State<BoardPostPage> {
             ),
             Expanded(
               child: Text(
-                postEntity!.isFull() ? "모임을 시작해보세요!" : "신청자 관리",
+                !isWriter
+                    ? "구성원 목록"
+                    : postEntity!.isFull()
+                    ? "모임을 시작해보세요!"
+                    : "신청자 관리",
                 style: TextStyle(color: Colors.black, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
@@ -771,20 +886,27 @@ class _BoardPostPage extends State<BoardPostPage> {
             SizedBox(width: 30),
           ],
         ),
-        postEntity!.isFull() ? SizedBox() : Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: _showApplyUserList(post, modalState),
-        ),
-        !postEntity!.isFull() ? Padding(
-          padding: const EdgeInsets.all(5.0),
-          child:
-          Text(
-            "참가자 현황",
-            style: TextStyle(color: Colors.black, fontSize: 16),
-            textAlign: TextAlign.center,
+        if (isWriter)
+          postEntity!.isFull()
+              ? SizedBox()
+              : Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: _showApplyUserList(post, modalState),
           ),
-        ) : SizedBox(),
-        SizedBox(height: 5,),
+        if (isWriter)
+          !postEntity!.isFull()
+              ? Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Text(
+              "참가자 현황",
+              style: TextStyle(color: Colors.black, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : SizedBox(),
+        SizedBox(
+          height: 5,
+        ),
         _showAcceptUserList(post),
         SizedBox(height: postEntity!.isFull() ? 3 : 25)
       ],
@@ -942,7 +1064,9 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
         padding: EdgeInsets.fromLTRB(0, 0, 0, 12),
       ),
       Text("시간 : ${getMeetTimeText(post.getTime())}"),
-      Text("장소 : ${post.getLLName().AddressName}"),
+      Text("장소 : ${post
+          .getLLName()
+          .AddressName}"),
       SizedBox(
         height: 20,
       ),

@@ -99,7 +99,7 @@ class FCMController {
     FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).update({"fcmToken" : "logOut"});
   }
 
-  void showChatNotificationSnackBar({required String title, required String body, Map<String, dynamic>? clickActionValue}) async {
+  void showNotificationSnackBar({required String title, required String body, Map<String, dynamic>? clickActionValue}) async {
     // 이미 접속해있는 채팅방인지 판별
     if ( clickActionValue != null ) {
       if ( clickActionValue["is_group_chat"] == null && chatRoomName == title) { // 개인 채팅방에 접속해 있을 경우

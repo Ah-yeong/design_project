@@ -113,9 +113,11 @@ class _ChatScreenState extends State<ChatScreen> {
           await preloadAvatar(uuid: uuid);
         }).then((value) {
           setState(() {
-            _loadProfiles().then((value) => setState(() {_isLoaded = true;}));
+            _loadProfiles().then((value) => setState(() {
+              _isLoaded = true;
+              _sendInitMessage();
+            }));
           });
-          _sendInitMessage();
         });
       });
     }

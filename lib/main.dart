@@ -24,8 +24,6 @@ import 'package:get/get.dart';
 
 import 'boards/post_list/page_hub.dart';
 
-
-
 final navigatorKey = GlobalKey<NavigatorState>();
 
 SharedPreferences? LocalStorage;
@@ -69,11 +67,7 @@ Future<void> main() async {
   appInfo = await PackageInfo.fromPlatform();
 
   // 알림 설정 상태
-  notificationSettings = await FirebaseMessaging.instance.requestPermission(
-      badge: true,
-      alert: true,
-      sound: true
-  );
+  notificationSettings = await FirebaseMessaging.instance.requestPermission(badge: true, alert: true, sound: true);
 
   // 로컬 알림 세팅
   // FCMController.init();
@@ -193,10 +187,7 @@ class _MyHomePage extends State<MyHomePage> {
                                               maxLength: _isManager ? 100 : 9,
                                               textInputAction: TextInputAction.next,
                                               decoration: InputDecoration(
-                                                  hintText: "아이디 (학번)",
-                                                  hintStyle: TextStyle(fontSize: 15),
-                                                  border: InputBorder.none,
-                                                  counterText: '')),
+                                                  hintText: "아이디 (학번)", hintStyle: TextStyle(fontSize: 15), border: InputBorder.none, counterText: '')),
                                         ),
                                       ),
                                       SizedBox(height: 8),
@@ -363,44 +354,45 @@ class _MyHomePage extends State<MyHomePage> {
     try {
       var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get();
       if (snapshot.exists) {
-        if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))){
-          await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
-              title: Text("최신 버전이 있습니다"),
-              content: Column(
-                children: [
-                  Text("\n현재 버전 : ${appInfo!.version}", style: TextStyle(fontSize: 14),),
-                  Text("최신 버전 : ${snapshot.get("version")}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                ],
-              ),
-              actions: [
-                CupertinoDialogAction(child: Text("확인"), onPressed: () {Navigator.pop(context);},)
-            ],
-          ));
+        if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))) {
+          await showCupertinoDialog(
+              context: context,
+              builder: (context) => CupertinoAlertDialog(
+                    title: Text("최신 버전이 있습니다"),
+                    content: Column(
+                      children: [
+                        Text("\n현재 버전 : ${appInfo!.version}", style: TextStyle(fontSize: 14)),
+                        Text("최신 버전 : ${snapshot.get("version")}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      ],
+                    ),
+                    actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+                  ));
           exit(0);
         }
       } else {
-        await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
-            title: Text("버전 확인 불가"),
-            content: Column(
-              children: [
-                Text("네트워크 상태를 확인하세요."),
-              ],
-            )
-        ));
+        await showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+                  title: Text("버전 확인 불가"),
+                  content: Column(
+                    children: [Text("네트워크 상태를 확인하세요.")],
+                  ),
+                  actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+                ));
         exit(0);
       }
     } catch (e) {
-      await showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: Text("버전 확인 불가"),
-          content: Column(
-            children: [
-              Text("네트워크 상태를 확인하세요."),
-            ],
-          )
-      ));
+      await showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: Text("버전 확인 불가"),
+                content: Column(
+                  children: [Text("네트워크 상태를 확인하세요.")],
+                ),
+                actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+              ));
       exit(0);
     }
-
 
     Future.delayed(const Duration(milliseconds: 100), () async {
       if (FirebaseAuth.instance.currentUser != null) {
@@ -567,9 +559,9 @@ class _MyHomePage extends State<MyHomePage> {
 
     try {
       DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
-      await reference.update({"fcmToken" : myToken});
+      await reference.update({"fcmToken": myToken});
     } catch (e) {
-      if ( e.toString().contains("document was not found")) {
+      if (e.toString().contains("document was not found")) {
         FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
       }
     }
@@ -582,9 +574,9 @@ class _MyHomePage extends State<MyHomePage> {
           myToken = await FirebaseMessaging.instance.getToken();
           try {
             DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
-            await reference.update({"fcmToken" : myToken});
+            await reference.update({"fcmToken": myToken});
           } catch (e) {
-            if ( e.toString().contains("document was not found")) {
+            if (e.toString().contains("document was not found")) {
               FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
             }
           }
@@ -593,15 +585,13 @@ class _MyHomePage extends State<MyHomePage> {
     });
 
     // 토큰 리프레시
-    FirebaseMessaging.instance.onTokenRefresh
-        .listen((fcmToken) async {
+    FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
       myToken = fcmToken;
       myProfileEntity!.fcmToken = fcmToken;
       DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
-      await reference.update({"fcmToken" : fcmToken});
+      await reference.update({"fcmToken": fcmToken});
       print("fcmToken 새로고침");
-    })
-        .onError((err) {
+    }).onError((err) {
       // Error getting token
     });
     // 백그라운드 푸시알림
@@ -612,11 +602,8 @@ class _MyHomePage extends State<MyHomePage> {
       if (message != null) {
         if (message.notification != null) {
           if (message.data.containsKey("type")) {
-            AlertType type = AlertType.fromJson(message.data["type"]);
-            if (type == AlertType.TO_CHAT_ROOM) {
-              var fcm = FCMController();
-              fcm.showChatNotificationSnackBar(title: message.notification!.title!, body: message.notification!.body!, clickActionValue: message.data);
-            }
+            var fcm = FCMController();
+            fcm.showNotificationSnackBar(title: message.notification!.title!, body: message.notification!.body!, clickActionValue: message.data);
             //_bottomAppbarRefresh(type);
             // else if ...
           }

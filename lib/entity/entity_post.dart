@@ -138,6 +138,24 @@ class EntityPost {
     _llName = LLName(LatLng(ds.get("lat"), ds.get("lng")), ds.get("name"));
   }
 
+  Future<void> removePost() async {
+    DocumentReference reference = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
+    var postDoc = await reference.get();
+    var users = postDoc.get("user") as List<dynamic>;
+    users.add({"status" : 1, "id" : myUuid});
+    users.retainWhere((user) => user["status"] == 1);
+    await Future.forEach(users, (user) async {
+      try {
+        DocumentReference userDoc = FirebaseFirestore.instance.collection("UserMeetings").doc(user["id"]);
+        userDoc.update({"meetingPost" : FieldValue.arrayRemove([_postId])});
+      } catch (e) {
+        print("Remove user meetingPost error : $e");
+      }
+    });
+    await reference.delete();
+    return;
+  }
+
   Future<void> loadPost() async {
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot ds = await transaction.get(_postDocRef!);

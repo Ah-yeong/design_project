@@ -22,7 +22,9 @@ class _BoardHomePage extends State<BoardHomePage> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
+      backgroundColor: Color(0xFFFEFEFE),
       body: SafeArea(
         child: DefaultTabController(
           length: 2,

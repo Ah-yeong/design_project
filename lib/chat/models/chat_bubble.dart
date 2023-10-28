@@ -1,6 +1,8 @@
 import 'package:design_project/main.dart';
+import 'package:design_project/profiles/profile_view.dart';
 import 'package:design_project/resources/resources.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ChatBubble extends StatelessWidget {
   const ChatBubble(this.message, this.isMe, this.userName, this.time,
@@ -35,11 +37,16 @@ class ChatBubble extends StatelessWidget {
                 child: !_longBubble && !isMe ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 5),
-                    child: CircleAvatar(
+                    child: GestureDetector(child: CircleAvatar(
                       radius: 20,
                       backgroundColor: colorLightGrey,
                       backgroundImage: userTempImage[uuid],
                     ),
+                    onTap: () {
+                      if ( uuid != null ) {
+                        Get.to(() => BoardProfilePage(profileId: uuid!));
+                      }
+                    },)
                   ),
                 ) : const SizedBox(),
               ),
@@ -49,12 +56,19 @@ class ChatBubble extends StatelessWidget {
                   if (!isMe && !_longBubble)
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        userName ?? 'Unknown',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[900],
+                      child: GestureDetector(
+                        onTap: () {
+                          if ( uuid != null ) {
+                            Get.to(() => BoardProfilePage(profileId: uuid!));
+                          }
+                        },
+                        child: Text(
+                          userName ?? '알 수 없음',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[900],
+                          ),
                         ),
                       ),
                     ),

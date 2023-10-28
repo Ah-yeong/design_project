@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:design_project/resources/resources.dart';
 import 'package:design_project/settings/reset.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../alert/models/alert_object.dart';
@@ -37,10 +39,19 @@ class PageSettings extends StatelessWidget {
           ListTile(
             title: Text('로그아웃'),
             onTap: () async {
-              await FirebaseAuth.instance.signOut().then((value) {
-                FCMController()..removeUserTokenDB();
-                Get.off(() => MyHomePage());
-              });
+              Get.off(() => MyHomePage());
+              await FirebaseAuth.instance.signOut().then((value) {});
+              await FCMController()..removeUserTokenDB();
+              await showCupertinoDialog(
+                  context: context,
+                  builder: (context) => CupertinoAlertDialog(
+                    title: Text("로그아웃"),
+                    content: Column(
+                      children: [Text("어플을 재실행하세요!.")],
+                    ),
+                    actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+                  ));
+              exit(0);
             },
           ),
           Divider(

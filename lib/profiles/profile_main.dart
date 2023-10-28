@@ -107,7 +107,7 @@ class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClient
               ),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: mannerWidget),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 child: Row(
                   children: [
                     Expanded(

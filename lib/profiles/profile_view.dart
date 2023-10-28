@@ -28,7 +28,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "작성자 프로필",
+          "프로필",
           style: TextStyle(color: Colors.black, fontSize: 16),
         ),
         leading: GestureDetector(
@@ -173,9 +173,9 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                     ),
                                     Expanded(
-                                        child: Text(myProfileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[myProfileEntity!.mbtiIndex],
+                                        child: Text(profileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[profileEntity!.mbtiIndex],
                                             textAlign: TextAlign.right,
-                                            style: TextStyle(fontSize: 14, color: myProfileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black))
+                                            style: TextStyle(fontSize: 14, color: profileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black))
                                     )
                                   ]),
                                   SizedBox(
@@ -192,9 +192,9 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                     ),
                                     Expanded(
                                         child: Text(
-                                          myProfileEntity!.commute ?? "비공개",
+                                          profileEntity!.commute ?? "비공개",
                                           textAlign: TextAlign.right,
-                                          style: TextStyle(fontSize: 14, color: myProfileEntity!.commute == null ? Colors.grey : Colors.black),
+                                          style: TextStyle(fontSize: 14, color: profileEntity!.commute == null ? Colors.grey : Colors.black),
                                         ))
                                   ]),
                                   SizedBox(
@@ -204,13 +204,13 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                   // SizedBox(
                                   //   height: 7,
                                   // ),
-                                  Align(
+                                  myUuid! != profileEntity!.profileId ?  Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
                                       padding: EdgeInsets.only(bottom: 18),
                                       child: InkWell(
                                           onTap: () {
-                                            if (profileEntity!.getProfileId() == myProfileEntity?.getProfileId()) return;
+                                            if (profileEntity!.getProfileId() == profileEntity?.getProfileId()) return;
                                             Navigator.of(context)
                                                 .push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
                                           },
@@ -240,7 +240,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
                                             ),
                                           )),
                                     ),
-                                  )
+                                  ) : const SizedBox()
                                 ],
                               ),
                             ))

@@ -14,13 +14,14 @@ StateSetter? listStateSetter;
 
 class BoardPostListPage extends StatefulWidget {
   const BoardPostListPage({super.key});
+
   static StateSetter? listStateSetter;
+
   @override
   State<StatefulWidget> createState() => _BoardGroupListPage();
 }
 
-class _BoardGroupListPage extends State<BoardPostListPage>
-    with AutomaticKeepAliveClientMixin {
+class _BoardGroupListPage extends State<BoardPostListPage> with AutomaticKeepAliveClientMixin {
   var count = 10;
   Timer? _postLoadingTimer;
   ScrollController _scrollController = ScrollController();
@@ -29,73 +30,72 @@ class _BoardGroupListPage extends State<BoardPostListPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StatefulBuilder(builder: (BuildContext context, StateSetter _listStateSetter) {
-      listStateSetter = _listStateSetter;
-      return postManager.isLoading
-        ? _postLoadingTimer!.isActive
-            ? SizedBox()
-            : buildLoadingProgress()
-        : Stack(
-            children: [
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                          (context, index) => GestureDetector(
-                                onTap: () {
-                                  naviToPost(index);
-                                },
-                                child: Card(
-                                    elevation: 0.5,
-                                    child: Padding(
-                                        padding: const EdgeInsets.all(7),
-                                        child: buildFriendRow(
-                                            postManager.list[postManager.list.length - index - 1], 0.0))),
-                              ),
-                          childCount: postManager.loadedCount)),
-                ],
-              ),
-              Positioned(
-                bottom: 16,
-                right: 16,
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: FittedBox(
-                    child: FloatingActionButton.small(
-                      heroTag: "fab2",
-                      backgroundColor: const Color(0xCCFFFFFF),
-                      onPressed: () {
-                        if(isScrollTop && !postManager.isLoading) {
-                          postManager.isLoading = true;
-                          setState(() {});
-                          postManager.reloadPages("").then((value) => setState(() {}));
-                        } else {
-                          _scrollController.animateTo(
-                            0,
-                            duration: const Duration(milliseconds: 750),
-                            curve: Curves.decelerate,
-                          );
-                        }
-                      },
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(color: Colors.grey, width: 0.7),
-                        borderRadius: BorderRadius.circular(15),
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter _listStateSetter) {
+        listStateSetter = _listStateSetter;
+        return postManager.isLoading
+            ? _postLoadingTimer!.isActive
+                ? SizedBox()
+                : buildLoadingProgress()
+            : Stack(
+                children: [
+                  CustomScrollView(
+                    controller: _scrollController,
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                            (context, index) => GestureDetector(
+                                  onTap: () {
+                                    naviToPost(index);
+                                  },
+                                  child: Card(
+                                      elevation: 0.5,
+                                      child: Padding(
+                                          padding: const EdgeInsets.all(7), child: buildFriendRow(postManager.list[postManager.list.length - index - 1], 0.0))),
+                                ),
+                            childCount: postManager.loadedCount),
                       ),
-                      child: Icon(
-                        isScrollTop ? Icons.refresh : Icons.arrow_upward,
-                        color: Color(0xFF888888),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: FittedBox(
+                        child: FloatingActionButton.small(
+                          heroTag: "fab2",
+                          backgroundColor: const Color(0xCCFFFFFF),
+                          onPressed: () {
+                            if (isScrollTop && !postManager.isLoading) {
+                              postManager.isLoading = true;
+                              setState(() {});
+                              postManager.reloadPages("").then((value) => setState(() {}));
+                            } else {
+                              _scrollController.animateTo(
+                                0,
+                                duration: const Duration(milliseconds: 750),
+                                curve: Curves.decelerate,
+                              );
+                            }
+                          },
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(color: Colors.grey, width: 0.7),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Icon(
+                            isScrollTop ? Icons.refresh : Icons.arrow_upward,
+                            color: Color(0xFF888888),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            ],
-          );
-    },
+                  )
+                ],
+              );
+      },
     );
-
   }
 
   @override
@@ -103,8 +103,7 @@ class _BoardGroupListPage extends State<BoardPostListPage>
     super.initState();
     _initLoadedPageChecker();
     _scrollController.addListener(() {
-      if (_scrollController.offset <=
-          _scrollController.position.minScrollExtent) {
+      if (_scrollController.offset <= _scrollController.position.minScrollExtent) {
         if (isScrollTop == false) {
           setState(() {
             isScrollTop = true;
@@ -122,10 +121,7 @@ class _BoardGroupListPage extends State<BoardPostListPage>
 
   naviToPost(int index) {
     Navigator.of(context)
-        .push(MaterialPageRoute(
-            builder: (context) => BoardPostPage(
-                postId: postManager.list[postManager.list.length - index - 1]
-                    .getPostId())))
+        .push(MaterialPageRoute(builder: (context) => BoardPostPage(postId: postManager.list[postManager.list.length - index - 1].getPostId())))
         .then((value) {
       if (value == false) {
         setState(() {
@@ -140,7 +136,7 @@ class _BoardGroupListPage extends State<BoardPostListPage>
   void _initLoadedPageChecker() {
     _postLoadingTimer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
       if (!postManager.isLoading) {
-        if ( listStateSetter != null ) {
+        if (listStateSetter != null) {
           listStateSetter!(() {});
         }
         timer.cancel();
@@ -154,6 +150,10 @@ class _BoardGroupListPage extends State<BoardPostListPage>
 
 // 모임 카드
 Widget buildFriendRow(EntityPost entity, double distance) {
+  final String timeText = getMeetTimeText(entity.getTime());
+  final bool isExpired = timeText.contains("전");
+  final bool isCloseTime = timeText.contains("분 후");
+
   return Row(
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -168,11 +168,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
               : entity.getPostCurrentPerson() == 2
                   ? CupertinoIcons.person_2_fill
                   : CupertinoIcons.person_3_fill),
-          Text(getMaxPersonText(entity),
-              style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold)),
+          Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
       const SizedBox(
@@ -192,8 +188,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                 children: [
                   Text(
                     '${entity.getPostHead()}', // 글 제목
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.start,
                   ),
                   Padding(
@@ -219,10 +214,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                       ),
                       Text(
                         " ${getDistanceString(entity.distance)}",
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: colorSuccess,
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 11, color: colorSuccess, fontWeight: FontWeight.bold),
                       ),
                     ],
                   )
@@ -248,14 +240,14 @@ Widget buildFriendRow(EntityPost entity, double distance) {
             ),
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.timer_outlined,
-                  color: colorGrey,
+                  color: isCloseTime ? Colors.redAccent : colorGrey,
                   size: 13,
                 ),
                 Text(
-                  getMeetTimeText(entity.getTime()),
-                  style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
+                  isExpired ? " 기한 만료" : timeText,
+                  style: TextStyle(fontSize: 11, color: isCloseTime ? Colors.redAccent : Color(0xFF858585)),
                 ),
               ],
             ),
@@ -288,10 +280,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                                     : entity.isVoluntary()
                                         ? "자율 참여"
                                         : "위치 공유",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold)),
+                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           // 더 추가해야함, 모집 완료
                         ),
@@ -303,17 +292,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                     SizedBox(
                       height: 18,
                       child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: const Color(0xFFB0B0B0)),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                         child: Center(
                           child: Padding(
                             padding: EdgeInsets.only(right: 5, left: 5),
-                            child: Text(entity.getCategory(),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold)),
+                            child: Text(entity.getCategory(), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ),
@@ -325,17 +308,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child: Text(getAgeText(entity),
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold)),
+                                  child: Text(getAgeText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -348,17 +325,11 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         ? SizedBox(
                             height: 18,
                             child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: const Color(0xFFB0B0B0)),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: const Color(0xFFB0B0B0)),
                               child: Center(
                                 child: Padding(
                                   padding: EdgeInsets.only(right: 5, left: 5),
-                                  child: Text(getGenderText(entity),
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold)),
+                                  child: Text(getGenderText(entity), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ),
@@ -376,9 +347,7 @@ Widget buildFriendRow(EntityPost entity, double distance) {
                         color: const Color(0xFF858585),
                         size: 11,
                       ),
-                      Text(" ${entity.getViewCount()}",
-                          style: const TextStyle(
-                              color: const Color(0xFF858585), fontSize: 11)),
+                      Text(" ${entity.getViewCount()}", style: const TextStyle(color: const Color(0xFF858585), fontSize: 11)),
                     ],
                   ),
                 ),
