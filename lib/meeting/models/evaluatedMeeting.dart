@@ -35,6 +35,14 @@ class EvaluatedMeeting {
     return currentDate.isBefore(deadline) || currentDate.isAtSameMomentAs(deadline);
   }
 
+  int calculateDeadline(String date){
+    DateTime deadline = DateFormat('yyyy-MM-dd').parse(date).add(Duration(days: 3));
+    DateTime currentDate = DateTime.now();
+    Duration difference = deadline.difference(currentDate);
+    int daysRemaining = difference.inDays;
+    return daysRemaining;
+  }
+
   Widget buildEndMeetingCard() {
     String timeText = getMeetTimeText(_meetTime.toString());
     return Column(
@@ -76,29 +84,48 @@ class EvaluatedMeeting {
               ],
             ),
             isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime)) ?
-            Container(
-              decoration: BoxDecoration(color: Colors.indigoAccent, borderRadius: BorderRadius.circular(10)),
-              width: 90,
-              height: 35,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  overlayColor: MaterialStateProperty.all(Colors.white38),
-                  onTap: () {
-                    Get.off(() => PageMeetingEvaluate(
-                      members: _members,
-                    ));
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("평가하기 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                      Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15,),
-                    ],
+            Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(color: Colors.indigoAccent, borderRadius: BorderRadius.circular(10)),
+                  width: 90,
+                  height: 35,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      overlayColor: MaterialStateProperty.all(Colors.white38),
+                      onTap: () {
+                        Get.off(() => PageMeetingEvaluate(
+                          members: _members,
+                          voluntary: _isVoluntary,
+                          arrivals: _arrivals,
+                          meetingId : _meetingId,
+                        ));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("평가하기 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15,),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(height: 6,),
+                calculateDeadline(DateFormat('yyyy-MM-dd').format(_meetTime)) == 0 ?
+                Text(
+                  '오늘까지 !', // 글 제목
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
+                  textAlign: TextAlign.right,
+                ) :
+                Text(
+                  '${calculateDeadline(DateFormat('yyyy-MM-dd').format(_meetTime))}일 남음', // 글 제목
+                  style: const TextStyle(fontSize: 12, color: colorGrey),
+                  textAlign: TextAlign.right,
+                )
+              ],
             ) : Container(),
           ],
         ),
