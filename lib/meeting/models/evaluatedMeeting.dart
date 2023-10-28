@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/latlng.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +20,7 @@ class EvaluatedMeeting {
   Map<String, dynamic> _arrivals;
 
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("Meetings");
-  CollectionReference _userInstance = FirebaseFirestore.instance.collection("UserMeetings");
+  CollectionReference _evalMeetingInstance = FirebaseFirestore.instance.collection("EvaluatedMeetings");
 
   EvaluatedMeeting(this._address, this._arrivals, this._isVoluntary, this._meetTime, this._meetingId, this._members);
 
@@ -43,7 +44,23 @@ class EvaluatedMeeting {
     return daysRemaining;
   }
 
-  Widget buildEndMeetingCard() {
+  Future<bool> isEnd() async {
+    DocumentReference evalMeeting = _evalMeetingInstance.doc(_meetingId.toString());
+    final documentSnapshot = await evalMeeting.get();
+    Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+    if (data["end"] == null || data["end"] is! Map<String, dynamic>) {
+      return false;
+    }
+    Map<String, dynamic> endUser = data["end"];
+    if(endUser.containsKey(FirebaseAuth.instance.currentUser!.uid)) {
+      if(endUser[FirebaseAuth.instance.currentUser!.uid]) { return true; }
+      else { return false; }
+    } else {
+      return false;
+    }
+  }
+
+  Future<Widget> buildEndMeetingCard() async {
     String timeText = getMeetTimeText(_meetTime.toString());
     return Column(
       children: [
@@ -83,7 +100,7 @@ class EvaluatedMeeting {
                 SizedBox(height: 5),
               ],
             ),
-            isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime)) ?
+            isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime)) && ! await isEnd()?
             Column(
               children: [
                 Container(
@@ -126,7 +143,26 @@ class EvaluatedMeeting {
                   textAlign: TextAlign.right,
                 )
               ],
-            ) : Container(),
+            ) : Container(
+              decoration: BoxDecoration(color: colorGrey, borderRadius: BorderRadius.circular(10)),
+              width: 90,
+              height: 35,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  overlayColor: MaterialStateProperty.all(Colors.white38),
+                  onTap: () {
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("평가완료 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))
+                    ],
+                  ),
+                ),
+              ),
+            )
           ],
         ),
         Divider(thickness: 1,)
