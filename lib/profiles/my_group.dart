@@ -97,27 +97,33 @@ class _PageMyGroup extends State<PageMyGroup> {
                         children: myGroupList.map((group) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Card(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => BoardPostPage(postId: group.getPostId()),
-                                  ));
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7),
-                                  child: _buildFriendRow(group),
+                            child: Column(
+                              children: [
+                                SizedBox(height: 5,),
+                                Container(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (context) => BoardPostPage(postId: group.getPostId()),
+                                      ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(7),
+                                      child: _buildPostCard(group),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                                Divider(thickness: 1, height: 0, color: colorLightGrey),
+                              ],
+                            )
                           );
                         }).toList(),
                       ),
                     )
                         : Padding(
                       padding: const EdgeInsets.symmetric(vertical: 25.0),
-                      child: Text("대기중인 모임이 없어요", style: TextStyle(color: colorGrey, fontSize: 11)),
+                      child: Text("대기중인 모임이 없어요", style: TextStyle(color: colorGrey, fontSize: 13)),
                     ),
                   ]),
                 )
@@ -156,7 +162,7 @@ class _PageMyGroup extends State<PageMyGroup> {
     });
   }
 
-  Widget _buildFriendRow(EntityPost entity) {
+  Widget _buildPostCard(EntityPost entity) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -176,11 +182,12 @@ class _PageMyGroup extends State<PageMyGroup> {
                     children: [
                       Text(
                         '${entity.getPostHead()}', // 글 제목
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.start,
                       ),
                       Padding(
-                          padding: const EdgeInsets.only(right: 5, bottom: 5),
+                          padding: const EdgeInsets.only(bottom: 5),
                           child: Container(
                             width: 60,
                             height: 25,
@@ -192,61 +199,52 @@ class _PageMyGroup extends State<PageMyGroup> {
                               padding: const EdgeInsets.all(5),
                               child: Center(
                                   child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.emoji_people,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                  Text(getMaxPersonText(entity), style: const TextStyle(color: Colors.white, fontSize: 10)),
-                                ],
-                              )),
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.emoji_people, color: Colors.white, size: 14,),
+                                      Text(getMaxPersonText(entity),
+                                          style: const TextStyle(
+                                              color: Colors.white, fontSize: 10)),
+                                    ],
+                                  )
+                              ),
                             ),
-                          ))
+                          )
+                      )
                     ],
-                  )),
+                  )
+              ),
               const Padding(
                 padding: EdgeInsets.only(bottom: 5),
               ),
               Row(
                 children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    color: colorGrey,
-                    size: 13,
-                  ),
+                  const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),
                   Text(
                     " ${entity.getLLName().AddressName}",
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
-                  SizedBox(
-                    height: 1,
-                  ),
+                  SizedBox(height: 1,),
                 ],
               ),
-              SizedBox(
-                height: 1,
-              ),
+              SizedBox(height: 1,),
               Row(
                 children: [
-                  const Icon(
-                    Icons.timer_outlined,
-                    color: colorGrey,
-                    size: 13,
-                  ),
+                  const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
                   Text(
                     getMeetTimeText(entity.getTime()),
                     style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 5,
-              ),
+              SizedBox(height: 5,),
             ],
           ),
         ),
+        SizedBox(width: 12,),
+        Container(
+          child: Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18,),
+        )
       ],
     );
   }
