@@ -1,0 +1,112 @@
+import 'dart:ffi';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
+class Evaluation{
+  List<String> _evaluatedUsers;
+  CollectionReference _evaluationInstance = FirebaseFirestore.instance.collection("Evaluation");
+  CollectionReference _userProfileInstance = FirebaseFirestore.instance.collection("UserProfile");
+
+  Evaluation(this._evaluatedUsers);
+
+  DocumentReference getEvaluationDocument() {
+    return _evaluationInstance.doc(FirebaseAuth.instance.currentUser!.uid);
+  }
+
+  bool isDateUpdate(String existingDate, DateTime now){
+    DateTime addSevenDays = DateFormat('yyyy-MM-dd').parse(existingDate).add(Duration(days: 7));
+    return now.isAfter(addSevenDays);
+  }
+
+  Future<void> upload() async {
+    DateTime now = DateTime.now();
+    String currentTime = now.toLocal().toString();
+
+    for (String uid in _evaluatedUsers) {
+      DocumentReference evalDocument = _evaluationInstance.doc(uid);
+
+      final documentSnapshot = await evalDocument.get();
+      if (!documentSnapshot.exists) {
+        await evalDocument.set({"users": {FirebaseAuth.instance.currentUser!.uid: [currentTime]}});
+      } else {
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        if(data["users"] == null) {
+          await evalDocument.update({"users": {FirebaseAuth.instance.currentUser!.uid: [currentTime]}});
+        } else {
+          Map<String, dynamic> usersData = data["users"];
+
+          if (usersData.containsKey(FirebaseAuth.instance.currentUser!.uid)) {
+            List<dynamic> timestamps = List.from(usersData[FirebaseAuth.instance.currentUser!.uid])..add(currentTime);
+            usersData[FirebaseAuth.instance.currentUser!.uid] = timestamps;
+          } else {
+            usersData[FirebaseAuth.instance.currentUser!.uid] = [currentTime];
+          }
+          data["users"] = usersData;
+          await evalDocument.update(data);
+        }
+      }
+    }
+  }
+
+  Future<void> count(int meetingId, Map<String, dynamic> notAttendedUser) async {
+    for (String uid in notAttendedUser.keys) {
+      if(notAttendedUser[uid] == true){
+        DocumentReference evalDocument = _evaluationInstance.doc(uid);
+        final userSnapshot = await evalDocument.get();
+        if(userSnapshot.exists) {
+          final userData = userSnapshot.data() as Map<String, dynamic>;
+          if(userData["meetings"] != null) {
+            final meetingsData = userData["meetings"];
+            final meetingData = meetingsData[meetingId.toString()];
+
+            meetingData["count"] = meetingData["count"] + 1;
+            if(meetingData["count"] == meetingData["memberCount"]){
+              resetMannerGroup(uid);
+            }
+
+            meetingsData[meetingId.toString()] = meetingData;
+            userData["meetings"] = meetingsData;
+            await evalDocument.set(userData);
+          } else {
+            await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+          }
+        } else {
+          await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+        }
+      }
+    }
+  }
+
+  Future<void> resetMannerGroup(uid) async {
+    DocumentReference userDocument = _userProfileInstance.doc(uid);
+    var documentSnapshot = await userDocument.get();
+    Map<String, dynamic> userProfile = documentSnapshot.data() as Map<String, dynamic>;
+    userProfile["mannerGroup"] = userProfile["mannerGroup"] + 3; // 불참시 마이너스 된 매너 지수 회복 ex) 3점
+    if(userProfile["mannerGroup"] > 100) { userProfile["mannerGroup"] = 100; }
+    userDocument.update(userProfile);
+  }
+
+  Future<void> updateMannerGroup(score) async {
+    for (String uid in _evaluatedUsers) {
+      DocumentReference userDocument = _userProfileInstance.doc(uid);
+      DocumentReference evalDocument = _evaluationInstance.doc(uid);
+
+      var documentSnapshot = await userDocument.get();
+      Map<String, dynamic> userProfile = documentSnapshot.data() as Map<String, dynamic>;
+      num mannerGroup = userProfile["mannerGroup"];
+
+      documentSnapshot = await evalDocument.get();
+      Map<String, dynamic> evaluation = documentSnapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> usersEval= evaluation["users"];
+      int count = usersEval[FirebaseAuth.instance.currentUser!.uid].length;
+
+      num newMannerGroup = mannerGroup + score[uid] * (100 - (count * 10)) * 0.005;
+      if(newMannerGroup > 100){ newMannerGroup = 100; }
+      userProfile["mannerGroup"]  = double.parse(newMannerGroup.toStringAsFixed(2));
+      print(userProfile["mannerGroup"]);
+      userDocument.update(userProfile);
+    }
+  }
+}
