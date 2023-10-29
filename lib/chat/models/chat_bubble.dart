@@ -44,7 +44,7 @@ class ChatBubble extends StatelessWidget {
                     ),
                     onTap: () {
                       if ( uuid != null ) {
-                        Get.to(() => BoardProfilePage(profileId: uuid!));
+                        Get.to(() => BoardProfilePage(profileId: uuid!), transition: Transition.downToUp);
                       }
                     },)
                   ),
@@ -59,7 +59,7 @@ class ChatBubble extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () {
                           if ( uuid != null ) {
-                            Get.to(() => BoardProfilePage(profileId: uuid!));
+                            Get.to(() => BoardProfilePage(profileId: uuid!), transition: Transition.downToUp);
                           }
                         },
                         child: Text(

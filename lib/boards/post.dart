@@ -561,7 +561,7 @@ class _BoardPostPage extends State<BoardPostPage> {
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
+                      Get.to(() => BoardProfilePage(profileId: userProfile.profileId), transition: Transition.downToUp);
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -686,7 +686,7 @@ class _BoardPostPage extends State<BoardPostPage> {
               EntityProfiles userProfile = acceptList[index];
               return GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: userProfile.profileId)));
+                  Get.to(() => BoardProfilePage(profileId: userProfile.profileId), transition: Transition.downToUp);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -927,7 +927,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
   return GestureDetector(
     behavior: HitTestBehavior.translucent,
     onTap: () {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => BoardProfilePage(profileId: profileEntity.profileId)));
+      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp);
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -959,7 +959,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "매너 지수 ${profileEntity.mannerGroup}점",
+                "매너 지수 ${profileEntity.mannerGroup.toStringAsFixed(1)}점",
                 style: const TextStyle(color: Color(0xFF777777), fontSize: 12),
               ),
               const Padding(

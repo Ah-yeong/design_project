@@ -351,49 +351,6 @@ class _MyHomePage extends State<MyHomePage> {
   }
 
   _auth() async {
-    try {
-      var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get();
-      if (snapshot.exists) {
-        if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))) {
-          await showCupertinoDialog(
-              context: context,
-              builder: (context) => CupertinoAlertDialog(
-                    title: Text("최신 버전이 있습니다"),
-                    content: Column(
-                      children: [
-                        Text("\n현재 버전 : ${appInfo!.version}", style: TextStyle(fontSize: 14)),
-                        Text("최신 버전 : ${snapshot.get("version")}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
-                    ),
-                    actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
-                  ));
-          exit(0);
-        }
-      } else {
-        await showCupertinoDialog(
-            context: context,
-            builder: (context) => CupertinoAlertDialog(
-                  title: Text("버전 확인 불가"),
-                  content: Column(
-                    children: [Text("네트워크 상태를 확인하세요.")],
-                  ),
-                  actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
-                ));
-        exit(0);
-      }
-    } catch (e) {
-      await showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-                title: Text("버전 확인 불가"),
-                content: Column(
-                  children: [Text("네트워크 상태를 확인하세요.")],
-                ),
-                actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
-              ));
-      exit(0);
-    }
-
     Future.delayed(const Duration(milliseconds: 100), () async {
       if (FirebaseAuth.instance.currentUser != null) {
         // postManager 로딩
@@ -511,6 +468,8 @@ class _MyHomePage extends State<MyHomePage> {
     return;
   }
 
+
+
   @override
   void initState() {
     super.initState();
@@ -622,5 +581,50 @@ _bottomAppbarRefresh(String type) {
       newAlert = true;
     }
     bAppbarStateSetter!(() {});
+  }
+}
+
+Future<void> versionCheck(BuildContext context) async {
+  try {
+    var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get();
+    if (snapshot.exists) {
+      if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))) {
+        await showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: Text("최신 버전이 있습니다"),
+              content: Column(
+                children: [
+                  Text("\n현재 버전 : ${appInfo!.version}", style: TextStyle(fontSize: 14)),
+                  Text("최신 버전 : ${snapshot.get("version")}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                ],
+              ),
+              actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+            ));
+        exit(0);
+      }
+    } else {
+      await showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: Text("버전 확인 불가"),
+            content: Column(
+              children: [Text("네트워크 상태를 확인하세요.")],
+            ),
+            actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+          ));
+      exit(0);
+    }
+  } catch (e) {
+    await showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: Text("네트워크 연결이 끊겼습니다"),
+          content: Column(
+            children: [Text("네트워크 상태를 확인하세요.")],
+          ),
+          actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+        ));
+    exit(0);
   }
 }

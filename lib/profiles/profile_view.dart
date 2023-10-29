@@ -27,8 +27,8 @@ class _BoardProfilePage extends State<BoardProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "프로필",
+        title: Text(
+          _isLoading ? "불러오는 중" : "${profileEntity!.name}님의 프로필",
           style: TextStyle(color: Colors.black, fontSize: 16),
         ),
         leading: GestureDetector(
@@ -46,207 +46,274 @@ class _BoardProfilePage extends State<BoardProfilePage> {
         toolbarHeight: 40,
         elevation: 1,
       ),
+      bottomNavigationBar: myUuid! != profileEntity!.profileId
+          ? Container(
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
+              width: double.infinity,
+              height: 105,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: StatefulBuilder(builder: (context, reloadButtonState) {
+                    return InkWell(
+                      onDoubleTap: () {},
+                      onTap: () {
+                        if (profileEntity!.getProfileId() == myProfileEntity!.getProfileId()) return;
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
+                      },
+                      child: SizedBox(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width - 30,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: colorSuccess,
+                              boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  " ${profileEntity!.name} 님에게 연락하기",
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            )
+          : const SizedBox(),
       backgroundColor: Colors.white,
-      body:
-          // body: profileEntity!.isLoading ? Center(
-          //     child: SizedBox(
-          //         height: 65,
-          //         width: 65,
-          //         child: CircularProgressIndicator(
-          //           strokeWidth: 4,
-          //           color: colorSuccess,
-          //         ))) :
-          Stack(
+      body: Stack(
         children: [
           !_isLoading
               ? SingleChildScrollView(
-                  child: Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(15),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15, top: 25),
+                        child: SizedBox(
+                          height: 80,
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                              SizedBox(width: 10),
-                              getAvatar(profileEntity!, 45),
-                              SizedBox(width: 25),
-                              Expanded(
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10, right: 20),
+                                child: getAvatar(profileEntity!, 40),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: <Widget>[
-                                    SizedBox(height: 6),
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
                                       "${profileEntity!.name}",
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                     ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      "${profileEntity!.major}, ${profileEntity!.age}세",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      "${profileEntity!.textInfo}",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 7),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            "매너 지수 ${profileEntity!.mannerGroup}점",
-                                            style: const TextStyle(color: Colors.black, fontSize: 12),
+                                    Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${profileEntity!.major}, ${profileEntity!.age}세",
+                                          style: TextStyle(
+                                            fontSize: 14,
                                           ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(top: 2),
-                                          ),
-                                          SizedBox(
-                                              height: 6,
-                                              //width: 200,
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(4),
-                                                child: LinearProgressIndicator(
-                                                  value: profileEntity!.mannerGroup / 100,
-                                                  valueColor: AlwaysStoppedAnimation<Color>(getColorForScore(profileEntity!.mannerGroup)),
-                                                  backgroundColor: getColorForScore(profileEntity!.mannerGroup).withOpacity(0.3),
-                                                ),
-                                              ))
-                                        ],
-                                      ),
+                                        ),
+                                        const SizedBox(height: 1),
+                                        profileEntity!.addr1 == null
+                                            ? Text(
+                                                textAlign: TextAlign.left,
+                                                "지역 비공개",
+                                                style: TextStyle(fontSize: 13, color: Colors.grey),
+                                              )
+                                            : Text(
+                                                textAlign: TextAlign.left,
+                                                "${profileEntity!.addr1 != null ? profileEntity!.addr1 + ' ' : ''}"
+                                                "${profileEntity!.addr2 != null ? profileEntity!.addr2 + ' ' : ''}"
+                                                "${profileEntity!.addr3 != null ? profileEntity!.addr3 : ''}",
+                                                style: TextStyle(fontSize: 13, color: colorGrey),
+                                              ),
+                                      ],
                                     )
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
-                        // Divider(thickness: 1, height: 1),
-                        Container(
-                            padding: EdgeInsets.fromLTRB(20, 10, 20, 5),
-                            // padding: EdgeInsets.all(20),
-                            child: Container(
-                              // padding:  EdgeInsets.all(15),
-                              // decoration: BoxDecoration(
-                              //   borderRadius: BorderRadius.circular(10),
-                              //   border: Border.all(
-                              //     width: 2,
-                              //     color: Color(0xFF6ACA89),
-                              //   ),
-                              // ),
-                              child: Column(
-                                children: [
-                                  Row(children: [
-                                    Text(
-                                      '취미',
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        '${profileEntity!.hobby?.join(', ')}',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                        ),
-                                        maxLines: 2, // 텍스트가 2줄을 초과하면 다음 줄로 내려가도록 설정
-                                        overflow: TextOverflow.ellipsis, // 텍스트가 오버플로우되는 경우 ...으로 표시
-                                      ),
-                                    )
-                                  ]),
-                                  SizedBox(
-                                    height: 14,
-                                  ),
-                                  // Divider(thickness: 1, height: 1),
-                                  // SizedBox(
-                                  //   height: 7,
-                                  // ),
-                                  Row(children: [
-                                    Text(
-                                      'MBTI',
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                    ),
-                                    Expanded(
-                                        child: Text(profileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[profileEntity!.mbtiIndex],
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(fontSize: 14, color: profileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black))
-                                    )
-                                  ]),
-                                  SizedBox(
-                                    height: 14,
-                                  ),
-                                  // Divider(thickness: 1, height: 1),
-                                  // SizedBox(
-                                  //   height: 7,
-                                  // ),
-                                  Row(children: [
-                                    Text(
-                                      '통학여부',
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                    ),
-                                    Expanded(
-                                        child: Text(
-                                          profileEntity!.commute ?? "비공개",
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(fontSize: 14, color: profileEntity!.commute == null ? Colors.grey : Colors.black),
-                                        ))
-                                  ]),
-                                  SizedBox(
-                                    height: 14,
-                                  ),
-                                  // Divider(thickness: 1, height: 1),
-                                  // SizedBox(
-                                  //   height: 7,
-                                  // ),
-                                  myUuid! != profileEntity!.profileId ?  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: 18),
-                                      child: InkWell(
-                                          onTap: () {
-                                            if (profileEntity!.getProfileId() == profileEntity?.getProfileId()) return;
-                                            Navigator.of(context)
-                                                .push(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: profileEntity!.getProfileId())));
-                                          },
-                                          child: SizedBox(
-                                            height: 50,
-                                            width: MediaQuery.of(context).size.width - 40,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(4),
-                                                  color: colorSuccess,
-                                                  boxShadow: [BoxShadow(color: Colors.grey, offset: Offset(1, 1), blurRadius: 4.5)]),
-                                              child: Center(
-                                                  child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.chat_outlined,
-                                                    color: Colors.white,
-                                                    size: 17,
-                                                  ),
-                                                  Text(
-                                                    " ${profileEntity!.name} 님에게 연락하기",
-                                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                ],
-                                              )),
+                      ),
+                      // Divider(thickness: 1, height: 1),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 5),
+                          // padding: EdgeInsets.all(20),
+                          child: Container(
+                            // padding:  EdgeInsets.all(15),
+                            // decoration: BoxDecoration(
+                            //   borderRadius: BorderRadius.circular(10),
+                            //   border: Border.all(
+                            //     width: 2,
+                            //     color: Color(0xFF6ACA89),
+                            //   ),
+                            // ),
+                            child: Column(
+                              children: [
+                                MannerTemperatureWidget(mannerScore: profileEntity!.mannerGroup),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          elevation: 0.75,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            height: 90,
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  'MBTI',
+                                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold
+                                                      //fontWeight: FontWeight.bold
+                                                      ),
+                                                ),
+                                                Expanded(
+                                                    child: Center(
+                                                  child: Text(profileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[profileEntity!.mbtiIndex],
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(fontSize: 13, color: profileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black)),
+                                                )),
+                                              ],
                                             ),
-                                          )),
-                                    ),
-                                  ) : const SizedBox()
-                                ],
-                              ),
-                            ))
-                        // 추가적인 프로필 정보를 이곳에 추가할 수 있습니다.
-                      ],
-                    ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          elevation: 0.75,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            height: 90,
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  '취미',
+                                                  style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold
+                                                      //fontWeight: FontWeight.bold
+                                                      ),
+                                                ),
+                                                Expanded(
+                                                    child: Center(
+                                                  child: Text(
+                                                    profileEntity!.hobby.length == 0 ? '비공개' : profileEntity!.hobby?.join(', '),
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 13, color: profileEntity!.hobby.length == 0 ? Colors.grey : Colors.black),
+                                                    maxLines: 3,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                )),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          elevation: 0.75,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            height: 90,
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  '통학 여부',
+                                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold
+                                                      //fontWeight: FontWeight.bold
+                                                      ),
+                                                ),
+                                                Expanded(
+                                                    child: Center(
+                                                  child: Text(
+                                                    profileEntity!.commute ?? "비공개",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 13, color: profileEntity!.commute == null ? Colors.grey : Colors.black),
+                                                  ),
+                                                )),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          elevation: 0.75,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            height: 80,
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  '한줄 소개',
+                                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold
+                                                      //fontWeight: FontWeight.bold
+                                                      ),
+                                                ),
+                                                Expanded(
+                                                    child: Center(
+                                                  child: Text(profileEntity!.textInfo == null || profileEntity!.textInfo == "" ? "없음" : profileEntity!.textInfo,
+                                                      textAlign: TextAlign.center,
+                                                      maxLines: 2,
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color:
+                                                              profileEntity!.textInfo == null || profileEntity!.textInfo == "" ? Colors.grey : Colors.black)),
+                                                )),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      // 추가적인 프로필 정보를 이곳에 추가할 수 있습니다.
+                    ],
                   ),
                 )
               : SizedBox(),

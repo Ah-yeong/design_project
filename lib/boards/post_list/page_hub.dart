@@ -34,12 +34,21 @@ String? myUuid;
 StateSetter? hubLoadingStateSetter;
 bool hubLoadingContainerVisible = false;
 
-class _BoardPageMainHub extends State<BoardPageMainHub> {
+class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObserver{
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state == AppLifecycleState.resumed) {
+      versionCheck(context);
+    }
+  }
 
   @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     _pageController!.dispose();
   }
 
@@ -114,7 +123,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> {
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addObserver(this);
     _myProfileLoad().then((value) => setupGetMessages());
 
     if (postManager.isLoading) postManager.loadPages("").then((_) =>

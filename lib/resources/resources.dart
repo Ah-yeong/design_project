@@ -55,7 +55,7 @@ var CategoryList = List.of([
   "쇼핑",
 ]);
 
-Color getColorForScore(int score) {
+Color getColorForScore(double score) {
   if (score < 20) {
     return Colors.redAccent;
   } else if (score < 40) {

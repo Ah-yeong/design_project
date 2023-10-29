@@ -44,6 +44,15 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
       var snapshot = await ref.get();
       if (snapshot.exists) {
         Map<String, dynamic> roomDoc = Map<String, dynamic>.from(snapshot.value as Map);
+
+        // 알림
+        try {
+          Map<String, bool> alarmReceives = Map<String, bool>.from(roomDoc["alarmReceives"]);
+          room.alarmReceive = alarmReceives[myUuid] ?? true;
+        } catch (e) {
+          room.alarmReceive = true;
+        }
+
         if (isGroupChat) {
           room.roomName = roomDoc["roomName"];
           room.postId = receiveId;
@@ -111,7 +120,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
     return Future.value(room);
   }
   
-  bool _isDeleting = false;
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -161,14 +170,33 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                     flex: 1,
                                     onPressed: (context) async {
                                       setState(() {
-                                        _isDeleting = true;
+                                        _isProcessing = true;
+                                      });
+                                      await list[index].toggleRoomAlert();
+                                      setState(() {
+                                        _isProcessing = false;
+                                      });
+                                    },
+                                    autoClose: true,
+                                    backgroundColor: colorGrey,
+                                    child: Icon(
+                                      list[index].alarmReceive != null && list[index].alarmReceive! == true ? CupertinoIcons.bell_fill : CupertinoIcons.bell_slash,
+                                      size: 23,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  CustomSlidableAction(
+                                    flex: 1,
+                                    onPressed: (context) async {
+                                      setState(() {
+                                        _isProcessing = true;
                                       });
                                       DocumentReference doc = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid!);
                                       if (list[index].isGroupChat) {
-                                        doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) => setState(() => _isDeleting = false));
+                                        doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) => setState(() => _isProcessing = false));
                                         ChatStorage(list[index].postId.toString())..remove();
                                       } else {
-                                        doc.update({"chat": FieldValue.arrayRemove([getNameChatRoom(myUuid!, list[index].recvUserId!)])}).then((value) => setState(() => _isDeleting = false));
+                                        doc.update({"chat": FieldValue.arrayRemove([getNameChatRoom(myUuid!, list[index].recvUserId!)])}).then((value) => setState(() => _isProcessing = false));
                                         ChatStorage(list[index].recvUserId!)..remove();
                                       }
                                     },
@@ -176,12 +204,12 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                     backgroundColor: colorError,
                                     child: Icon(
                                       Icons.delete,
-                                      size: 28,
+                                      size: 25,
                                       color: Colors.white,
                                     ),
                                   )
                                 ],
-                                extentRatio: 0.2,
+                                extentRatio: 0.4,
                               ),
                               child: Container(
                                 padding: EdgeInsets.fromLTRB(15, 17, 15, 17),
@@ -287,7 +315,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                         ),
                       );
               }),
-          if (_isDeleting) buildContainerLoading(100)
+          if (_isProcessing) buildContainerLoading(100)
         ],
       ),
     );

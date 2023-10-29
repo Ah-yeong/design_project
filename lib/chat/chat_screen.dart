@@ -400,6 +400,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final message = init ? "모임 채팅방이 개설되었어요.\n여기서 자유롭게 대화해보세요!" : _chatController.text.trim(); // 좌우 공백 제거된 전송될 내용
     final timestamp = Timestamp.now(); // 전송 시간
+    Map<String, bool> alarmSendList = {};
     try {
       final _chatDB = FirebaseDatabase.instance.ref(chatColName).child(chatDocName!);
 
@@ -410,10 +411,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
       DataSnapshot _roomRef = await _chatDB.get();
       if (!_roomRef.exists) {
+        // 새로운 채팅방 생성
+        Map<String, bool> newAlarmStatus = {};
+        if (isGroupChat) {
+          members!.forEach((uuid) {
+            newAlarmStatus[uuid] = true;
+          });
+        } else {
+          newAlarmStatus[recvUserId!] = true;
+          newAlarmStatus[sendUserId!] = true;
+        }
         _chatDB.set({
           "roomName": isGroupChat && init ? ds.get("head") : "none",
-          "members": !isGroupChat ? ["$recvUserId", "$sendUserId"] : members,
+          "members": newAlarmStatus,
+          "alarmReceives": newAlarmStatus
         });
+      } else {
+        // 이미 존재하는 채팅방일때
+        Map<String, dynamic> roomDocMap = Map<String, dynamic>.from(_roomRef.value as Map);
+        if ( roomDocMap["alarmReceives"] != null)
+        alarmSendList = Map<String, bool>.from(roomDocMap["alarmReceives"]);
       }
 
       final _messageDB = _chatDB.child("messages").child(timestamp.millisecondsSinceEpoch.toString());
@@ -453,7 +470,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (isGroupChat) {
         for (String member in members!) {
           updateChatList(member);
-
+          if (alarmSendList[member] != null && alarmSendList[member] == false) return;
           if (member == myUuid!) continue;
           profile = _memberProfiles[member]!;
           fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
@@ -463,7 +480,8 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       } else {
         updateChatList(recvUserId!);
-        profile = _memberProfiles[recvUserId!]!;
+        if (alarmSendList[recvUserId] != null && alarmSendList[recvUserId] == false) return;
+        profile = _memberProfiles[recvUserId]!;
         fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
           "chat_id": myProfileEntity!.profileId,
         }).then((value) => print(value));
@@ -504,8 +522,8 @@ class _ChatScreenState extends State<ChatScreen> {
       var dataSnapshot = await FirebaseDatabase.instance.ref("PostGroupChat").child(postId.toString()).child("members").get();
       if (dataSnapshot.exists) {
         members = [];
-        List<dynamic> dataList = dataSnapshot.value as List<dynamic>;
-        for (dynamic data in dataList) {
+        Map<String, bool> dataList = Map<String, bool>.from(dataSnapshot.value as Map);
+        for (dynamic data in dataList.keys) {
           members!.add(data.toString());
         }
       }

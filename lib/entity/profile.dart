@@ -57,7 +57,7 @@ class EntityProfiles {
       name = ds.get("nickName");
       major = "소프트웨어학과";
       textInfo = ds.get("textInfo");
-      mannerGroup = ds.get("mannerGroup");
+      mannerGroup = 0.0 + ds.get("mannerGroup");
       post = ds.get("post");
       addr1 = ds.get("addr1");
       addr2 = ds.get("addr2");

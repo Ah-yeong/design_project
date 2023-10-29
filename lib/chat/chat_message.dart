@@ -166,7 +166,7 @@ class _ChatMessageState extends State<ChatMessage> {
                     return buildLoadingProgress();
                   }
                   var chatDocs = {};
-                  if ( snapshot.data!.snapshot.exists ) {
+                  if ( snapshot.hasData && snapshot.data!.snapshot.exists ) {
                     chatDocs= snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
                   }
 

@@ -58,7 +58,7 @@ class AlertObject {
         break;
       case AlertType.TO_PROFILE:
         if (_clickAction["profile_id"] != null) {
-          Get.to(() => BoardProfilePage(profileId: _clickAction["profile_id"]!));
+          Get.to(() => BoardProfilePage(profileId: _clickAction["profile_id"]!),transition: Transition.downToUp);
         }
         break;
       case AlertType.TO_SHARE_LOCATION:

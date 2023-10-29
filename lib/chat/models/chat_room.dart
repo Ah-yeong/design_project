@@ -1,9 +1,13 @@
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/boards/post_list/page_hub.dart';
+import 'package:design_project/chat/chat_message.dart';
 import 'package:design_project/entity/entity_post.dart';
 import 'package:design_project/entity/profile.dart';
 import 'package:design_project/resources/resources.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:http/http.dart';
 
 import 'chat_storage.dart';
 
@@ -19,6 +23,7 @@ class ChatRoom implements Comparable<ChatRoom> {
   Timestamp? lastTimeStamp;
   int? unreadCount = 0;
   EntityProfiles? profile;
+  bool? alarmReceive;
 
   ChatRoom(
       {required this.isGroupChat,
@@ -29,7 +34,8 @@ class ChatRoom implements Comparable<ChatRoom> {
       this.recvUserNick,
       this.lastChat,
       this.unreadCount,
-      this.profile});
+      this.profile,
+      this.alarmReceive});
 
   Future<String> getLastChatting(Timestamp? timestamp) async {
     ChatStorage? _savedChat;
@@ -59,6 +65,14 @@ class ChatRoom implements Comparable<ChatRoom> {
       lastTimeStamp = localStamp;
       return "${getTimeBefore(localStamp.toFormattedString())}#${_savedChat.savedChatList.last.text}";
     }
+  }
+  
+  Future<void> toggleRoomAlert() async {
+    final String chatColName = isGroupChat ? "PostGroupChat" : "Chat";
+    final String chatDocName = isGroupChat ? postId : getNameChatRoom(myUuid!, recvUserId!);
+    await FirebaseDatabase.instance.ref(chatColName).child(chatDocName).child("alarmReceives").update({myUuid!: !alarmReceive!});
+    alarmReceive = !alarmReceive!;
+    return;
   }
 
   @override
