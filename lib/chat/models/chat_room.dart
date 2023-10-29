@@ -69,7 +69,7 @@ class ChatRoom implements Comparable<ChatRoom> {
   
   Future<void> toggleRoomAlert() async {
     final String chatColName = isGroupChat ? "PostGroupChat" : "Chat";
-    final String chatDocName = isGroupChat ? postId : getNameChatRoom(myUuid!, recvUserId!);
+    final String chatDocName = isGroupChat ? postId.toString() : getNameChatRoom(myUuid!, recvUserId!);
     await FirebaseDatabase.instance.ref(chatColName).child(chatDocName).child("alarmReceives").update({myUuid!: !alarmReceive!});
     alarmReceive = !alarmReceive!;
     return;
