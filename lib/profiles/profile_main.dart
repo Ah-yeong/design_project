@@ -392,14 +392,14 @@ class _PageProfileState extends State<PageProfile> with AutomaticKeepAliveClient
 }
 
 class MannerTemperatureWidget extends StatelessWidget {
-  final int mannerScore;
+  final double mannerScore;
 
   const MannerTemperatureWidget({
     Key? key,
     required this.mannerScore,
   }) : super(key: key);
 
-  Color _getColorForScore(int score) {
+  Color _getColorForScore(double score) {
     if (score < 20) {
       return Colors.red;
     } else if (score < 40) {
