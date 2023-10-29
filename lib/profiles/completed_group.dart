@@ -92,11 +92,20 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
                           return Container(
                             child: GestureDetector(
                               onTap: () {
-                                // 모임 채팅방으로 이동해야 되나 ?
+                                // 모임 채팅방으로 이동해야 될지 여부를 결정하거나 다른 작업을 수행
                               },
                               child: Padding(
                                 padding: const EdgeInsets.fromLTRB(7, 7, 7, 0),
-                                child: meeting.buildEndMeetingCard(),
+                                child: FutureBuilder<Widget>(
+                                  future: meeting.buildEndMeetingCard(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.data != null) {
+                                      return snapshot.data!;
+                                    } else {
+                                      return buildLoadingProgress();
+                                    }
+                                  },
+                                ),
                               ),
                             ),
                           );
