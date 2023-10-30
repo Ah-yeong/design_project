@@ -75,7 +75,10 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                         itemBuilder: (BuildContext context, int index) {
                           String userId = userProfileList.keys.elementAt(index);
                           EntityProfiles? userProfile = userProfileList[userId];
-                          int score = scores[userId] ?? 5;
+                          if (!scores.containsKey(userId)) {
+                            scores[userId] = 5; // 클릭하지 않았을 때 기본값으로 5 설정
+                          }
+                          int? score = scores[userId];
                           return Column(
                             children: [
                               ListTile(
@@ -130,7 +133,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                       child: Container(
                                         padding: EdgeInsets.all(2),
                                         child: Icon(
-                                          i < score ? Icons.star : Icons
+                                          i < score! ? Icons.star : Icons
                                               .star_border,
                                           color: Colors.yellow,
                                           size: 25,
@@ -188,7 +191,10 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                           itemBuilder: (BuildContext context, int index) {
                             String userId = attendedProfiles.keys.elementAt(index);
                             EntityProfiles? userProfile = attendedProfiles[userId];
-                            int score = scores[userId] ?? 5;
+                            if (!scores.containsKey(userId)) {
+                              scores[userId] = 5; // 클릭하지 않았을 때 기본값으로 5 설정
+                            }
+                            int? score = scores[userId];
                             return Column(
                               children: [
                                 ListTile(
@@ -243,7 +249,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                         child: Container(
                                           padding: EdgeInsets.all(2),
                                           child: Icon(
-                                            i < score ? Icons.star : Icons
+                                            i < score! ? Icons.star : Icons
                                                 .star_border,
                                             color: Colors.yellow,
                                             size: 25,
