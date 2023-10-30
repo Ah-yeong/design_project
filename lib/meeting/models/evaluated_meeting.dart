@@ -107,7 +107,7 @@ class EvaluatedMeeting {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("평가 마감 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                  Text("평가 완료 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
                 ],
               ),
             ) :
@@ -160,7 +160,7 @@ class EvaluatedMeeting {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("평가 완료 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                  Text("평가 마감 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
                 ],
               ),
             )
