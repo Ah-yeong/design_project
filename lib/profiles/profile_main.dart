@@ -84,10 +84,17 @@ class _PageProfileState extends State<PageProfile> {
                                     onPressed: () {
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => PageProfileEdit())).then((value) {
                                         _reloadProfile().then((value) async {
-                                          String url = await FirebaseStorage.instance.ref().child("profile_image/${myUuid!}").getDownloadURL();
-                                          setState(() {
-                                            userTempImage[myProfile!.profileId] = NetworkImage(url);
-                                          });
+                                          try {
+                                            String url = await FirebaseStorage.instance.ref().child("profile_image/${myUuid!}").getDownloadURL();
+                                            setState(() {
+                                              userTempImage[myProfile!.profileId] = NetworkImage(url);
+                                            });
+                                          } catch (e) {
+                                            if ( !e.toString().contains("No object exists")) {
+                                              print("Profile image error : $e");
+                                            }
+                                          }
+
                                         });
                                       });
                                     },
@@ -242,6 +249,7 @@ class _PageProfileState extends State<PageProfile> {
                     ),
                     const Divider(thickness: 1),
                     GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => PageMyPost(),
@@ -273,6 +281,7 @@ class _PageProfileState extends State<PageProfile> {
                     ),
                     const Divider(thickness: 1),
                     GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => PageMyGroup(),
@@ -304,6 +313,7 @@ class _PageProfileState extends State<PageProfile> {
                     ),
                     const Divider(thickness: 1),
                     GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => PageMyEndGroup(),

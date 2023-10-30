@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../boards/post.dart';
 import '../entity/entity_post.dart';
@@ -16,15 +17,16 @@ class PageMyPost extends StatefulWidget {
 class _PageMyPost extends State<PageMyPost> {
   EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
-  Map<String, List<EntityPost>> groupedPosts = {};
+  Map<String, List<EntityPost>> _groupedPosts = {};
+  bool _isLoadingPost = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "내가 만든 모임",
-          style: TextStyle(color: Colors.black, fontSize: 16),
+          "작성한 모임 게시글",
+          style: TextStyle(color: Colors.black, fontSize: 19),
         ),
         leading: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
@@ -38,52 +40,76 @@ class _PageMyPost extends State<PageMyPost> {
           ),
         ),
         backgroundColor: Colors.white,
-        toolbarHeight: 40,
         elevation: 1,
       ),
       backgroundColor: Colors.white,
-      body: myProfile!.isLoading ? buildLoadingProgress()
-      : SingleChildScrollView(
-        padding: EdgeInsets.all(10),
-        child: myPostList.isEmpty ?
-          Column(
-            children: [
-              SizedBox(height: 20),
-              Center(
-                child: Text("내가 만든 모임이 아직 없습니다.",
-                    style: TextStyle(color: Colors.grey, fontSize: 15)
-                )
-              )
-            ],
-          ) :
-          Column(
+      body: _isLoadingPost ? buildLoadingProgress()
+          : myPostList.isEmpty ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: myPostList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Card(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => BoardPostPage(postId: myPostList[index].getPostId()),
-                          ));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: _buildFriendRow(myPostList[index]),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
+            Text(
+              "내가 만든 모임이 없어요\n",
+              style: TextStyle(color: colorGrey, fontSize: 13),
             ),
+            Text("지금 바로 새로운 모임을 만들어보세요!")
           ],
         ),
+      ): SingleChildScrollView(
+          padding: EdgeInsets.all(10),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _groupedPosts.length,
+            separatorBuilder: (context, index) => Divider(),
+            itemBuilder: (context, index) {
+              final dateKey = _groupedPosts.keys.elementAt(index);
+              final posts = _groupedPosts[dateKey];
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(width: 3),
+                      Text(
+                        dateKey,
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: posts!.map((post) {
+                      return Column(
+                        children: [
+                          SizedBox(height: 5,),
+                          Container(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => BoardPostPage(postId: post.getPostId()),
+                                ));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(7),
+                                child: _buildPostCard(post),
+                              ),
+                            ),
+                          ),
+                          Divider(thickness: 1, height: 0, color: colorLightGrey),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              );
+            },
+          )
       ),
     );
   }
@@ -92,14 +118,14 @@ class _PageMyPost extends State<PageMyPost> {
   void initState() {
     super.initState();
     myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    myProfile!.loadProfile().then((n) {
-      for (var postId in myProfile!.post) {
-        EntityPost myPost = EntityPost(postId);
-        myPost.loadPost().then((value) {
-          myPostList.add(myPost);
+    myProfile!.loadProfile().then((n) async {
+      if (myProfile!.post != null) {
+        Future.forEach(myProfile!.post, (dynamic postId) async {
+          EntityPost myPost = EntityPost(postId);
+          await myPost.loadPost().then((value) => myPostList.add(myPost));
           if (myPostList.length == myProfile!.post.length) {
             myPostList.sort((a, b) => a.getTime().compareTo(b.getTime()));
-
+            Map<String, List<EntityPost>> groupedPosts= {};
             for (var post in myPostList) {
               final dateKey = post.getTime().substring(0, post.getTime().indexOf(' '));
               if (!groupedPosts.containsKey(dateKey)) {
@@ -107,15 +133,14 @@ class _PageMyPost extends State<PageMyPost> {
               }
               groupedPosts[dateKey]!.add(post);
             }
-            setState(() {
-            });
+            setState(() { _groupedPosts = groupedPosts; });
           }
-        });
+        }).then((value) => setState(() => _isLoadingPost = false));
       }
     });
   }
 
-  Widget _buildFriendRow(EntityPost entity) {
+  Widget _buildPostCard(EntityPost entity) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -140,7 +165,7 @@ class _PageMyPost extends State<PageMyPost> {
                         textAlign: TextAlign.start,
                       ),
                       Padding(
-                          padding: const EdgeInsets.only(right: 5, bottom: 5),
+                          padding: const EdgeInsets.only(bottom: 5),
                           child: Container(
                             width: 60,
                             height: 25,
@@ -194,6 +219,10 @@ class _PageMyPost extends State<PageMyPost> {
             ],
           ),
         ),
+        SizedBox(width: 12,),
+        Container(
+          child: Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18,),
+        )
       ],
     );
   }
