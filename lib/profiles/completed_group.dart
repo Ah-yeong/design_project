@@ -74,19 +74,6 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
                           ),
                         ],
                       ),
-                      // isOverDeadline(DateAddThreeDays(dateKey)) ?
-                      // Padding(
-                      //   padding: const EdgeInsets.fromLTRB(7, 10, 7, 7),
-                      //   child: Container(
-                      //     padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      //     width: double.infinity,
-                      //     decoration: BoxDecoration(
-                      //         color: const Color(0xFFEAEAEA),
-                      //         borderRadius: BorderRadius.circular(8)),
-                      //     child: Center(
-                      //         child: Text("${DateAddThreeDays(dateKey)} 까지 평가 가능")),
-                      //   ),
-                      // ) : Container(),
                       Column(
                         children: meetings!.map((meeting) {
                           return Container(

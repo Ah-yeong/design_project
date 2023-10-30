@@ -100,7 +100,18 @@ class EvaluatedMeeting {
                 SizedBox(height: 5),
               ],
             ),
-            isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime)) && ! await isEnd()?
+            await isEnd() ?
+            Container(
+              width: 90,
+              height: 35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("평가 마감 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                ],
+              ),
+            ) :
+            isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime))?
             Column(
               children: [
                 Container(
@@ -144,23 +155,13 @@ class EvaluatedMeeting {
                 )
               ],
             ) : Container(
-              decoration: BoxDecoration(color: colorGrey, borderRadius: BorderRadius.circular(10)),
               width: 90,
               height: 35,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  overlayColor: MaterialStateProperty.all(Colors.white38),
-                  onTap: () {
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("평가완료 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))
-                    ],
-                  ),
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("평가 완료 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                ],
               ),
             )
           ],
