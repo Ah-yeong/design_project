@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../resources/resources.dart';
 
+
+int appBarSelectedIdx = 0;
 class BoardBottomAppBar extends StatefulWidget {
   final PageController pageController;
 
@@ -15,7 +17,6 @@ class BoardBottomAppBar extends StatefulWidget {
 }
 
 class _BoardBottomAppbar extends State<BoardBottomAppBar> {
-  int _selectedIdx = 0;
   PageController _pageController;
 
   _BoardBottomAppbar(this._pageController);
@@ -49,8 +50,8 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
                       child: Stack(
                         children: [
                           Center(
-                            child: Icon(_selectedIdx == 0 ? Icons.home : Icons.home_outlined,
-                                color: _selectedIdx == 0 ? colorSuccess : colorGrey, size: 26),
+                            child: Icon(appBarSelectedIdx == 0 ? Icons.home : Icons.home_outlined,
+                                color: appBarSelectedIdx == 0 ? colorSuccess : colorGrey, size: 26),
                           ),
                           //buildAlertPoint()
                         ],
@@ -71,8 +72,8 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
                       child: Stack(
                         children: [
                           Center(
-                            child: Icon(_selectedIdx == 1 ? CupertinoIcons.chat_bubble_2_fill : CupertinoIcons.chat_bubble_2,
-                                color: _selectedIdx == 1 ? colorSuccess : colorGrey, size: 26),
+                            child: Icon(appBarSelectedIdx == 1 ? CupertinoIcons.chat_bubble_2_fill : CupertinoIcons.chat_bubble_2,
+                                color: appBarSelectedIdx == 1 ? colorSuccess : colorGrey, size: 26),
                           ),
                           // if(newChat) buildAlertPoint()
                         ],
@@ -93,8 +94,8 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
                       child: Stack(
                         children: [
                           Center(
-                            child: Icon(_selectedIdx == 2 ? Icons.notifications : Icons.notifications_none,
-                                color: _selectedIdx == 2 ? colorSuccess : colorGrey, size: 26),
+                            child: Icon(appBarSelectedIdx == 2 ? Icons.notifications : Icons.notifications_none,
+                                color: appBarSelectedIdx == 2 ? colorSuccess : colorGrey, size: 26),
                           ),
                           // if(newAlert) buildAlertPoint()
                         ],
@@ -115,8 +116,8 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
                       child: Stack(
                         children: [
                           Center(
-                            child: Icon(_selectedIdx == 3 ? Icons.person : Icons.person_outline,
-                                color: _selectedIdx == 3 ? colorSuccess : colorGrey, size: 26),
+                            child: Icon(appBarSelectedIdx == 3 ? Icons.person : Icons.person_outline,
+                                color: appBarSelectedIdx == 3 ? colorSuccess : colorGrey, size: 26),
                           ),
                           //buildAlertPoint()
                         ],
@@ -137,7 +138,7 @@ class _BoardBottomAppbar extends State<BoardBottomAppBar> {
 
   _onTappedItem(int idx) {
     setState(() {
-      _selectedIdx = idx;
+      appBarSelectedIdx = idx;
       _pageController.jumpToPage(idx);
     });
   }

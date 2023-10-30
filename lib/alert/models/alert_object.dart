@@ -1,5 +1,6 @@
 import 'package:design_project/alert/models/alert_manager.dart';
 import 'package:design_project/boards/post.dart';
+import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/entity/entity_post.dart';
 import 'package:design_project/main.dart';
@@ -59,6 +60,10 @@ class AlertObject {
       case AlertType.TO_PROFILE:
         if (_clickAction["profile_id"] != null) {
           Get.to(() => BoardProfilePage(profileId: _clickAction["profile_id"]!),transition: Transition.downToUp);
+        } else {
+          if ( hubPageJump != null ) {
+            hubPageJump!(3);
+          }
         }
         break;
       case AlertType.TO_SHARE_LOCATION:

@@ -192,10 +192,12 @@ class _BoardPostPage extends State<BoardPostPage> {
                             if (postEntity!.isFull()) {
                               showAlert("더 이상 참여할 수 없어요!", context, colorGrey);
                             } else {
+                              setState(() {
+                                isAllLoading = true;
+                              });
                               await postEntity!.applyToPost(userID).then((requestSuccess) async {
                                 await _loadPost(isReload: true);
                                 if (requestSuccess) {
-                                  showAlert("신청이 완료되었어요!", context, colorSuccess);
                                   var alertManager = AlertManager(LocalStorage!);
                                   await alertManager.sendAlert(
                                       title: "새로운 모임 신청자가 있어요",
@@ -204,10 +206,11 @@ class _BoardPostPage extends State<BoardPostPage> {
                                       userUUID: postEntity!.getWriterId(),
                                       withPushNotifications: true,
                                       clickAction: {"post_id": postId.toString()});
+                                  showAlert("신청이 완료되었어요!", context, colorSuccess);
                                 } else {
                                   showAlert("신청한 적이 있거나, 만료되었어요!", context, colorError);
                                 }
-                                setState(() {});
+                                setState(() {isAllLoading = false;});
                               });
                             }
                           } else if (postEntity!.getRequestState(myUuid!) == "wait") {

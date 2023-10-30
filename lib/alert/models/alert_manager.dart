@@ -18,6 +18,34 @@ class AlertManager {
 
   get alertList => _alertList;
 
+  Future<void> clearAlert() async {
+    _alertList.clear();
+    _alertStringList.clear();
+    if (_preferences.getStringList(ALERT_FIELD) != null) {
+      _preferences.remove(ALERT_FIELD);
+    }
+    await setUnreadCount(0);
+  }
+
+  Future<void> readAll() async {
+
+    _alertList.forEach((alertObj) {
+      alertObj.reading();
+    });
+    await saveAlert(isSync: true);
+    await setUnreadCount(0);
+  }
+
+  Future<void> setUnreadCount(int count) async {
+    DocumentReference ref = FirebaseFirestore.instance.collection("Alert").doc(myUuid!);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      var documentSnapshots = await transaction.get(ref);
+      if ( documentSnapshots.exists ) {
+        await transaction.set(ref, {"unread_alert" : count});
+      }
+    });
+  }
+
   loadAlert() {
     if (_preferences.getStringList(ALERT_FIELD) != null) {
       _alertList.clear();

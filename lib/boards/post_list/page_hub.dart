@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:design_project/alert/models/alert_object.dart';
 import 'package:design_project/boards/post.dart';
 import 'package:design_project/boards/post_list/bottom_appbar.dart';
 import 'package:design_project/boards/post_list/post_list.dart';
@@ -33,6 +34,7 @@ EntityProfiles? myProfileEntity;
 String? myUuid;
 StateSetter? hubLoadingStateSetter;
 bool hubLoadingContainerVisible = false;
+Function? hubPageJump;
 
 class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObserver{
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
@@ -63,7 +65,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
           backgroundColor: Colors.white,
           bottomNavigationBar: StatefulBuilder(
             builder: (BuildContext context, StateSetter bottomAppbarSetState) {
-              bAppbarStateSetter = bottomAppbarSetState;
+              appbarStateSetter = bottomAppbarSetState;
               return BoardBottomAppBar(pageController: _pageController!);
             },
           ),
@@ -133,6 +135,14 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
           }
         }));
     _pageController = PageController();
+    hubPageJump = (int index) {
+      appBarSelectedIdx = 3;
+      _pageController?.jumpToPage(index);
+      if (appbarStateSetter != null) {
+        appbarStateSetter!(() {});
+      }
+
+    };
   }
 
   Future<void> setupGetMessages() async {
@@ -179,6 +189,10 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
         } catch (e) {
           showAlert("위치 공유 지원이 종료된 모임이에요!", navigatorKey.currentContext!, colorError);
         }
+      } else if (message.data["type"] == AlertType.TO_PROFILE) {
+        appBarSelectedIdx = 3;
+        _pageController?.jumpToPage(3);
+        appbarStateSetter!(() {});
       }
     }
   }
