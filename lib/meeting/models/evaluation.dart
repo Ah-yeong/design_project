@@ -100,13 +100,31 @@ class Evaluation{
       documentSnapshot = await evalDocument.get();
       Map<String, dynamic> evaluation = documentSnapshot.data() as Map<String, dynamic>;
       Map<String, dynamic> usersEval= evaluation["users"];
-      int count = usersEval[FirebaseAuth.instance.currentUser!.uid].length;
 
-      num newMannerGroup = mannerGroup + score[uid] * (100 - (count * 10)) * 0.005;
+      int count = usersEval[FirebaseAuth.instance.currentUser!.uid].length;
+      double newScore = getNewScore(score[uid]);
+      double countRate = (100 - ((count-1)*30)) / 100;
+      if (countRate < 0) { countRate = 0; }
+      double rate = 1 / score.length;
+
+      num newMannerGroup = mannerGroup + (newScore-3) * countRate * 0.5 * rate;
       if(newMannerGroup > 100){ newMannerGroup = 100; }
       userProfile["mannerGroup"]  = double.parse(newMannerGroup.toStringAsFixed(2));
-      print(userProfile["mannerGroup"]);
       userDocument.update(userProfile);
+    }
+  }
+
+  double getNewScore(int score) {
+    if (score == 1) {
+      return 0;
+    } else if (score == 2) {
+      return 2;
+    } else if (score == 3) {
+      return 3.5;
+    } else if (score == 4) {
+      return 5;
+    } else {
+      return 7;
     }
   }
 }
