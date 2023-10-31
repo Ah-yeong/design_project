@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:design_project/entity/latlng.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
-import '../../chat/chat_screen.dart';
 import '../../resources/resources.dart';
 import '../../boards/post_list/post_list.dart';
 import '../meeting_evaluate.dart';
@@ -60,6 +57,15 @@ class EvaluatedMeeting {
     }
   }
 
+  bool isNotAttended(){
+    if(_arrivals.containsKey(FirebaseAuth.instance.currentUser!.uid)){
+      if(_arrivals[FirebaseAuth.instance.currentUser!.uid] == false){
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<Widget> buildEndMeetingCard() async {
     String timeText = getMeetTimeText(_meetTime.toString());
     return Column(
@@ -107,11 +113,32 @@ class EvaluatedMeeting {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("평가 완료 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                  Text("평가 완료", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
                 ],
               ),
             ) :
-            isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime))?
+            ! isOverDeadline(DateFormat('yyyy-MM-dd').format(_meetTime))?
+            Container(
+              width: 90,
+              height: 35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("평가 마감", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                ],
+              ),
+            ) :
+            isNotAttended() ?
+            Container(
+              width: 90,
+              height: 35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("모임 불참 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
+                ],
+              ),
+            ) :
             Column(
               children: [
                 Container(
@@ -154,15 +181,6 @@ class EvaluatedMeeting {
                   textAlign: TextAlign.right,
                 )
               ],
-            ) : Container(
-              width: 90,
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("평가 마감 ", style: TextStyle(color: colorLightGrey, fontWeight: FontWeight.bold, fontSize: 15))
-                ],
-              ),
             )
           ],
         ),

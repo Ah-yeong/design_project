@@ -42,6 +42,17 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
         appBar: AppBar(
           elevation: 1,
           title: const Text('모임 평가', style: TextStyle(fontSize: 18, color: Colors.black)),
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: const SizedBox(
+              height: 55,
+              width: 55,
+              child: Icon(
+                Icons.arrow_back_ios,
+                color: Colors.black,
+              ),
+            ),
+          ),
           backgroundColor: Colors.white,
         ),
         body: SingleChildScrollView(
