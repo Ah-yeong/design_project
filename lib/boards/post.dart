@@ -925,7 +925,7 @@ class _BoardPostPage extends State<BoardPostPage> {
   }
 }
 
-Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
+Widget drawProfile(EntityProfiles profileEntity, BuildContext context, {bool? withManner}) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     behavior: HitTestBehavior.translucent,
@@ -955,7 +955,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context) {
             ),
           ],
         ),
-        Padding(
+        if (withManner != null && withManner) Padding(
           padding: const EdgeInsets.only(right: 7, top: 10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -1039,7 +1039,7 @@ Column buildPostContext(EntityPost post, EntityProfiles profiles, BuildContext c
           thickness: 1,
         ),
       ),
-      drawProfile(profiles, context),
+      drawProfile(profiles, context, withManner: true),
       // 프로필
       const Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 12),

@@ -267,7 +267,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   for (int i = 0; i < localBubbleStorage.length; i++) {
                     ChatDataModel chat = localBubbleStorage[i];
                     int unreadCount = chat.unreadCount!;
-                    bool isMe = chat.nickName == myProfileEntity!.name;
+                    bool isMe = chat.uuid == myProfileEntity!.profileId;
                     final String text = chat.text;
                     final String userName = chat.nickName;
                     final timestamp = chat.ts;

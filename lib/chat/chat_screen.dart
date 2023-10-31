@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
+import 'package:side_sheet/side_sheet.dart';
 import '../alert/models/alert_manager.dart';
 import '../alert/models/alert_object.dart';
 import '../boards/post_list/page_hub.dart';
@@ -176,6 +176,12 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: BackButton(
           color: Colors.black,
         ),
+        actions: [
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+              onTap: () => SideSheet.right(body: _showProfileList(), context: context, width: MediaQuery.of(context).size.width * 0.7),
+              child: SizedBox(width: 55, height: 55, child: Icon(CupertinoIcons.line_horizontal_3, color: Colors.black, size: 25,),)),
+        ],
       ),
       body: (_isLoaded == false || _chatLoaded == false)
           ? buildLoadingProgress()
@@ -529,6 +535,46 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     }
     return;
+  }
+
+  Widget _showProfileList() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 70, 10, 10),
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const Align(alignment: Alignment.topCenter, child:
+            Center(child: Text("채팅방 구성원", style: TextStyle(fontSize: 16),),),),
+          const Divider(thickness: 1.5,),
+          SizedBox(
+            height: MediaQuery.of(context).size.height-126,
+            child: ListView.separated(physics: NeverScrollableScrollPhysics(), itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 5, 0, 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      drawProfile(_memberProfiles[members![index]]!, context),
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            showAlert("신고 개발중입니다.", context, colorLightGrey);
+                          },
+                          child: Icon(CupertinoIcons.person_crop_circle_fill_badge_exclam, color: colorError,),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+            }, separatorBuilder: (BuildContext context, int index) => const Divider(thickness: 1,), itemCount: isGroupChat ? _memberProfiles.length : 2, padding: EdgeInsets.zero,),
+          ),
+        ],
+      ),
+    );
   }
 }
 
