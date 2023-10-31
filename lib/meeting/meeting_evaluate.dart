@@ -1,15 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-
-import '../Boards/post_list/page_hub.dart';
-import '../Profiles/completed_group.dart';
 import '../entity/profile.dart';
 import '../resources/loading_indicator.dart';
 import '../resources/resources.dart';
-import 'models/evaluation.dart';
 import 'models/evaluation_manager.dart';
 
 class PageMeetingEvaluate extends StatefulWidget {
@@ -192,18 +186,18 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                           children: <Widget>[
                                             SizedBox(height: 6),
                                             Text(
-                                              userProfile?.name,
+                                              userProfile.name,
                                               style: TextStyle(fontSize: 14),
                                             ),
                                             SizedBox(height: 3),
                                             Row(
                                               children: [
                                                 Text(
-                                                  userProfile?.major,
+                                                  userProfile.major,
                                                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                                 ),
                                                 Text(
-                                                  " (${userProfile?.age})",
+                                                  " (${userProfile.age})",
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                   ),
@@ -277,10 +271,9 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
               ),
               onPressed: () async {
                 EvaluationManager manager = EvaluationManager();
-                print(notAttendedUser); // 이거 왜 notAttendedUser이 적용이 안되는지 모르겟음
-                // await manager.evaluationCreate(members, scores, notAttendedUser, meetingId);
-                // await manager.updateMannerGroup(scores);
-                // await manager.evaluationEnd(meetingId);
+                await manager.evaluationCreate(members, scores, notAttendedUser, meetingId);
+                await manager.updateMannerGroup(scores);
+                await manager.evaluationEnd(meetingId);
                 Navigator.pop(context);
               },
             ),
@@ -298,14 +291,16 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
 
     getMemberProfiles(members!).then((profileList) {
       for (String uuid in profileList.keys) {
-        if (voluntary) {
-          userProfileList.add(profileList[uuid]!);
-        } else {
-          if (arrivals[uuid]) {
-            attendedProfiles.add(profileList[uuid]!);
+        if(uuid != FirebaseAuth.instance.currentUser!.uid){
+          if (voluntary) {
+            userProfileList.add(profileList[uuid]!);
           } else {
-            notAttendedUser[uuid] = false;
-            notAttendedProfiles.add(profileList[uuid]!);
+            if (arrivals[uuid]) {
+              attendedProfiles.add(profileList[uuid]!);
+            } else {
+              notAttendedUser[uuid] = false;
+              notAttendedProfiles.add(profileList[uuid]!);
+            }
           }
         }
       }
