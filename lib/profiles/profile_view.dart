@@ -326,8 +326,6 @@ class _BoardProfilePage extends State<BoardProfilePage> {
   @override
   void initState() {
     super.initState();
-    print("작성자 프로필 로드");
-    print(widget.profileId);
     profileEntity = EntityProfiles(widget.profileId);
     profileEntity!.loadProfile().then((n) {
       mannerWidget = MannerTemperatureWidget(mannerScore: profileEntity!.mannerGroup);

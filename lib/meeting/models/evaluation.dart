@@ -57,11 +57,18 @@ class Evaluation{
         final userSnapshot = await evalDocument.get();
         if(userSnapshot.exists) {
           final userData = userSnapshot.data() as Map<String, dynamic>;
-          if(userData["meetings"] != null) {
+          if(userData["meetings"] != null) {  // meetings 있음
             final meetingsData = userData["meetings"];
-            final meetingData = meetingsData[meetingId.toString()];
+            Map<String, dynamic> meetingData = {};
+            if(meetingsData.containsKey(meetingId.toString())) { // meetings에 meetingId 있음
+              meetingData = meetingsData[meetingId.toString()];
+              meetingData["count"] = meetingData["count"] + 1;
+            } else { // meetings에 meetingId 없음
+              meetingData[meetingId.toString()] = {};
+              meetingData["count"] = 1;
+              meetingData["memberCount"] = _evaluatedUsers.length;
+            }
 
-            meetingData["count"] = meetingData["count"] + 1;
             if(meetingData["count"] == meetingData["memberCount"]){
               resetMannerGroup(uid);
             }
@@ -69,8 +76,9 @@ class Evaluation{
             meetingsData[meetingId.toString()] = meetingData;
             userData["meetings"] = meetingsData;
             await evalDocument.set(userData);
-          } else {
-            await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+          } else {  // meetings 없음 user는 있을수도 ?
+            userData.addAll({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+            await evalDocument.set(userData);
           }
         } else {
           await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});

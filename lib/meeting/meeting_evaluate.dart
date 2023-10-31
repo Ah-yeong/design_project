@@ -21,7 +21,6 @@ class PageMeetingEvaluate extends StatefulWidget {
 class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
   List<String>? members;
   bool voluntary;
-  bool isAttending = false;
   bool _isLoading = true;
   int meetingId;
   Map<String, dynamic> arrivals;
@@ -223,14 +222,13 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      isAttending
+                                      notAttendedUser[userId]
                                           ? ElevatedButton(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.grey,
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  isAttending = false;
                                                   notAttendedUser[userId] = false;
                                                 });
                                               },
@@ -240,7 +238,6 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                               style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF6ACA9A)),
                                               onPressed: () {
                                                 setState(() {
-                                                  isAttending = true;
                                                   notAttendedUser[userId] = true;
                                                 });
                                               },
@@ -282,7 +279,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
               ),
               onPressed: () async {
                 EvaluationManager manager = EvaluationManager();
-                await manager.evaluationCreate(members, scores, notAttendedUser, meetingId);
+                await manager.evaluationCreate(members, scores, notAttendedUser, meetingId); // notAttendedUser : 참여 인정 -> true
                 await manager.updateMannerGroup(scores);
                 await manager.evaluationEnd(meetingId);
                 Navigator.pop(context);
@@ -306,7 +303,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
           if (voluntary) {
             userProfileList.add(profileList[uuid]!);
           } else {
-            if (arrivals[uuid]) {
+            if (arrivals[uuid] == true) {
               attendedProfiles.add(profileList[uuid]!);
             } else {
               notAttendedUser[uuid] = false;
