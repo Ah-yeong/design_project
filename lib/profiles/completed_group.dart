@@ -1,6 +1,4 @@
-import 'package:design_project/meeting/meeting_evaluate.dart';
 import 'package:design_project/meeting/models/evaluated_meeting_manager.dart';
-import 'package:design_project/meeting/models/evaluation_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,11 +47,10 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
           : myEndMeetingList.length != 0 ?
             SingleChildScrollView(
               padding: EdgeInsets.all(10),
-              child: ListView.separated(
+              child: ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: _groupedMeetings.length,
-                separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, index) {
                   final dateKey = _groupedMeetings.keys.elementAt(index);
                   final meetings = _groupedMeetings[dateKey];
@@ -82,7 +79,7 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
                                 // 모임 채팅방으로 이동해야 될지 여부를 결정하거나 다른 작업을 수행
                               },
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(7, 7, 7, 0),
+                                padding: const EdgeInsets.fromLTRB(0, 7, 0, 0),
                                 child: FutureBuilder<Widget>(
                                   future: meeting.buildEndMeetingCard(),
                                   builder: (context, snapshot) {
@@ -122,32 +119,21 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
     var evalMeetingManager = EvaluatedMeetingManager();
     evalMeetingManager.getUserEndMeetingData(FirebaseAuth.instance.currentUser!.uid).then((meetingList) async {
       Future.forEach(meetingList, (meetingId) async {
-        await evalMeetingManager.getEvaluatedMeeting(meetingId).then((meeting) {
+        await evalMeetingManager.getEvaluatedMeeting(meetingId).then((meeting) async {
           if (meeting != null) myEndMeetingList.add(meeting);
           if (meetingList.length == myEndMeetingList.length) {
             myEndMeetingList.sort((a, b) =>
-                a.getMeetTime().compareTo(b.getMeetTime()));
-            Map<String, List<EvaluatedMeeting>> evaluableMeetings = {};
-            Map<String, List<EvaluatedMeeting>> notEvaluableMeetings = {};
+                b.getMeetTime().compareTo(a.getMeetTime()));
+            Map<String, List<EvaluatedMeeting>> groupedMeetings = {};
 
             for (var meeting in myEndMeetingList) {
-              final dateKey = DateFormat('yyyy-MM-dd').format(
-                  meeting.getMeetTime());
-              if (isOverDeadline(DateAddThreeDays(dateKey))){
-                if (!evaluableMeetings.containsKey(dateKey)) {
-                  evaluableMeetings[dateKey] = [];
-                }
-                evaluableMeetings[dateKey]!.add(meeting);
+              final dateKey = DateFormat('yyyy-MM-dd').format(meeting.getMeetTime());
+              if (!groupedMeetings.containsKey(dateKey)) {
+                groupedMeetings[dateKey] = [];
               }
-              else{
-                if (!notEvaluableMeetings.containsKey(dateKey)) {
-                  notEvaluableMeetings[dateKey] = [];
-                }
-                notEvaluableMeetings[dateKey]!.add(meeting);
-              }
+              groupedMeetings[dateKey]!.add(meeting);
             }
-            evaluableMeetings.addAll(notEvaluableMeetings);
-            setState(() => _groupedMeetings = evaluableMeetings);
+            setState(() => _groupedMeetings = groupedMeetings);
           }
         });
       }).then((value) => setState(() => _isLoadingPost = true));
