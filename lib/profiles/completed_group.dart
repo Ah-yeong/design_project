@@ -14,7 +14,6 @@ class PageMyEndGroup extends StatefulWidget {
 }
 
 class _PageMyEndGroup extends State<PageMyEndGroup> {
-  EntityProfiles? myProfile;
   List<EvaluatedMeeting> myEndMeetingList = [];
   Map<String, List<EvaluatedMeeting>> _groupedMeetings = {};
   bool _isLoadingPost = false;

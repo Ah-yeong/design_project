@@ -351,8 +351,8 @@ class _MyHomePage extends State<MyHomePage> {
   }
 
   _auth() async {
-    await versionCheck(context);
     Future.delayed(const Duration(milliseconds: 100), () async {
+      await versionCheck(context);
       if (FirebaseAuth.instance.currentUser != null) {
         // postManager 로딩
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
@@ -587,7 +587,7 @@ _bottomAppbarRefresh(String type) {
 
 Future<void> versionCheck(BuildContext context) async {
   try {
-    var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get().timeout(Duration(milliseconds: 5000), onTimeout: throw Exception("버전 확인 실패"));
+    var snapshot = await FirebaseFirestore.instance.collection("AppInfo").doc("version").get();
     if (snapshot.exists) {
       if (int.parse(snapshot.get("version").toString().replaceAll(".", "")) > int.parse(appInfo!.version.replaceAll(".", ""))) {
         await showCupertinoDialog(

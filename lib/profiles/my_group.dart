@@ -16,7 +16,6 @@ class PageMyGroup extends StatefulWidget {
 }
 
 class _PageMyGroup extends State<PageMyGroup> {
-  EntityProfiles? myProfile;
   List<EntityPost> myGroupList = List.empty(growable: true);
   List<Meeting> myMeetingList = [];
 

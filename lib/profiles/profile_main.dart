@@ -21,7 +21,6 @@ class PageProfile extends StatefulWidget {
 }
 
 class _PageProfileState extends State<PageProfile> {
-  EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
   MannerTemperatureWidget? mannerWidget;
 
@@ -34,7 +33,7 @@ class _PageProfileState extends State<PageProfile> {
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
-      body: myProfile!.isLoading
+      body: myProfileEntity!.isLoading
           ? Center(child: SizedBox(height: 65, width: 65, child: buildLoadingProgress()))
           : SingleChildScrollView(
               child: Center(
@@ -47,7 +46,7 @@ class _PageProfileState extends State<PageProfile> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           const SizedBox(width: 10),
-                          getAvatar(myProfile, 50),
+                          getAvatar(myProfileEntity, 50),
                           const SizedBox(width: 25),
                           Expanded(
                             child: Column(
@@ -55,18 +54,18 @@ class _PageProfileState extends State<PageProfile> {
                               children: <Widget>[
                                 const SizedBox(height: 10),
                                 Text(
-                                  "${myProfile!.name}",
+                                  "${myProfileEntity!.name}",
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  "${myProfile!.major}, ${myProfile!.age}세",
+                                  "${myProfileEntity!.major}, ${myProfileEntity!.age}세",
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
                                 ),
                                 const SizedBox(height: 1),
-                                myProfile!.addr1 == null
+                                myProfileEntity!.addr1 == null
                                     ? Text(
                                         textAlign: TextAlign.left,
                                         "지역 비공개",
@@ -74,9 +73,9 @@ class _PageProfileState extends State<PageProfile> {
                                       )
                                     : Text(
                                         textAlign: TextAlign.left,
-                                        "${myProfile!.addr1 != null ? myProfile!.addr1 + ' ' : ''}"
-                                        "${myProfile!.addr2 != null ? myProfile!.addr2 + ' ' : ''}"
-                                        "${myProfile!.addr3 != null ? myProfile!.addr3 : ''}",
+                                        "${myProfileEntity!.addr1 != null ? myProfileEntity!.addr1 + ' ' : ''}"
+                                        "${myProfileEntity!.addr2 != null ? myProfileEntity!.addr2 + ' ' : ''}"
+                                        "${myProfileEntity!.addr3 != null ? myProfileEntity!.addr3 : ''}",
                                         style: TextStyle(fontSize: 13, color: colorGrey),
                                       ),
                                 const SizedBox(height: 6),
@@ -87,7 +86,7 @@ class _PageProfileState extends State<PageProfile> {
                                           try {
                                             String url = await FirebaseStorage.instance.ref().child("profile_image/${myUuid!}").getDownloadURL();
                                             setState(() {
-                                              userTempImage[myProfile!.profileId] = NetworkImage(url);
+                                              userTempImage[myProfileEntity!.profileId] = NetworkImage(url);
                                             });
                                           } catch (e) {
                                             if ( !e.toString().contains("No object exists")) {
@@ -130,9 +129,9 @@ class _PageProfileState extends State<PageProfile> {
                                     ),
                                     Expanded(
                                         child: Center(
-                                      child: Text(myProfile!.mbtiIndex == -1 ? "비공개" : mbtiList[myProfile!.mbtiIndex],
+                                      child: Text(myProfileEntity!.mbtiIndex == -1 ? "비공개" : mbtiList[myProfileEntity!.mbtiIndex],
                                           textAlign: TextAlign.center,
-                                          style: TextStyle(fontSize: 13, color: myProfile!.mbtiIndex == -1 ? Colors.grey : Colors.black)),
+                                          style: TextStyle(fontSize: 13, color: myProfileEntity!.mbtiIndex == -1 ? Colors.grey : Colors.black)),
                                     )),
                                   ],
                                 ),
@@ -162,9 +161,9 @@ class _PageProfileState extends State<PageProfile> {
                                     Expanded(
                                         child: Center(
                                       child: Text(
-                                        myProfile!.hobby.length == 0 ? '비공개' : myProfile!.hobby?.join(', '),
+                                        myProfileEntity!.hobby.length == 0 ? '비공개' : myProfileEntity!.hobby?.join(', '),
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 13, color: myProfile!.hobby.length == 0 ? Colors.grey : Colors.black),
+                                        style: TextStyle(fontSize: 13, color: myProfileEntity!.hobby.length == 0 ? Colors.grey : Colors.black),
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -197,9 +196,9 @@ class _PageProfileState extends State<PageProfile> {
                                     Expanded(
                                         child: Center(
                                       child: Text(
-                                        myProfile!.commute ?? "비공개",
+                                        myProfileEntity!.commute ?? "비공개",
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 13, color: myProfile!.commute == null ? Colors.grey : Colors.black),
+                                        style: TextStyle(fontSize: 13, color: myProfileEntity!.commute == null ? Colors.grey : Colors.black),
                                       ),
                                     )),
                                   ],
@@ -233,11 +232,11 @@ class _PageProfileState extends State<PageProfile> {
                                     ),
                                     Expanded(
                                         child: Center(
-                                      child: Text(myProfile!.textInfo == null || myProfile!.textInfo == "" ? "없음" : myProfile!.textInfo,
+                                      child: Text(myProfileEntity!.textInfo == null || myProfileEntity!.textInfo == "" ? "없음" : myProfileEntity!.textInfo,
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           style: TextStyle(
-                                              fontSize: 13, color: myProfile!.textInfo == null || myProfile!.textInfo == "" ? Colors.grey : Colors.black)),
+                                              fontSize: 13, color: myProfileEntity!.textInfo == null || myProfileEntity!.textInfo == "" ? Colors.grey : Colors.black)),
                                     )),
                                   ],
                                 ),
@@ -355,10 +354,9 @@ class _PageProfileState extends State<PageProfile> {
   void initState() {
     //setState(() {});
     super.initState();
-    myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    myProfile!.loadProfile().then((n) {
-      mannerWidget = MannerTemperatureWidget(mannerScore: myProfile!.mannerGroup);
-      // for( var postId in myProfile!.post){
+    myProfileEntity!.loadProfile().then((n) {
+      mannerWidget = MannerTemperatureWidget(mannerScore: myProfileEntity!.mannerGroup);
+      // for( var postId in myProfileEntity!.post){
       //   EntityPost myPost = EntityPost(postId);
       //   myPost.loadPost().then((value) {
       //     myPostList.add(myPost);
@@ -369,7 +367,7 @@ class _PageProfileState extends State<PageProfile> {
   }
 
   Future<void> _reloadProfile() async {
-    await myProfile!.loadProfile().then((n) {
+    await myProfileEntity!.loadProfile().then((n) {
       setState(() {});
     });
   }

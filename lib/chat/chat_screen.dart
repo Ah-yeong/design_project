@@ -179,7 +179,11 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-              onTap: () => SideSheet.right(body: _showProfileList(), context: context, width: MediaQuery.of(context).size.width * 0.7),
+              onTap: () {
+                if ( members != null ) {
+                  SideSheet.right(body: _showProfileList(), context: context, width: MediaQuery.of(context).size.width * 0.7);
+                }
+              },
               child: SizedBox(width: 55, height: 55, child: Icon(CupertinoIcons.line_horizontal_3, color: Colors.black, size: 25,),)),
         ],
       ),
@@ -506,8 +510,14 @@ class _ChatScreenState extends State<ChatScreen> {
         _memberProfiles[profile.profileId] = profile;
       });
     } else {
+      if (members == null) {
+        members = [];
+        members!.add(myUuid!);
+        members!.add(recvUserId!);
+      }
       profile = EntityProfiles(recvUserId);
       await profile.loadProfile();
+      _memberProfiles[myUuid!] = myProfileEntity!;
       _memberProfiles[profile.profileId] = profile;
     }
     return;
@@ -555,16 +565,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      drawProfile(_memberProfiles[members![index]]!, context),
+                      drawProfile(_memberProfiles[members![index]]!, context, withChatButton: isGroupChat ? true : false),
                       SizedBox(
                         width: 40,
                         height: 40,
                         child: GestureDetector(
                           onTap: () {
+                            if (myUuid != members![index]) return;
                             Navigator.of(context).pop();
                             showAlert("신고 개발중입니다.", context, colorLightGrey);
                           },
-                          child: Icon(CupertinoIcons.person_crop_circle_fill_badge_exclam, color: colorError,),
+                          child: myUuid != members![index] ? Icon(CupertinoIcons.person_crop_circle_fill_badge_exclam, color: colorError,)
+                          : const SizedBox()
                         ),
                       )
                     ],

@@ -925,12 +925,12 @@ class _BoardPostPage extends State<BoardPostPage> {
   }
 }
 
-Widget drawProfile(EntityProfiles profileEntity, BuildContext context, {bool? withManner}) {
+Widget drawProfile(EntityProfiles profileEntity, BuildContext context, {bool? withManner, bool? withChatButton}) {
   final color = getColorForScore(profileEntity.mannerGroup);
   return GestureDetector(
     behavior: HitTestBehavior.translucent,
     onTap: () {
-      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp);
+      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp, arguments: withChatButton == null || (withChatButton != null && withChatButton == true) );
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

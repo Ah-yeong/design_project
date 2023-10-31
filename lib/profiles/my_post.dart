@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../boards/post.dart';
+import '../boards/post_list/page_hub.dart';
 import '../entity/entity_post.dart';
 import '../entity/profile.dart';
 
@@ -15,7 +16,6 @@ class PageMyPost extends StatefulWidget {
 }
 
 class _PageMyPost extends State<PageMyPost> {
-  EntityProfiles? myProfile;
   List<EntityPost> myPostList = List.empty(growable: true);
   Map<String, List<EntityPost>> _groupedPosts = {};
   bool _isLoadingPost = true;
@@ -117,13 +117,12 @@ class _PageMyPost extends State<PageMyPost> {
   @override
   void initState() {
     super.initState();
-    myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    myProfile!.loadProfile().then((n) async {
-      if (myProfile!.post != null) {
-        Future.forEach(myProfile!.post, (dynamic postId) async {
+    myProfileEntity!.loadProfile().then((n) async {
+      if (myProfileEntity!.post != null) {
+        Future.forEach(myProfileEntity!.post, (dynamic postId) async {
           EntityPost myPost = EntityPost(postId);
           await myPost.loadPost().then((value) => myPostList.add(myPost));
-          if (myPostList.length == myProfile!.post.length) {
+          if (myPostList.length == myProfileEntity!.post.length) {
             myPostList.sort((a, b) => a.getTime().compareTo(b.getTime()));
             Map<String, List<EntityPost>> groupedPosts= {};
             for (var post in myPostList) {

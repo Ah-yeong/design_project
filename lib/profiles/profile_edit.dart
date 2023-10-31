@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../boards/post_list/page_hub.dart';
@@ -57,7 +58,6 @@ final List<String> hobby = [
 class _PageProfileEditState extends State<PageProfileEdit> {
   final _picker = ImagePicker();
   XFile? _image;
-  EntityProfiles? myProfile;
 
   int _mbtiIndex = 0;
   bool selectMbti = false;
@@ -388,7 +388,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                       radius: 70,
                                       backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
                                       child: _image == null ? Icon(Icons.person, size: 80) : null,
-                                    ) : getAvatar(myProfile!, 70),
+                                    ) : getAvatar(myProfileEntity!, 70),
                                   ),
                                   const SizedBox(
                                     height: 6,
@@ -678,6 +678,10 @@ class _PageProfileEditState extends State<PageProfileEdit> {
                                 backgroundColor: colorSuccess,
                               ),
                               onPressed: () async {
+                                if (_nicknameController!.text.length < 2) {
+                                  showAlert("닉네임은 두 글자 이상만 허용돼요!", context, colorError);
+                                  return;
+                                }
                                 setState(() {
                                   if (_hobbyEntry != null && _hobbyEntry!.mounted) _hobbyEntry!.remove();
                                   if (_MBTIEntry != null && _MBTIEntry!.mounted) _MBTIEntry!.remove();
@@ -707,21 +711,20 @@ class _PageProfileEditState extends State<PageProfileEdit> {
 
   void initState() {
     super.initState();
-    myProfile = EntityProfiles(FirebaseAuth.instance.currentUser!.uid);
-    myProfile!.loadProfile().then((n) {
-      _nicknameController = TextEditingController(text: '${myProfile!.name}');
-      _textInfoController = TextEditingController(text: '${myProfile!.textInfo}');
+    myProfileEntity!.loadProfile().then((n) {
+      _nicknameController = TextEditingController(text: '${myProfileEntity!.name}');
+      _textInfoController = TextEditingController(text: '${myProfileEntity!.textInfo}');
 
-      if (myProfile!.commute != null) selectedCommute = myProfile!.commute;
-      if (myProfile!.mbtiIndex != null) _mbtiIndex = myProfile!.mbtiIndex;
+      if (myProfileEntity!.commute != null) selectedCommute = myProfileEntity!.commute;
+      if (myProfileEntity!.mbtiIndex != null) _mbtiIndex = myProfileEntity!.mbtiIndex;
 
-      for (int i = 0; i < myProfile!.hobbyIndex.length; i++) {
-        _selectedHobby[myProfile!.hobbyIndex[i]] = true;
+      for (int i = 0; i < myProfileEntity!.hobbyIndex.length; i++) {
+        _selectedHobby[myProfileEntity!.hobbyIndex[i]] = true;
       }
 
-      selectedSiDo = myProfile!.addr1;
-      selectedSiGunGu = myProfile!.addr2;
-      selectedDong = myProfile!.addr3;
+      selectedSiDo = myProfileEntity!.addr1;
+      selectedSiGunGu = myProfileEntity!.addr2;
+      selectedDong = myProfileEntity!.addr3;
       setState(() {});
     });
     fetchData(currentPage);
@@ -853,7 +856,7 @@ class _PageProfileEditState extends State<PageProfileEdit> {
     );
   }
 
-  _updateProfile() async {
+  Future<void> _updateProfile() async {
     List<int> hobbyIndex = [];
     List<String> selectedHobby = [];
     for (int i = 0; i < _selectedHobby.length; i++) {
@@ -867,6 +870,24 @@ class _PageProfileEditState extends State<PageProfileEdit> {
       Reference storageRef = storageInstance.ref("profile_image/${myUuid}");
       await storageRef.putFile(File(_image!.path));
     }
+
+    try {
+      var ds = await FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).get();
+      List<int> myPostList = List<int>.from(ds.get("post") as List);
+      print(myPostList);
+      var posts = await FirebaseFirestore.instance.collection("Post").get();
+      await Future.forEach(posts.docs, (doc) async {
+        if (doc.reference.id.isNumericOnly) {
+          if (myPostList.contains(int.parse(doc.reference.id))) {
+            print("good");
+            await doc.reference.update({"writer_nick": _nicknameController!.text});
+          }
+        }
+      });
+    } catch (e) {
+      print("Post name editing error : $e");
+    }
+
     try {
       await FirebaseFirestore.instance.collection('UserProfile').doc(FirebaseAuth.instance.currentUser!.uid).update({
         'nickName': _nicknameController!.value.text,
@@ -883,5 +904,6 @@ class _PageProfileEditState extends State<PageProfileEdit> {
     } catch (e) {
       print('Error updating profile data: $e');
     }
+    await myProfileEntity!.loadProfile();
   }
 }

@@ -2,6 +2,7 @@ import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/profiles/profile_edit.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../chat/chat_screen.dart';
 import '../entity/profile.dart';
 import 'package:design_project/profiles/profile_main.dart';
@@ -22,6 +23,8 @@ class _BoardProfilePage extends State<BoardProfilePage> {
   EntityProfiles? profileEntity;
   MannerTemperatureWidget? mannerWidget;
   bool _isLoading = true;
+
+  bool? _isShowChatButton = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +49,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
         toolbarHeight: 40,
         elevation: 1,
       ),
-      bottomNavigationBar: myUuid! != profileEntity!.profileId
+      bottomNavigationBar: myUuid! != profileEntity!.profileId && (_isShowChatButton == null || _isShowChatButton == true)
           ? Container(
               decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
               width: double.infinity,
