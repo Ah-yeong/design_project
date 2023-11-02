@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/entity/latlng.dart';
+import 'package:design_project/resources/icon_set.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -142,15 +143,20 @@ class EntityPost {
     DocumentReference reference = FirebaseFirestore.instance.collection("Post").doc(_postId.toString());
     var postDoc = await reference.get();
     var users = postDoc.get("user") as List<dynamic>;
-    users.add({"status" : 1, "id" : myUuid});
+    users.add({"status": 1, "id": myUuid});
     users.retainWhere((user) => user["status"] == 1);
     await Future.forEach(users, (user) async {
       try {
         DocumentReference userDoc = FirebaseFirestore.instance.collection("UserMeetings").doc(user["id"]);
-        userDoc.update({"meetingPost" : FieldValue.arrayRemove([_postId])});
+        userDoc.update({
+          "meetingPost": FieldValue.arrayRemove([_postId])
+        });
       } catch (e) {
         print("Remove user meetingPost error : $e");
       }
+    });
+    await FirebaseFirestore.instance.collection("UserProfile").doc(myUuid).update({
+      "post": FieldValue.arrayRemove([_postId])
     });
     await reference.delete();
     return;
@@ -226,8 +232,8 @@ class EntityPost {
     return userStatus["status"] == 0
         ? "wait"
         : userStatus["status"] == 1
-        ? "accept"
-        : "reject";
+            ? "accept"
+            : "reject";
   }
 
   addViewCount(String uuid) async {
@@ -293,6 +299,41 @@ class EntityPost {
     userList.forEach((element) => memberList.add(element["id"]));
     return memberList;
   }
+
+  BitmapDescriptor getMarker() {
+    switch (_category) {
+      case "밥":
+        return MyIcon.food;
+      case "술":
+        return MyIcon.drink;
+      case "공예":
+        return MyIcon.art;
+      case "기타":
+        return MyIcon.etc;
+      case "게임":
+        return MyIcon.game;
+      case "운동":
+        return MyIcon.gym;
+      case "취미":
+        return MyIcon.hobby;
+      case "영화":
+        return MyIcon.movie;
+      case "음악":
+        return MyIcon.music;
+      case "쇼핑":
+        return MyIcon.shop;
+      case "공연":
+        return MyIcon.show;
+      case "공부":
+        return MyIcon.study;
+      case "여행":
+        return MyIcon.trip;
+      case "산책":
+        return MyIcon.walk;
+      default:
+        return MyIcon.etc;
+    }
+  }
 }
 
 String getTimeBefore(String upTime) {
@@ -318,20 +359,20 @@ String getTimeBefore(String upTime) {
 
 Future<bool> addPost(
     {required String writerId,
-      required String head,
-      required String body,
-      required int gender,
-      required int maxPerson,
-      required String time,
-      required LLName llName,
-      required String upTime,
-      required String category,
-      required int minAge,
-      required int maxAge,
-      required String writerNick,
-      required bool isVoluntary,
-      bool? isProcessingPost,
-      int? postId}) async {
+    required String head,
+    required String body,
+    required int gender,
+    required int maxPerson,
+    required String time,
+    required LLName llName,
+    required String upTime,
+    required String category,
+    required int minAge,
+    required int maxAge,
+    required String writerNick,
+    required bool isVoluntary,
+    bool? isProcessingPost,
+    int? postId}) async {
   try {
     bool processingPost = isProcessingPost != null && isProcessingPost && postId != null;
     int? new_post_id;

@@ -89,9 +89,20 @@ flutter:
 
   assets:
     - assets/images/userImage.png
-    - assets/images/hobbyMarker.png
-    - assets/images/foodMarker.png
-    - assets/images/drinkMarker.png
+    - assets/images/hobby_marker.png
+    - assets/images/food_marker.png
+    - assets/images/drink_marker.png
+    - assets/images/art_marker.png
+    - assets/images/etc_marker.png
+    - assets/images/game_marker.png
+    - assets/images/gym_marker.png
+    - assets/images/movie_marker.png
+    - assets/images/music_marker.png
+    - assets/images/shop_marker.png
+    - assets/images/study_marker.png
+    - assets/images/show_marker.png
+    - assets/images/trip_marker.png
+    - assets/images/walk_marker.png
     - assets/images/myMarker.png
     - assets/map_style.json
   # To add assets to your application, add an assets section, like this:

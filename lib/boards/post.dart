@@ -930,7 +930,7 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context, {bool? wi
   return GestureDetector(
     behavior: HitTestBehavior.translucent,
     onTap: () {
-      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp, arguments: withChatButton == null || (withChatButton != null && withChatButton == true) );
+      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp, arguments: withChatButton == null || withChatButton == true );
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

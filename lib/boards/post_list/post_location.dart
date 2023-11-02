@@ -194,7 +194,7 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
               //postLoad(ep.getPostId());
             },
             draggable: true,
-            icon: MyIcon.randomIcon(startIndex: 1)),
+            icon: postManager.list[i].getMarker()),
       );
       markerid++;
     }
