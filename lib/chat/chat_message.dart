@@ -1,23 +1,15 @@
 import 'dart:async';
 
 import 'package:design_project/resources/loading_indicator.dart';
-import 'package:design_project/resources/resources.dart';
 import 'package:firebase_database_platform_interface/firebase_database_platform_interface.dart' as rt;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../alert/models/alert_manager.dart';
-import '../alert/models/alert_object.dart';
 import '../boards/post_list/page_hub.dart';
-import '../entity/profile.dart';
-import '../main.dart';
-import '../resources/fcm.dart';
 import 'models/chat_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
-import 'chat_screen.dart';
 import 'models/chat_data_model.dart';
 import 'models/chat_storage.dart';
 
@@ -32,7 +24,7 @@ class ChatMessage extends StatefulWidget {
   _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members);
 }
 
-class _ChatMessageState extends State<ChatMessage> {
+class _ChatMessageState extends State<ChatMessage> with AutomaticKeepAliveClientMixin{
   final int? postId;
   final String? recvUserId;
   final List<String>? members;
@@ -50,13 +42,12 @@ class _ChatMessageState extends State<ChatMessage> {
   bool spLoaded = false;
   bool dbLoaded = false;
 
-
+  Stream<DatabaseEvent>? chatStream;
   late ChatStorage? _savedChat;
 
   @override
   void initState() {
     super.initState();
-
     _savedChat = ChatStorage(postId == null ? recvUserId! : postId!.toString());
     _savedChat!.init().then((value) => setState(() {
           spLoaded = true;
@@ -81,6 +72,7 @@ class _ChatMessageState extends State<ChatMessage> {
     sendUserId = FirebaseAuth.instance.currentUser!.uid;
     chatDocName = isGroupChat ? postId.toString() : getNameChatRoom(sendUserId, recvUserId!);
     chatColName = isGroupChat ? "PostGroupChat" : "Chat";
+    chatStream = FirebaseDatabase.instance.ref(chatColName).child(chatDocName).child("messages").onValue;
     return;
   }
 
@@ -137,7 +129,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    super.build(context);
     // _chatRef.onChildAdded.listen((event) {
     //   final chatData = event.snapshot.value as Map<dynamic, dynamic>;
     //   final isMe = chatData['userID'] == user!.uid;
@@ -160,7 +152,7 @@ class _ChatMessageState extends State<ChatMessage> {
               ),
               // 채팅 내용 (버블)
               StreamBuilder<DatabaseEvent>(
-                stream: FirebaseDatabase.instance.ref(chatColName).child(chatDocName).child("messages").onValue,
+                stream: chatStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return buildLoadingProgress();
@@ -201,7 +193,7 @@ class _ChatMessageState extends State<ChatMessage> {
                       bool isLocalSave = false;
                       bool addReadBy = false;
 
-                      if (!readBy.contains(user!.uid)) {
+                      if (!readBy.contains(myUuid!)) {
                         final bool isReadedAll = readBy.length + 1 >= membersCount;
                         if (isReadedAll) {
                           // 다 읽었음 = 로컬에 저장
@@ -217,7 +209,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         }
                         addReadBy = true;
                         _readList.add(chatModel);
-                      } else if (!savedBy.contains(user.uid)) {
+                      } else if (!savedBy.contains(myUuid!)) {
                         if (readBy.length >= membersCount) {
                           final bool isSavedAll = savedBy.length + 1 >= membersCount;
                           if (isSavedAll) {
@@ -348,6 +340,9 @@ class _ChatMessageState extends State<ChatMessage> {
             ],
           ));
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 getNameChatRoom(String sendId, String recvId) {

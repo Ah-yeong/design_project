@@ -35,7 +35,7 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState(postId, recvUserId, members);
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMixin{
   User? loggedUser;
   final int? postId;
   List<String>? members;
@@ -155,6 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -588,6 +589,9 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 // uid에 해당하는 UserChatData에 채팅방 postId 또는 채팅 상대 recvUserId 연결
