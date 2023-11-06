@@ -6,20 +6,18 @@ import 'evaluation.dart';
 class EvaluationManager {
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("EvaluatedMeetings");
 
-  Future<void> evaluationCreate(members, score, notAttendedUser, arrivals, meetingId) async {
+  Future<void> evaluation(members, score, notAttendedUser, arrivals, meetingId) async {
     Evaluation newEvaluation = convertScoreToUserId(score);
-    await uploadUser(newEvaluation);
-    int memberCount = CountArrivalsTrue(arrivals);
-    await uploadCount(Evaluation(members), notAttendedUser, meetingId, memberCount);
+    await newEvaluation.upload();
+    await newEvaluation.count(meetingId, notAttendedUser, CountArrivalsTrue(arrivals));
+    await updateMannerGroup(score);
+    await evaluationEnd(meetingId);
     return;
   }
 
-  int CountArrivalsTrue(arrivals){
-    int cnt = 0;
-    for (String uid in arrivals.containsKey) {
-      if(arrivals[uid] == true){ cnt += 1; }
-    }
-    return cnt;
+  int CountArrivalsTrue(Map<String, dynamic> arrivals){
+    arrivals.removeWhere((key, value) => value == false);
+    return arrivals.length;
   }
 
   Evaluation convertScoreToUserId(score) {
@@ -27,31 +25,9 @@ class EvaluationManager {
     return Evaluation(userIds);
   }
 
-  Evaluation convertNotAttendedUserToEval(notAttendedUser) {
-    List<String> userIds = notAttendedUser.keys.toList();
-    return Evaluation(userIds);
-  }
-
-  Future<void> uploadUser(Evaluation evaluation) async {
-    DocumentReference reference = evaluation.getEvaluationDocument();
-    await reference.get().then((ds) async {
-      await evaluation.upload();
-    });
-  }
-
-  Future<void> uploadCount(Evaluation evaluation, notAttendedUser, meetingId, memberCount) async {
-    DocumentReference reference = evaluation.getEvaluationDocument();
-    await reference.get().then((ds) async {
-      await evaluation.count(meetingId, notAttendedUser, memberCount);
-    });
-  }
-
   Future<void> updateMannerGroup(score) async {
-    Evaluation newEvaluation= convertScoreToUserId(score);
-    DocumentReference reference = newEvaluation.getEvaluationDocument();
-    await reference.get().then((ds) async {
-      await newEvaluation.updateMannerGroup(score);
-    });
+    Evaluation newEvaluation = convertScoreToUserId(score);
+    await newEvaluation.updateMannerGroup(score);
   }
 
   Future<void> evaluationEnd(meetingId) async {

@@ -19,26 +19,4 @@ class EvaluatedMeetingManager {
     });
     return endMeetingData;
   }
-
-  Future<EvaluatedMeeting?> getEvaluatedMeeting(int meetingId) async {
-    DocumentReference reference = _evalMeetingInstance.doc(meetingId.toString());
-    EvaluatedMeeting? evalMeetingData;
-    await reference.get().then((snapshot) async {
-      if (snapshot.exists) {
-        bool isVoluntary = snapshot.get("isVoluntary");
-        Map<String, dynamic> emptyMap = {};
-        var arrivals = isVoluntary ? emptyMap : snapshot.get("arrivals");
-        evalMeetingData = EvaluatedMeeting(
-          snapshot.get("address"),
-          arrivals,
-          isVoluntary,
-          (snapshot.get("meetTime") as Timestamp).toDate(),
-          snapshot.get("meetingId"),
-          snapshot.get("members").cast<String>(),
-          snapshot.get("meetingName")
-        );
-      }
-    });
-    return evalMeetingData;
-  }
 }

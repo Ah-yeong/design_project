@@ -59,25 +59,33 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
             backgroundColor: Colors.white,
           body: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(
                   height: 20,
                 ),
-                Text(
-                  '모임 구성원에 대한 개별 평가가 가능해요.',
-                  style: TextStyle(fontSize: 16),
+                const Center(
+                  child: Text(
+                    '모임 구성원에 대한 개별 평가가 가능해요.',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                Text(
-                  '평가 점수는 매너점수에 반영되니,\n신중하게 평가해주세요.',
-                  style: TextStyle(fontSize: 14),
+                const Center(
+                  child: Text(
+                    '평가 점수는 매너점수에 반영돼요\n신중히 평가해주세요!',
+                    style: TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                Column(
+                members!.length != 1 ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (!voluntary && attendedProfiles.length != 0)
                       Padding(
@@ -106,7 +114,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                               title: Row(
                                 children: <Widget>[
                                   SizedBox(width: 5),
-                                  getAvatar(userProfile, 20),
+                                  getAvatar(userProfile, 20, nullIcon: Icon(CupertinoIcons.person_fill, color: Colors.white,)),
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
@@ -118,7 +126,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                           style: TextStyle(fontSize: 14),
                                         ),
                                         SizedBox(height: 3),
-                                        Row(
+                                        userProfile.name != "탈퇴한 사용자" ? Row(
                                           children: [
                                             Text(
                                               userProfile.major,
@@ -131,7 +139,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                               ),
                                             ),
                                           ],
-                                        ),
+                                        ) : const SizedBox(),
                                       ],
                                     ),
                                   )
@@ -188,10 +196,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                     title: Row(
                                       children: <Widget>[
                                         SizedBox(width: 5),
-                                        CircleAvatar(
-                                          radius: 20,
-                                          backgroundImage: NetworkImage('https://picsum.photos/id/237/200/300'),
-                                        ),
+                                        getAvatar(userProfile, 20, nullIcon: Icon(CupertinoIcons.person_fill, color: Colors.white,)),
                                         SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
@@ -203,7 +208,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                                 style: TextStyle(fontSize: 14),
                                               ),
                                               SizedBox(height: 3),
-                                              Row(
+                                              userProfile.name != "탈퇴한 사용자" ? Row(
                                                 children: [
                                                   Text(
                                                     userProfile.major,
@@ -216,7 +221,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                                     ),
                                                   ),
                                                 ],
-                                              ),
+                                              ) : const SizedBox(),
                                             ],
                                           ),
                                         )
@@ -228,7 +233,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                         notAttendedUser[userId]
                                             ? ElevatedButton(
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.grey,
+                                                  backgroundColor: colorGrey,
                                                 ),
                                                 onPressed: () {
                                                   setState(() {
@@ -238,7 +243,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                                 child: Text('참여 취소하기', style: TextStyle(fontSize: 13)),
                                               )
                                             : ElevatedButton(
-                                                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF6ACA9A)),
+                                                style: ElevatedButton.styleFrom(backgroundColor: colorSuccess),
                                                 onPressed: () {
                                                   setState(() {
                                                     notAttendedUser[userId] = true;
@@ -260,7 +265,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                         ],
                       ),
                   ],
-                )
+                ) : SizedBox()
               ],
             ),
           ),
@@ -285,9 +290,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                     _isLoading = true;
                   });
                   EvaluationManager manager = EvaluationManager();
-                  await manager.evaluationCreate(members, scores, notAttendedUser, arrivals, meetingId); // notAttendedUser : 참여 인정 -> true
-                  await manager.updateMannerGroup(scores);
-                  await manager.evaluationEnd(meetingId);
+                  await manager.evaluation(members, scores, notAttendedUser, arrivals, meetingId); // notAttendedUser : 참여 인정 -> true
                   setState(() {
                     _isLoading = false;
                   });
@@ -306,7 +309,14 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
   void initState() {
     super.initState();
 
-    getMemberProfiles(members!).then((profileList) {
+    getMemberProfiles(members!).then((profileList) async {
+      if (profileList.length <= 0) {
+        final manager = EvaluationManager();
+        await manager.evaluationEnd(meetingId);
+        Navigator.of(context).pop();
+        showAlert("평가할 구성원이 없어요", context, colorGrey);
+        return;
+      }
       for (String uuid in profileList.keys) {
         if(uuid != FirebaseAuth.instance.currentUser!.uid){
           if (voluntary) {
@@ -329,14 +339,19 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
 
   Future<Map<String, EntityProfiles>> getMemberProfiles(List<String> uuids) async {
     Map<String, EntityProfiles> profileList = {};
+    List<String> removeUuidList = [];
     for (String uuid in uuids) {
       if (uuid != FirebaseAuth.instance.currentUser!.uid) {
         EntityProfiles profiles = EntityProfiles(uuid);
         await profiles.loadProfile();
-        if (profiles.isValid) profileList[uuid] = profiles;
-        else members!.remove(uuid);
+        if(!profiles.isValid) {
+          removeUuidList.add(uuid);
+        } else {
+          profileList[uuid] = profiles;
+        }
       }
     }
+    members!.removeWhere((element) => removeUuidList.contains(element));
     return profileList;
   }
 }

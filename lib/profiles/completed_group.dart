@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/meeting/models/evaluated_meeting_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -117,25 +118,37 @@ class _PageMyEndGroup extends State<PageMyEndGroup> {
     super.initState();
     var evalMeetingManager = EvaluatedMeetingManager();
     evalMeetingManager.getUserEndMeetingData(FirebaseAuth.instance.currentUser!.uid).then((meetingList) async {
-      Future.forEach(meetingList, (meetingId) async {
-        await evalMeetingManager.getEvaluatedMeeting(meetingId).then((meeting) async {
-          if (meeting != null) myEndMeetingList.add(meeting);
-          if (meetingList.length == myEndMeetingList.length) {
-            myEndMeetingList.sort((a, b) =>
-                b.getMeetTime().compareTo(a.getMeetTime()));
-            Map<String, List<EvaluatedMeeting>> groupedMeetings = {};
+      CollectionReference reference = FirebaseFirestore.instance.collection("EvaluatedMeetings");
+      QuerySnapshot qs = await reference.get();
+      List<DocumentSnapshot> evaluatedMeeting = qs.docs;
+      evaluatedMeeting.retainWhere((ds) => meetingList.contains(int.parse(ds.reference.id)));
+      evaluatedMeeting.forEach((snapshot){
+        bool isVoluntary = snapshot.get("isVoluntary");
+        Map<String, dynamic> arrivals = isVoluntary ? {} : Map<String, dynamic>.from(snapshot.get("arrivals"));
+        EvaluatedMeeting evalMeetingData = EvaluatedMeeting(
+            snapshot.get("address"),
+            arrivals,
+            snapshot.get("isVoluntary"),
+            (snapshot.get("meetTime") as Timestamp).toDate(),
+            snapshot.get("meetingId"),
+            snapshot.get("members").cast<String>(),
+            snapshot.get("meetingName")
+        );
+        myEndMeetingList.add(evalMeetingData);
+      });
+      myEndMeetingList.sort((a, b) =>
+          b.getMeetTime().compareTo(a.getMeetTime()));
+      Map<String, List<EvaluatedMeeting>> groupedMeetings = {};
 
-            for (var meeting in myEndMeetingList) {
-              final dateKey = DateFormat('yyyy-MM-dd').format(meeting.getMeetTime());
-              if (!groupedMeetings.containsKey(dateKey)) {
-                groupedMeetings[dateKey] = [];
-              }
-              groupedMeetings[dateKey]!.add(meeting);
-            }
-            setState(() => _groupedMeetings = groupedMeetings);
-          }
-        });
-      }).then((value) => setState(() => _isLoadingPost = true));
+      for (var meeting in myEndMeetingList) {
+        final dateKey = DateFormat('yyyy-MM-dd').format(meeting.getMeetTime());
+        if (!groupedMeetings.containsKey(dateKey)) {
+          groupedMeetings[dateKey] = [];
+        }
+        groupedMeetings[dateKey]!.add(meeting);
+      }
+      _isLoadingPost = true;
+      setState(() => _groupedMeetings = groupedMeetings);
     });
   }
 
