@@ -35,7 +35,7 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState(postId, recvUserId, members);
 }
 
-class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMixin{
+class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMixin {
   User? loggedUser;
   final int? postId;
   List<String>? members;
@@ -92,7 +92,8 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
       });
     });
 
-    _loadProfiles().then((value) => setState(() {
+    _loadProfiles().then((value) =>
+        setState(() {
           profileLoaded = true;
           _sendInitMessage();
         }));
@@ -112,12 +113,18 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
         Future.forEach(members!, (uuid) async {
           await preloadAvatar(uuid: uuid);
         }).then((value) {
-          setState(() {
-            _loadProfiles().then((value) => setState(() {
-              _isLoaded = true;
-              _sendInitMessage();
-            }));
-          });
+          if (mounted) {
+            setState(() {
+              _loadProfiles().then((value) {
+                if (mounted) {
+                  setState(() {
+                    _isLoaded = true;
+                    _sendInitMessage();
+                  });
+                }
+              });
+            });
+          }
         });
       });
     }
@@ -164,14 +171,14 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
             _isLoaded == false
                 ? "불러오는 중"
                 : isGroupChat && _post != null
-                    ? "${_post!.getPostHead()}".length > 12
-                        ? "${_post!.getPostHead().replaceRange(12, null, "...")} (${members!.length}명)"
-                        : "${_post!.getPostHead()} (${members!.length}명)"
-                    : !isGroupChat
-                        ? recvUser.name
-                        : members == null
-                            ? "알 수 없음"
-                            : "종료된 모임 (${members!.length}명)",
+                ? "${_post!.getPostHead()}".length > 12
+                ? "${_post!.getPostHead().replaceRange(12, null, "...")} (${members!.length}명)"
+                : "${_post!.getPostHead()} (${members!.length}명)"
+                : !isGroupChat
+                ? recvUser.name
+                : members == null
+                ? "알 수 없음"
+                : "종료된 모임 (${members!.length}명)",
             style: TextStyle(color: Colors.black, fontSize: 19)),
         backgroundColor: Colors.white,
         leading: BackButton(
@@ -179,10 +186,13 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
         ),
         actions: [
           GestureDetector(
-            behavior: HitTestBehavior.translucent,
+              behavior: HitTestBehavior.translucent,
               onTap: () {
-                if ( members != null ) {
-                  SideSheet.right(body: _showProfileList(), context: context, width: MediaQuery.of(context).size.width * 0.7);
+                if (members != null) {
+                  SideSheet.right(body: _showProfileList(), context: context, width: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.7);
                 }
               },
               child: SizedBox(width: 55, height: 55, child: Icon(CupertinoIcons.line_horizontal_3, color: Colors.black, size: 25,),)),
@@ -191,25 +201,26 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
       body: (_isLoaded == false || _chatLoaded == false)
           ? buildLoadingProgress()
           : SafeArea(
-              bottom: true,
-              child: Stack(
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    child: Container(
-                        child: Column(
-                      children: [
-                        Expanded(
-                          child: ChatMessage(
-                            postId: postId,
-                            recvUser: recvUserId,
-                            members: members,
-                          ),
+        bottom: true,
+        child: Stack(
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: Container(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ChatMessage(
+                          postId: postId,
+                          recvUser: recvUserId,
+                          members: members,
+                          valid: !(recvUserId != null && _memberProfiles[recvUserId]!.name == "(알 수 없음)")
                         ),
-                        if (!(recvUserId != null && _memberProfiles[recvUserId]!.name == "(알 수 없음)"))
+                      ),
+                      if (!(recvUserId != null && _memberProfiles[recvUserId]!.name == "(알 수 없음)"))
                         Container(
                             decoration: BoxDecoration(
                                 color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 0.8, spreadRadius: 0.5)]),
@@ -253,142 +264,142 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
                                 ),
                               ),
                             )),
-                      ],
-                    )),
-                  ),
-                  isGroupChat && _post != null
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 13),
-                              child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(color: Colors.white.withAlpha(180), borderRadius: BorderRadius.circular(6)),
-                                  child: StatefulBuilder(
-                                    builder: (BuildContext context, StateSetter timeRemainSetter) {
-                                      timeSetter = timeRemainSetter;
-                                      int gapSeconds = _post!.getTimeRemainInSeconds();
-                                      return Row(
-                                        children: [
-                                          Icon(
-                                            Icons.access_time_filled_rounded,
-                                            size: 20,
-                                            color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent,
-                                          ),
-                                          Text(
-                                            "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작")}",
-                                            style: TextStyle(
-                                                color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent, fontSize: 14, fontWeight: FontWeight.bold),
-                                          )
-                                        ],
-                                      );
-                                    },
-                                  )),
-                            ),
-                            StatefulBuilder(
-                              builder: (BuildContext context, StateSetter rowSetState) {
-                                return Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 13, top: 13),
-                                      child: Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: _post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : Colors.white,
-                                            borderRadius: BorderRadius.circular(15),
-                                            border: Border.all(color: colorGrey),
-                                            boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
-                                          ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              borderRadius: BorderRadius.circular(15),
-                                              onTap: () {
-                                                rowSetState(() {});
-                                                final int _remain = _post!.getTimeRemainInSeconds();
-                                                if (_remain < 60 * 10 * -1) {
-                                                  showAlert("모임이 완료되었어요!", context, colorError);
-                                                  return;
-                                                }
-                                                Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState(() {}));
-                                              },
-                                              overlayColor:
-                                                  MaterialStateProperty.all(_post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
-                                              child: const Icon(
-                                                Icons.file_copy,
-                                                size: 25,
-                                                color: colorGrey,
-                                              ),
-                                            ),
-                                          )),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 13, top: 13),
-                                      child: Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: (_post!.isVoluntary() ||
-                                                    _post!.getTimeRemainInSeconds() > 60 * 15 ||
-                                                    _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
-                                                ? colorLightGrey
-                                                : Colors.white,
-                                            borderRadius: BorderRadius.circular(15),
-                                            border: Border.all(color: colorGrey),
-                                            boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
-                                          ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              borderRadius: BorderRadius.circular(15),
-                                              onTap: () async {
-                                                rowSetState(() {});
-                                                if (_post!.isVoluntary()) {
-                                                  showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
-                                                  return;
-                                                }
-                                                final int _remain = _post!.getTimeRemainInSeconds();
-                                                if (_remain > 60 * 15) {
-                                                  showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
-                                                  return;
-                                                }
-                                                if (_remain < 60 * 10 * -1) {
-                                                  showAlert("모임이 완료되었어요!", context, colorError);
-                                                  return;
-                                                }
-                                                try {
-                                                  LocationManager existTest = LocationManager();
-                                                  await existTest.getLocationGroupData(postId!);
-                                                  Get.to(() => PageShareLocation(), arguments: postId)!.then((value) => rowSetState(() {}));
-                                                } catch (e) {
-                                                  showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
-                                                }
-                                              },
-                                              overlayColor: MaterialStateProperty.all((_post!.isVoluntary() ||
-                                                      _post!.getTimeRemainInSeconds() > 60 * 15 ||
-                                                      _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
-                                                  ? colorLightGrey
-                                                  : colorSuccess),
-                                              child: const Icon(
-                                                Icons.location_on,
-                                                size: 28,
-                                                color: colorGrey,
-                                              ),
-                                            ),
-                                          )),
-                                    ),
-                                  ],
-                                );
-                              },
-                            )
-                          ],
-                        )
-                      : SizedBox(),
-                ],
-              ),
+                    ],
+                  )),
             ),
+            isGroupChat && _post != null
+                ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 13),
+                  child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(color: Colors.white.withAlpha(180), borderRadius: BorderRadius.circular(6)),
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter timeRemainSetter) {
+                          timeSetter = timeRemainSetter;
+                          int gapSeconds = _post!.getTimeRemainInSeconds();
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_filled_rounded,
+                                size: 20,
+                                color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent,
+                              ),
+                              Text(
+                                "${getMeetTimeText(_post!.getTime()).replaceAll("전", "전에 완료").replaceAll("후", "후 모임 시작")}",
+                                style: TextStyle(
+                                    color: gapSeconds > 1800 ? colorGrey : Colors.indigoAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          );
+                        },
+                      )),
+                ),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter rowSetState) {
+                    return Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 13, top: 13),
+                          child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: _post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: colorGrey),
+                                boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(15),
+                                  onTap: () {
+                                    rowSetState(() {});
+                                    final int _remain = _post!.getTimeRemainInSeconds();
+                                    if (_remain < 60 * 10 * -1) {
+                                      showAlert("모임이 완료되었어요!", context, colorError);
+                                      return;
+                                    }
+                                    Get.to(() => BoardPostPage(postId: postId), arguments: true)!.then((value) => rowSetState(() {}));
+                                  },
+                                  overlayColor:
+                                  MaterialStateProperty.all(_post!.getTimeRemainInSeconds() < 60 * 10 * -1 ? colorLightGrey : colorSuccess),
+                                  child: const Icon(
+                                    Icons.file_copy,
+                                    size: 25,
+                                    color: colorGrey,
+                                  ),
+                                ),
+                              )),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 13, top: 13),
+                          child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: (_post!.isVoluntary() ||
+                                    _post!.getTimeRemainInSeconds() > 60 * 15 ||
+                                    _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
+                                    ? colorLightGrey
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: colorGrey),
+                                boxShadow: [BoxShadow(offset: Offset(0, 1), blurRadius: 0.5, spreadRadius: 0.5, color: colorGrey)],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(15),
+                                  onTap: () async {
+                                    rowSetState(() {});
+                                    if (_post!.isVoluntary()) {
+                                      showAlert("위치 서비스가 지원되지 않는 모임 방식이에요!", context, colorGrey);
+                                      return;
+                                    }
+                                    final int _remain = _post!.getTimeRemainInSeconds();
+                                    if (_remain > 60 * 15) {
+                                      showAlert("모임 시간 15분 전부터 이용 가능해요!", context, colorError);
+                                      return;
+                                    }
+                                    if (_remain < 60 * 10 * -1) {
+                                      showAlert("모임이 완료되었어요!", context, colorError);
+                                      return;
+                                    }
+                                    try {
+                                      LocationManager existTest = LocationManager();
+                                      await existTest.getLocationGroupData(postId!);
+                                      Get.to(() => PageShareLocation(), arguments: postId)!.then((value) => rowSetState(() {}));
+                                    } catch (e) {
+                                      showAlert("위치 공유 지원이 종료된 모임이에요!.", context, colorGrey);
+                                    }
+                                  },
+                                  overlayColor: MaterialStateProperty.all((_post!.isVoluntary() ||
+                                      _post!.getTimeRemainInSeconds() > 60 * 15 ||
+                                      _post!.getTimeRemainInSeconds() < 60 * 10 * -1)
+                                      ? colorLightGrey
+                                      : colorSuccess),
+                                  child: const Icon(
+                                    Icons.location_on,
+                                    size: 28,
+                                    color: colorGrey,
+                                  ),
+                                ),
+                              )),
+                        ),
+                      ],
+                    );
+                  },
+                )
+              ],
+            )
+                : SizedBox(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -441,8 +452,8 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
       } else {
         // 이미 존재하는 채팅방일때
         Map<String, dynamic> roomDocMap = Map<String, dynamic>.from(_roomRef.value as Map);
-        if ( roomDocMap["alarmReceives"] != null)
-        alarmSendList = Map<String, bool>.from(roomDocMap["alarmReceives"]);
+        if (roomDocMap["alarmReceives"] != null)
+          alarmSendList = Map<String, bool>.from(roomDocMap["alarmReceives"]);
       }
 
       final _messageDB = _chatDB.child("messages").child(timestamp.millisecondsSinceEpoch.toString());
@@ -485,18 +496,26 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
           if (alarmSendList[member] != null && alarmSendList[member] == false) return;
           if (member == myUuid!) continue;
           profile = _memberProfiles[member]!;
-          fcm.sendMessage(userToken: profile.fcmToken, title: myProfileEntity!.name, body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
-            "chat_id": postId.toString(),
-            "is_group_chat": "true",
-          }).then((value) => print(value));
+          fcm.sendMessage(userToken: profile.fcmToken,
+              title: myProfileEntity!.name,
+              body: message,
+              type: AlertType.TO_CHAT_ROOM,
+              clickAction: {
+                "chat_id": postId.toString(),
+                "is_group_chat": "true",
+              }).then((value) => print(value));
         }
       } else {
         updateChatList(recvUserId!);
         if (alarmSendList[recvUserId] != null && alarmSendList[recvUserId] == false) return;
         profile = _memberProfiles[recvUserId]!;
-        fcm.sendMessage(userToken: profile.fcmToken, title: "${myProfileEntity!.name}", body: message, type: AlertType.TO_CHAT_ROOM, clickAction: {
-          "chat_id": myProfileEntity!.profileId,
-        }).then((value) => print(value));
+        fcm.sendMessage(userToken: profile.fcmToken,
+            title: "${myProfileEntity!.name}",
+            body: message,
+            type: AlertType.TO_CHAT_ROOM,
+            clickAction: {
+              "chat_id": myProfileEntity!.profileId,
+            }).then((value) => print(value));
       }
     }
     return;
@@ -557,11 +576,15 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
         mainAxisSize: MainAxisSize.max,
         children: [
           const Align(alignment: Alignment.topCenter, child:
-            Center(child: Text("채팅방 구성원", style: TextStyle(fontSize: 16),),),),
+          Center(child: Text("채팅방 구성원", style: TextStyle(fontSize: 16),),),),
           const Divider(thickness: 1.5,),
           SizedBox(
-            height: MediaQuery.of(context).size.height-126,
-            child: ListView.separated(physics: NeverScrollableScrollPhysics(), itemBuilder: (context, index) {
+            height: MediaQuery
+                .of(context)
+                .size
+                .height - 126,
+            child: ListView.separated(physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(6, 5, 0, 5),
                   child: Row(
@@ -572,20 +595,23 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
                         width: 40,
                         height: 40,
                         child: GestureDetector(
-                          onTap: () {
-                            if (!_memberProfiles[members![index]]!.isValid) return;
-                            if (myUuid != members![index]) return;
-                            Navigator.of(context).pop();
-                            showAlert("신고 개발중입니다.", context, colorLightGrey);
-                          },
-                          child: myUuid != members![index] ? Icon(CupertinoIcons.person_crop_circle_fill_badge_exclam, color: colorError,)
-                          : const SizedBox()
+                            onTap: () {
+                              if (!_memberProfiles[members![index]]!.isValid) return;
+                              if (myUuid != members![index]) return;
+                              Navigator.of(context).pop();
+                              showAlert("신고 개발중입니다.", context, colorLightGrey);
+                            },
+                            child: myUuid != members![index] ? Icon(CupertinoIcons.person_crop_circle_fill_badge_exclam, color: colorError,)
+                                : const SizedBox()
                         ),
                       )
                     ],
                   ),
                 );
-            }, separatorBuilder: (BuildContext context, int index) => const Divider(thickness: 1,), itemCount: isGroupChat ? _memberProfiles.length : 2, padding: EdgeInsets.zero,),
+              },
+              separatorBuilder: (BuildContext context, int index) => const Divider(thickness: 1,),
+              itemCount: isGroupChat ? _memberProfiles.length : 2,
+              padding: EdgeInsets.zero,),
           ),
         ],
       ),
@@ -597,8 +623,7 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
 }
 
 // uid에 해당하는 UserChatData에 채팅방 postId 또는 채팅 상대 recvUserId 연결
-Future<void> addChatDataList(
-  bool isGroupChat, {
+Future<void> addChatDataList(bool isGroupChat, {
   String? uid,
   String? recvUserId,
   int? postId,

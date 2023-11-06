@@ -35,6 +35,8 @@ String? myUuid;
 StateSetter? hubLoadingStateSetter;
 bool hubLoadingContainerVisible = false;
 Function? hubPageJump;
+StateSetter? appbarStateSetter;
+PageController? hubPageController;
 
 class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObserver{
   static List<Widget> _pages = <Widget>[BoardHomePage(), ChatRoomListScreen(), PageAlert(), PageProfile()];
@@ -51,11 +53,8 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _pageController!.dispose();
+    hubPageController!.dispose();
   }
-
-  StateSetter? appbarStateSetter;
-  PageController? _pageController;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +65,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
           bottomNavigationBar: StatefulBuilder(
             builder: (BuildContext context, StateSetter bottomAppbarSetState) {
               appbarStateSetter = bottomAppbarSetState;
-              return BoardBottomAppBar(pageController: _pageController!);
+              return BoardBottomAppBar(pageController: hubPageController!);
             },
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -99,7 +98,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
           // 글쓰기 플로팅 버튼
           body: SafeArea(
               child: PageView(
-                controller: _pageController,
+                controller: hubPageController,
                 physics: NeverScrollableScrollPhysics(),
                 children: _pages,
               )),
@@ -134,10 +133,10 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
             listStateSetter!(() {});
           }
         }));
-    _pageController = PageController();
+    hubPageController = PageController();
     hubPageJump = (int index) {
       appBarSelectedIdx = 3;
-      _pageController?.jumpToPage(index);
+      hubPageController?.jumpToPage(index);
       if (appbarStateSetter != null) {
         appbarStateSetter!(() {});
       }
@@ -176,7 +175,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
         } else {
           Get.to(() => ChatScreen(recvUserId: message.data[CHAT_ID]));
         }
-      } else if (message.data[POST_ID]) { // 게시물
+      } else if (message.data[POST_ID] != null) { // 게시물
         final int postId = int.parse(message.data[POST_ID]);
         Get.to(() => BoardPostPage(postId: postId));
       } else if (message.data[MEETING_ID] != null) {
@@ -191,7 +190,7 @@ class _BoardPageMainHub extends State<BoardPageMainHub> with WidgetsBindingObser
         }
       } else if (message.data["type"] == AlertType.TO_PROFILE) {
         appBarSelectedIdx = 3;
-        _pageController?.jumpToPage(3);
+        hubPageController?.jumpToPage(3);
         appbarStateSetter!(() {});
       }
     }

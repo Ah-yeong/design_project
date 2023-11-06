@@ -4,6 +4,7 @@ import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_database_platform_interface/firebase_database_platform_interface.dart' as rt;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../boards/post_list/page_hub.dart';
 import 'models/chat_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,19 +18,21 @@ class ChatMessage extends StatefulWidget {
   final int? postId;
   final String? recvUser;
   final List<String>? members;
+  final bool? valid;
 
-  const ChatMessage({Key? key, this.postId, this.recvUser, this.members,}) : super(key: key);
+  const ChatMessage({Key? key, this.postId, this.recvUser, this.members, this.valid}) : super(key: key);
 
   @override
-  _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members);
+  _ChatMessageState createState() => _ChatMessageState(postId, recvUser, members, valid);
 }
 
 class _ChatMessageState extends State<ChatMessage> with AutomaticKeepAliveClientMixin{
   final int? postId;
   final String? recvUserId;
   final List<String>? members;
+  final bool? validChat;
 
-  _ChatMessageState(this.postId, this.recvUserId, this.members);
+  _ChatMessageState(this.postId, this.recvUserId, this.members, this.validChat);
 
   final _chatController = TextEditingController();
 
@@ -37,6 +40,7 @@ class _ChatMessageState extends State<ChatMessage> with AutomaticKeepAliveClient
   late String chatDocName;
   late String chatColName;
   late String sendUserId;
+
 
   bool calculateChecker = false;
   bool spLoaded = false;
@@ -250,7 +254,7 @@ class _ChatMessageState extends State<ChatMessage> with AutomaticKeepAliveClient
                     final chat = _savedChat!.savedChatList[i];
                     final timestamp = chat.ts;
                     // 채팅 구분 표시 위젯
-                    final userName = chat.nickName;
+                    final userName = validChat! ? chat.nickName : "탈퇴한 사용자";
                     localBubbleStorage
                         .add(ChatDataModel(text: chat.text, ts: timestamp, nickName: userName, unreadCount: 0, uuid: chat.uuid));
                   }

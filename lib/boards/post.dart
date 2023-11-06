@@ -352,7 +352,7 @@ class _BoardPostPage extends State<BoardPostPage> {
     try {
       await postEntity!.loadPost().then((value) async {
         if (isReload != true) {
-          profileEntity = EntityProfiles(postEntity!.getWriterId()+"ㅇ");
+          profileEntity = EntityProfiles(postEntity!.getWriterId());
           await profileEntity!.loadProfile().then((value) {
             _markers.add(Marker(markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
             _checkWriterId(postEntity!.getWriterId());

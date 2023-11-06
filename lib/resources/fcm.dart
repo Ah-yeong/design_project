@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/alert/models/alert_object.dart';
+import 'package:design_project/boards/post.dart';
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/chat/chat_screen.dart';
 import 'package:design_project/main.dart';
@@ -14,6 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
+
+import '../boards/post_list/bottom_appbar.dart';
+import '../meeting/models/location_manager.dart';
+import '../meeting/share_location.dart';
 
 class FCMController {
 
@@ -109,6 +114,8 @@ class FCMController {
       }
     }
 
+    AlertType alertType = AlertType.fromJson(clickActionValue != null ? clickActionValue["type"] : AlertType.NONE.toJson());
+
     // 이미 메시지가 띄워져 있는 경우 삭제하고 띄움
     if (nowFlushBar != null && !nowFlushBar!.isDismissed()) {
       nowFlushBar!.dismiss();
@@ -128,21 +135,40 @@ class FCMController {
       onTap: (value) async {
         await value.dismiss();
         if (clickActionValue == null) return;
-        if (clickActionValue["is_group_chat"] == null || clickActionValue["is_group_chat"] == "false") {
-          if(isInChat) {
-            nestedChatOpenSignal = true;
-            Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: clickActionValue["chat_id"])));
+        if (alertType == AlertType.TO_CHAT_ROOM) {
+          if (clickActionValue["is_group_chat"] == null || clickActionValue["is_group_chat"] == "false") {
+            if(isInChat) {
+              nestedChatOpenSignal = true;
+              Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (context) => ChatScreen(recvUserId: clickActionValue["chat_id"])));
+            } else {
+              Get.to(() => ChatScreen(recvUserId: clickActionValue["chat_id"]));
+            }
           } else {
-            Get.to(() => ChatScreen(recvUserId: clickActionValue["chat_id"]));
+            if(isInChat) {
+              nestedChatOpenSignal = true;
+              Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (context) => ChatScreen(postId: int.parse(clickActionValue["chat_id"]))));
+            } else {
+              Get.to(() => ChatScreen(postId: int.parse(clickActionValue["chat_id"])));
+            }
           }
-        } else {
-          if(isInChat) {
-            nestedChatOpenSignal = true;
-            Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(builder: (context) => ChatScreen(postId: int.parse(clickActionValue["chat_id"]))));
-          } else {
-            Get.to(() => ChatScreen(postId: int.parse(clickActionValue["chat_id"])));
+        } else if (alertType == AlertType.TO_POST){
+          Get.to(() => BoardPostPage(postId: int.parse(clickActionValue["post_id"])));
+        } else if (alertType == AlertType.TO_SHARE_LOCATION) {
+          final int meeting_id = int.parse(clickActionValue["meeting_id"]);
+          Get.to(() => ChatScreen(postId: meeting_id));
+          try {
+            LocationManager existTest = LocationManager();
+            await existTest.getLocationGroupData(meeting_id);
+            Get.to(() => PageShareLocation(), arguments: meeting_id);
+          } catch (e) {
+            showAlert("위치 공유 지원이 종료된 모임이에요!", navigatorKey.currentContext!, colorError);
           }
+        } else if (alertType == AlertType.TO_PROFILE) {
+          appBarSelectedIdx = 3;
+          hubPageController?.jumpToPage(3);
+          appbarStateSetter!(() {});
         }
+
       },
     )..show(navigatorKey.currentContext!);
 

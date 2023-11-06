@@ -30,7 +30,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
   @override
   void initState() {
     chatStream = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid).snapshots().asyncMap(
-        (chats) => Future.wait([for (var room in chats['chat']) _loadRooms(false, room), for (var room in chats['group_chat']) _loadRooms(true, room)]));
+            (chats) => Future.wait([for (var room in chats['chat']) _loadRooms(false, room), for (var room in chats['group_chat']) _loadRooms(true, room)]));
     super.initState();
   }
 
@@ -65,13 +65,14 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
           room.profile = _profile;
         }
         Map<String, dynamic> chatDocs = {};
-        if ( roomDoc["messages"] != null ) {
+        if (roomDoc["messages"] != null) {
           chatDocs = Map<String, dynamic>.from(roomDoc["messages"]);
         }
         if (chatDocs.length != 0) {
           // 읽은 메시지 카운트
           int checkCount = 0;
-          var keys = chatDocs.keys.toList()..sort();
+          var keys = chatDocs.keys.toList()
+            ..sort();
           for (var key in keys) {
             List<dynamic> readByList = chatDocs[key]["readBy"];
             if (!readByList.contains(myUuid!)) {
@@ -119,7 +120,7 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
     }
     return Future.value(room);
   }
-  
+
   bool _isProcessing = false;
 
   @override
@@ -150,177 +151,185 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
 
                 return list.length != 0
                     ? SlidableAutoCloseBehavior(
-                        child: ListView.separated(
-                          itemCount: list.length + 2,
-                          separatorBuilder: (context, index) => Divider(
-                            //구분선
-                            color: colorLightGrey,
-                            thickness: 0.7,
-                            height: 0.7,
-                          ),
-                          itemBuilder: (context, index) {
-                            if (index == 0 || index == list.length + 1) return const SizedBox();
-                            index = index - 1;
-                            return Slidable(
-                              groupTag: '0',
-                              endActionPane: ActionPane(
-                                motion: ScrollMotion(),
-                                children: [
-                                  CustomSlidableAction(
-                                    flex: 1,
-                                    onPressed: (context) async {
-                                      setState(() {
-                                        _isProcessing = true;
-                                      });
-                                      await list[index].toggleRoomAlert();
-                                      setState(() {
-                                        _isProcessing = false;
-                                      });
+                  child: ListView.separated(
+                    itemCount: list.length + 2,
+                    separatorBuilder: (context, index) =>
+                        Divider(
+                          //구분선
+                          color: colorLightGrey,
+                          thickness: 0.7,
+                          height: 0.7,
+                        ),
+                    itemBuilder: (context, index) {
+                      if (index == 0 || index == list.length + 1) return const SizedBox();
+                      index = index - 1;
+                      return Slidable(
+                        groupTag: '0',
+                        endActionPane: ActionPane(
+                          motion: ScrollMotion(),
+                          children: [
+                            CustomSlidableAction(
+                              flex: 1,
+                              onPressed: (context) async {
+                                setState(() {
+                                  _isProcessing = true;
+                                });
+                                await list[index].toggleRoomAlert();
+                                setState(() {
+                                  _isProcessing = false;
+                                });
+                              },
+                              autoClose: true,
+                              backgroundColor: colorGrey,
+                              child: Icon(
+                                list[index].alarmReceive != null && list[index].alarmReceive! == true ? CupertinoIcons.bell_fill : CupertinoIcons.bell_slash,
+                                size: 23,
+                                color: Colors.white,
+                              ),
+                            ),
+                            CustomSlidableAction(
+                              flex: 1,
+                              onPressed: (context) async {
+                                setState(() {
+                                  _isProcessing = true;
+                                });
+                                DocumentReference doc = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid!);
+                                if (list[index].isGroupChat) {
+                                  doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) =>
+                                      setState(() => _isProcessing = false));
+                                  ChatStorage(list[index].postId.toString())
+                                    ..remove();
+                                } else {
+                                  doc.update({"chat": FieldValue.arrayRemove([getNameChatRoom(myUuid!, list[index].recvUserId!)])}).then((value) =>
+                                      setState(() => _isProcessing = false));
+                                  ChatStorage(list[index].recvUserId!)
+                                    ..remove();
+                                }
+                              },
+                              autoClose: true,
+                              backgroundColor: colorError,
+                              child: Icon(
+                                Icons.delete,
+                                size: 25,
+                                color: Colors.white,
+                              ),
+                            )
+                          ],
+                          extentRatio: 0.4,
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(15, 17, 15, 17),
+                          child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                // if (!list[index].isGroupChat) {
+                                //   if (!list[index].profile!.isValid) {
+                                //     showAlert("채팅방 정보가 잘못되었어요", context, colorLightGrey);
+                                //     return;
+                                //   }
+                                // } else {
+                                //   if (list[index].roomName!.contains("알 수 없음")) {
+                                //     showAlert("채팅방 정보가 잘못되었어요", context, colorLightGrey);
+                                //     return;
+                                //   }
+                                // }
+                                Navigator.of(context)
+                                    .push(MaterialPageRoute(
+                                    builder: (context) {
+                                      isInChat = true;
+                                      if (list[index].isGroupChat) {
+                                        return ChatScreen(
+                                          postId: list[index].postId,
+                                        );
+                                      } else {
+                                        return ChatScreen(
+                                          recvUserId: list[index].recvUserId,
+                                        );
+                                      }
                                     },
-                                    autoClose: true,
-                                    backgroundColor: colorGrey,
-                                    child: Icon(
-                                      list[index].alarmReceive != null && list[index].alarmReceive! == true ? CupertinoIcons.bell_fill : CupertinoIcons.bell_slash,
-                                      size: 23,
-                                      color: Colors.white,
+                                    settings: ModalRoute.of(context)!.settings))
+                                    .then((_) => isInChat = false);
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(3, 0, 15, 0),
+                                    child: getAvatar(list[index].profile, 22.5,
+                                        nullIcon: Icon(
+                                          list[index].isGroupChat ? CupertinoIcons.person_3_fill : list[index].profile!.isValid ? CupertinoIcons.person_fill : CupertinoIcons.exclamationmark,
+                                          color: Colors.white,
+                                          size: 35,
+                                        ),
+                                        backgroundColor: colorGrey),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // 닉네임 표시
+                                            Text('${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
+                                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                            // 마지막 내용 표시
+                                            Text("${list[index].lastTimeStampString}"),
+                                          ],
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // 마지막 채팅 시간 표시
+                                            list[index].lastChat != null
+                                                ? Text(
+                                              list[index].lastChat!.length > 15
+                                                  ? "${list[index].lastChat!.substring(0, 15)}..."
+                                                  : "${list[index].lastChat}",
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: (list[index].unreadCount! > 0 ? Colors.black : Colors.grey),
+                                                  fontWeight: (list[index].unreadCount! > 0 ? FontWeight.bold : FontWeight.normal)),
+                                            )
+                                                : SizedBox(),
+                                            // 읽지 않은 메시지 개수 표시
+                                            list[index].unreadCount! > 0
+                                                ? Container(
+                                              width: (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
+                                              height: 18,
+                                              decoration: BoxDecoration(color: colorSuccess, borderRadius: BorderRadius.circular(18)),
+                                              child: Center(
+                                                child: Text(
+                                                  "${list[index].unreadCount}",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                                : SizedBox(),
+                                          ],
+                                        )
+                                      ],
                                     ),
                                   ),
-                                  CustomSlidableAction(
-                                    flex: 1,
-                                    onPressed: (context) async {
-                                      setState(() {
-                                        _isProcessing = true;
-                                      });
-                                      DocumentReference doc = FirebaseFirestore.instance.collection("UserChatData").doc(myUuid!);
-                                      if (list[index].isGroupChat) {
-                                        doc.update({"group_chat": FieldValue.arrayRemove([list[index].postId])}).then((value) => setState(() => _isProcessing = false));
-                                        ChatStorage(list[index].postId.toString())..remove();
-                                      } else {
-                                        doc.update({"chat": FieldValue.arrayRemove([getNameChatRoom(myUuid!, list[index].recvUserId!)])}).then((value) => setState(() => _isProcessing = false));
-                                        ChatStorage(list[index].recvUserId!)..remove();
-                                      }
-                                    },
-                                    autoClose: true,
-                                    backgroundColor: colorError,
-                                    child: Icon(
-                                      Icons.delete,
-                                      size: 25,
-                                      color: Colors.white,
-                                    ),
-                                  )
                                 ],
-                                extentRatio: 0.4,
-                              ),
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(15, 17, 15, 17),
-                                child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onTap: () {
-                                      if (list[index].isGroupChat) {
-                                        if (!list[index].profile!.isValid || list[index].roomName!.contains("알 수 없음")) {
-                                          showAlert("채팅방 정보가 잘못되었어요", context, colorLightGrey);
-                                          return;
-                                        }
-                                      }
-
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                              builder: (context) {
-                                                isInChat = true;
-                                                if (list[index].isGroupChat) {
-                                                  return ChatScreen(
-                                                    postId: list[index].postId,
-                                                  );
-                                                } else {
-                                                  return ChatScreen(
-                                                    recvUserId: list[index].recvUserId,
-                                                  );
-                                                }
-                                              },
-                                              settings: ModalRoute.of(context)!.settings))
-                                          .then((_) => isInChat = false);
-                                    },
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        // 프로필 이미지 (구현 필요)
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(3, 0, 15, 0),
-                                          child: getAvatar(list[index].profile, 22.5,
-                                              nullIcon: const Icon(
-                                                CupertinoIcons.person_3_fill,
-                                                color: Colors.white,
-                                                size: 35,
-                                              ),
-                                              backgroundColor: colorGrey),
-                                        ),
-                                        Expanded(
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  // 닉네임 표시
-                                                  Text('${list[index].isGroupChat ? list[index].roomName : "${list[index].recvUserNick}"}',
-                                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                                  // 마지막 내용 표시
-                                                  Text("${list[index].lastTimeStampString}"),
-                                                ],
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                              ),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  // 마지막 채팅 시간 표시
-                                                  list[index].lastChat != null
-                                                      ? Text(
-                                                          list[index].lastChat!.length > 15
-                                                              ? "${list[index].lastChat!.substring(0, 15)}..."
-                                                              : "${list[index].lastChat}",
-                                                          style: TextStyle(
-                                                              fontSize: 14,
-                                                              color: (list[index].unreadCount! > 0 ? Colors.black : Colors.grey),
-                                                              fontWeight: (list[index].unreadCount! > 0 ? FontWeight.bold : FontWeight.normal)),
-                                                        )
-                                                      : SizedBox(),
-                                                  // 읽지 않은 메시지 개수 표시
-                                                  list[index].unreadCount! > 0
-                                                      ? Container(
-                                                          width: (18 + 9 * (list[index].unreadCount!.toString().length - 1)),
-                                                          height: 18,
-                                                          decoration: BoxDecoration(color: colorSuccess, borderRadius: BorderRadius.circular(18)),
-                                                          child: Center(
-                                                            child: Text(
-                                                              "${list[index].unreadCount}",
-                                                              style: TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontSize: 12,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        )
-                                                      : SizedBox(),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : Center(
-                        child: Text(
-                          "진행 중인 채팅이 없어요",
-                          style: TextStyle(color: colorGrey),
+                              )),
                         ),
                       );
+                    },
+                  ),
+                )
+                    : Center(
+                  child: Text(
+                    "진행 중인 채팅이 없어요",
+                    style: TextStyle(color: colorGrey),
+                  ),
+                );
               }),
           if (_isProcessing) buildContainerLoading(100)
         ],

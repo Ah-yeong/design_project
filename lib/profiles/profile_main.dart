@@ -67,14 +67,6 @@ class _PageProfileState extends State<PageProfile> {
                       showAlert("gitlimjw@gmail.com\n문의 바랍니다", context, colorGrey, duration: Duration(milliseconds: 5000));
                     },
                   ),
-                  PullDownMenuItem.selectable(
-                    iconWidget: const Icon(CupertinoIcons.exclamationmark_bubble),
-                    title: '프로필 처음 설정',
-                    itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color: Colors.black)),
-                    onTap: () {
-                      Get.to(() => NameSignUpScreen());
-                    },
-                  ),
                 ],
                 buttonBuilder: (context, showMenu) => CupertinoButton(
                   onPressed: showMenu,
