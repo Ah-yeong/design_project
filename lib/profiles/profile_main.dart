@@ -1,18 +1,23 @@
+import 'dart:io';
+
 import 'package:design_project/boards/post_list/page_hub.dart';
 import 'package:design_project/main.dart';
 import 'package:design_project/profiles/completed_group.dart';
 import 'package:design_project/profiles/my_group.dart';
 import 'package:design_project/profiles/my_post.dart';
+import 'package:design_project/profiles/profile_first_set.dart';
 import 'package:design_project/resources/loading_indicator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 import 'package:super_tooltip/super_tooltip.dart';
-import '../entity/profile.dart';
 import '../entity/entity_post.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../resources/fcm.dart';
 import '../resources/resources.dart';
+import '../settings/user_resignation.dart';
 import 'profile_edit.dart';
 
 class PageProfile extends StatefulWidget {
@@ -31,6 +36,53 @@ class _PageProfileState extends State<PageProfile> {
         elevation: 1,
         title: const Text('프로필', style: TextStyle(fontSize: 19, color: Colors.black)),
         backgroundColor: Colors.white,
+        actions: [
+          SizedBox(
+              width: 55,
+              height: 55,
+              child: PullDownButton(
+                itemBuilder: (context) => [
+                  const PullDownMenuTitle(title: Text("프로필 옵션")),
+                  PullDownMenuItem.selectable(
+                    iconWidget: const Icon(CupertinoIcons.lock),
+                    title: '로그아웃',
+                    itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color: Colors.redAccent)),
+                    onTap: () {
+                      _showLogoutPopup();
+                    },
+                  ),
+                  PullDownMenuItem.selectable(
+                    iconWidget: const Icon(CupertinoIcons.lock_slash),
+                    title: '회원 탈퇴',
+                    itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color: Colors.redAccent)),
+                    onTap: () {
+                      Get.to(() => PageResignation());
+                    },
+                  ),
+                  PullDownMenuItem.selectable(
+                    iconWidget: const Icon(CupertinoIcons.exclamationmark_bubble),
+                    title: '버그 제보',
+                    itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color: Colors.black)),
+                    onTap: () {
+                      showAlert("gitlimjw@gmail.com\n문의 바랍니다", context, colorGrey, duration: Duration(milliseconds: 5000));
+                    },
+                  ),
+                  PullDownMenuItem.selectable(
+                    iconWidget: const Icon(CupertinoIcons.exclamationmark_bubble),
+                    title: '프로필 처음 설정',
+                    itemTheme: PullDownMenuItemTheme(textStyle: TextStyle(color: Colors.black)),
+                    onTap: () {
+                      Get.to(() => NameSignUpScreen());
+                    },
+                  ),
+                ],
+                buttonBuilder: (context, showMenu) => CupertinoButton(
+                  onPressed: showMenu,
+                  padding: EdgeInsets.zero,
+                  child: const Icon(Icons.settings, color: Colors.black),
+                ),
+              ))
+        ],
       ),
       backgroundColor: Colors.white,
       body: myProfileEntity!.isLoading
@@ -89,11 +141,10 @@ class _PageProfileState extends State<PageProfile> {
                                               userTempImage[myProfileEntity!.profileId] = NetworkImage(url);
                                             });
                                           } catch (e) {
-                                            if ( !e.toString().contains("No object exists")) {
+                                            if (!e.toString().contains("No object exists")) {
                                               print("Profile image error : $e");
                                             }
                                           }
-
                                         });
                                       });
                                     },
@@ -236,7 +287,8 @@ class _PageProfileState extends State<PageProfile> {
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           style: TextStyle(
-                                              fontSize: 13, color: myProfileEntity!.textInfo == null || myProfileEntity!.textInfo == "" ? Colors.grey : Colors.black)),
+                                              fontSize: 13,
+                                              color: myProfileEntity!.textInfo == null || myProfileEntity!.textInfo == "" ? Colors.grey : Colors.black)),
                                     )),
                                   ],
                                 ),
@@ -261,7 +313,11 @@ class _PageProfileState extends State<PageProfile> {
                           children: [
                             Row(
                               children: [
-                                Icon(CupertinoIcons.doc_text, color: colorSuccess, size: 23,),
+                                Icon(
+                                  CupertinoIcons.doc_text,
+                                  color: colorSuccess,
+                                  size: 23,
+                                ),
                                 Text(
                                   '   작성한 모임 게시글',
                                   style: TextStyle(
@@ -293,7 +349,11 @@ class _PageProfileState extends State<PageProfile> {
                           children: [
                             Row(
                               children: [
-                                Icon(CupertinoIcons.calendar_today, color: colorSuccess, size: 23,),
+                                Icon(
+                                  CupertinoIcons.calendar_today,
+                                  color: colorSuccess,
+                                  size: 23,
+                                ),
                                 Text(
                                   '   진행 예정 모임',
                                   style: TextStyle(
@@ -325,7 +385,11 @@ class _PageProfileState extends State<PageProfile> {
                           children: [
                             Row(
                               children: [
-                                Icon(CupertinoIcons.check_mark_circled, color: colorSuccess, size: 23,),
+                                Icon(
+                                  CupertinoIcons.check_mark_circled,
+                                  color: colorSuccess,
+                                  size: 23,
+                                ),
                                 Text(
                                   '   종료된 모임 및 평가',
                                   style: TextStyle(
@@ -370,6 +434,47 @@ class _PageProfileState extends State<PageProfile> {
     await myProfileEntity!.loadProfile().then((n) {
       setState(() {});
     });
+  }
+
+  Future<void> _showLogoutPopup() async {
+    final action = CupertinoActionSheet(
+      title: Text(
+        "${myProfileEntity!.name} 계정에서 로그아웃 할까요?",
+        style: TextStyle(fontSize: 15),
+      ),
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("로그아웃"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.pop(context);
+            hubLoadingStateSetter!(() {
+              hubLoadingContainerVisible = true;
+            });
+            await FirebaseAuth.instance.signOut().then((value) {});
+            await FCMController()
+              ..removeUserTokenDB();
+            await showCupertinoDialog(
+                context: context,
+                builder: (context) => CupertinoAlertDialog(
+                      title: Text("로그아웃 성공!"),
+                      content: Column(
+                        children: [Text("어플을 재실행하세요!.")],
+                      ),
+                      actions: [CupertinoDialogAction(child: Text("확인"), onPressed: () => Navigator.pop(context))],
+                    ));
+            exit(0);
+          },
+        ),
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("취소"),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
+    await showCupertinoModalPopup(context: context, builder: (context) => action);
   }
 }
 

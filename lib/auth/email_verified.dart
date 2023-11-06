@@ -1,10 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:design_project/auth/resend_verify_mail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../alert/models/alert_object.dart';
+import '../boards/post_list/page_hub.dart';
+import '../resources/fcm.dart';
 import '../resources/resources.dart';
 import '../main.dart';
-import '../profiles/profile_first_setting/input_form.dart';
+import '../profiles/profile_first_set.dart';
 
 class PageEmailVerified extends StatefulWidget {
   const PageEmailVerified({super.key});
@@ -18,18 +23,21 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
 
   var _user = FirebaseAuth.instance.currentUser;
 
-  _checkEmailVerified() {
+  Future<void> _checkEmailVerified() async {
     if (_user != null) {
       try {
-        _user!.reload().then((event) {
+        await _user!.reload();
           _user = FirebaseAuth.instance.currentUser;
           if (_user!.emailVerified) {
+            myUuid = FirebaseAuth.instance.currentUser!.uid;
+            await getServerToken();
+            await postManager.loadPages("");
+            await _initializeFCM();
             Get.off(() => NameSignUpScreen());
           } else {
             print("what?");
             showAlert("이메일 인증이 완료되지 않았어요!", context, colorWarning);
           }
-        });
       } catch (e) {
         showAlert("알 수 없는 오류가 발생했어요", context, colorWarning);
       }
@@ -139,5 +147,68 @@ class _StatePageEmailVerified extends State<PageEmailVerified> {
         ),
       ),
     );
+  }
+
+  _initializeFCM() async {
+    // FCM 토큰 받아오기
+    myUuid = FirebaseAuth.instance.currentUser!.uid;
+
+    myToken = await FirebaseMessaging.instance.getToken();
+
+    try {
+      DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+      await reference.update({"fcmToken": myToken});
+    } catch (e) {
+      if (e.toString().contains("document was not found")) {
+        FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
+      }
+    }
+
+    // 토큰 만료 확인
+    FCMController fcm = FCMController();
+    await fcm.sendMessage(userToken: myToken!, title: "TestMessaging", body: "TestMessage", type: AlertType.FCM_TEST).then((value) {
+      if (value == "전송 실패") {
+        FirebaseMessaging.instance.deleteToken().then((value) async {
+          myToken = await FirebaseMessaging.instance.getToken();
+          try {
+            DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+            await reference.update({"fcmToken": myToken});
+          } catch (e) {
+            if (e.toString().contains("document was not found")) {
+              FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!).set({"fcmToken": myToken});
+            }
+          }
+        });
+      }
+    });
+
+    // 토큰 리프레시
+    FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
+      myToken = fcmToken;
+      if (myProfileEntity != null) {
+        myProfileEntity!.fcmToken = fcmToken;
+      }
+      DocumentReference reference = FirebaseFirestore.instance.collection("UserProfile").doc(myUuid!);
+      await reference.update({"fcmToken": fcmToken});
+      print("fcmToken 새로고침");
+    }).onError((err) {
+      // Error getting token
+    });
+    // 백그라운드 푸시알림
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+    // 포어그라운드 푸시알림
+    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+      if (message != null) {
+        if (message.notification != null) {
+          if (message.data.containsKey("type")) {
+            var fcm = FCMController();
+            fcm.showNotificationSnackBar(title: message.notification!.title!, body: message.notification!.body!, clickActionValue: message.data);
+            //_bottomAppbarRefresh(type);
+            // else if ...
+          }
+        }
+      }
+    });
   }
 }

@@ -340,24 +340,34 @@ class _BoardPostPage extends State<BoardPostPage> {
     postId = widget.postId;
     postEntity = EntityPost(postId, isProcessing: isProcessing);
     _loadPost().then((value) {
-      if (!isProcessing!) postEntity!.addViewCount(myUuid!);
-      setState(() => isRequestLoading = false);
+      if (value == true) {
+        if (!isProcessing!) postEntity!.addViewCount(myUuid!);
+        setState(() => isRequestLoading = false);
+      }
     });
   }
 
   Future<bool> _loadPost({bool? isReload}) async {
+    bool validWriter = true;
     try {
       await postEntity!.loadPost().then((value) async {
         if (isReload != true) {
-          profileEntity = EntityProfiles(postEntity!.getWriterId());
+          profileEntity = EntityProfiles(postEntity!.getWriterId()+"ㅇ");
           await profileEntity!.loadProfile().then((value) {
             _markers.add(Marker(markerId: const MarkerId('1'), draggable: true, onTap: () {}, position: postEntity!.getLLName().latLng));
             _checkWriterId(postEntity!.getWriterId());
             _loadPostTime();
           });
+          if (!profileEntity!.isValid) {
+            // 프로필이 잘못되었을 때 (작성자의 탈퇴 등)
+            await postEntity!.removePost().then((value) => postManager.reloadPages("").then((value) => listStateSetter!((){})));
+            Navigator.of(context).pop();
+            showAlert("탈퇴한 작성자입니다.", context, colorGrey);
+            validWriter = false;
+          }
         }
       });
-
+      if (!validWriter) return false;
       // 중복 체크
       if (!isProcessing!) {
         List<String> loadedProfileList = [];
@@ -930,7 +940,10 @@ Widget drawProfile(EntityProfiles profileEntity, BuildContext context, {bool? wi
   return GestureDetector(
     behavior: HitTestBehavior.translucent,
     onTap: () {
-      Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp, arguments: withChatButton == null || withChatButton == true );
+      if ( profileEntity.isValid ) {
+        Get.to(() => BoardProfilePage(profileId: profileEntity.profileId), transition: Transition.downToUp,
+            arguments: withChatButton == null || withChatButton == true);
+      }
     },
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

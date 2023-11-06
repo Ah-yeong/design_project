@@ -216,6 +216,13 @@ class _ChatRoomListScreenState extends State<ChatRoomListScreen> with AutomaticK
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
+                                      if (list[index].isGroupChat) {
+                                        if (!list[index].profile!.isValid || list[index].roomName!.contains("알 수 없음")) {
+                                          showAlert("채팅방 정보가 잘못되었어요", context, colorLightGrey);
+                                          return;
+                                        }
+                                      }
+
                                       Navigator.of(context)
                                           .push(MaterialPageRoute(
                                               builder: (context) {

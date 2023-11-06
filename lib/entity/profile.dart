@@ -23,7 +23,7 @@ class EntityProfiles {
   var textInfo;
   var post;
   bool isLoading = true;
-  // bool isLoaded = false;
+  bool isValid = true;
   var addr1;
   var addr2;
   var addr3;
@@ -44,41 +44,50 @@ class EntityProfiles {
       }
     }
 
-    await FirebaseFirestore.instance.collection("UserProfile").doc(
-        profileId.toString()).get().then((ds) {
-      birth = ds.get("birth");
-      age = ds.get("age");
-      profileImagePath = "assets/images/userImage.png";
-      commute = ds.get("commute");
-      gender = ds.get("gender");
-      hobby = ds.get("hobby");
-      hobbyIndex = ds.get("hobbyIndex");
-      mbtiIndex = ds.get("mbtiIndex");
-      name = ds.get("nickName");
-      major = "소프트웨어학과";
-      textInfo = ds.get("textInfo");
-      mannerGroup = 0.0 + ds.get("mannerGroup");
-      post = ds.get("post");
-      addr1 = ds.get("addr1");
-      addr2 = ds.get("addr2");
-      addr3 = ds.get("addr3");
-      fcmToken = ds.get("fcmToken");
-    });
+    try {
+      await FirebaseFirestore.instance.collection("UserProfile").doc(
+          profileId.toString()).get().then((ds) {
+        birth = ds.get("birth");
+        age = ds.get("age");
+        commute = ds.get("commute");
+        gender = ds.get("gender");
+        hobby = ds.get("hobby");
+        hobbyIndex = ds.get("hobbyIndex");
+        mbtiIndex = ds.get("mbtiIndex");
+        name = ds.get("nickName");
+        major = "소프트웨어학과";
+        textInfo = ds.get("textInfo");
+        mannerGroup = 0.0 + ds.get("mannerGroup");
+        post = ds.get("post");
+        addr1 = ds.get("addr1");
+        addr2 = ds.get("addr2");
+        addr3 = ds.get("addr3");
+        fcmToken = ds.get("fcmToken");
+      });
+    } catch (e) {
+      birth = "null";
+      age = 0;
+      commute = "";
+      gender = "male";
+      hobby = [];
+      hobbyIndex = [];
+      mannerGroup = 0.0;
+      mbtiIndex = -1;
+      name = "(알 수 없음)";
+      post = [];
+      textInfo = "탈퇴한 프로필";
+      fcmToken = "logOut";
+      addr1 = "";
+      addr2 = "";
+      addr3 = "";
+      major = "";
+      isValid = false;
+    }
+
     isLoading = false;
   }
 
   String getProfileId() => profileId;
-
-  makeTestingProfile() {
-    name = "홍길동";
-    age = 23;
-    major = "소프트웨어학과";
-    profileImagePath = "assets/images/userImage.png";
-    mannerGroup = 80;
-    hobby = ["술", "영화"];
-    birth = "1999-10-19";
-    commute = "통학";
-  }
 
   Future<int> addPostId() async {
     try {

@@ -42,7 +42,7 @@ bool isInChat = false;
 bool nestedChatOpenSignal = false;
 
 // 백그라운드 푸시알림 핸들러
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (message.notification != null) {
     if (message.data.containsKey("type")) {
       String type = message.data["type"];
@@ -554,7 +554,7 @@ class _MyHomePage extends State<MyHomePage> {
       // Error getting token
     });
     // 백그라운드 푸시알림
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     // 포어그라운드 푸시알림
     FirebaseMessaging.onMessage.listen((RemoteMessage? message) {

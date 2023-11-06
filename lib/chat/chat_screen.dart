@@ -209,6 +209,7 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
                             members: members,
                           ),
                         ),
+                        if (!(recvUserId != null && _memberProfiles[recvUserId]!.name == "(알 수 없음)"))
                         Container(
                             decoration: BoxDecoration(
                                 color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 0.8, spreadRadius: 0.5)]),
@@ -572,6 +573,7 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
                         height: 40,
                         child: GestureDetector(
                           onTap: () {
+                            if (!_memberProfiles[members![index]]!.isValid) return;
                             if (myUuid != members![index]) return;
                             Navigator.of(context).pop();
                             showAlert("신고 개발중입니다.", context, colorLightGrey);

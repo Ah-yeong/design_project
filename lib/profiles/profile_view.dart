@@ -49,7 +49,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
         toolbarHeight: 40,
         elevation: 1,
       ),
-      bottomNavigationBar: myUuid! != profileEntity!.profileId && (_isShowChatButton == null || _isShowChatButton == true)
+      bottomNavigationBar: myUuid! != profileEntity!.profileId && (_isShowChatButton == null || _isShowChatButton == true) && profileEntity!.isValid
           ? Container(
               decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(offset: Offset(0, -1), color: colorLightGrey, blurRadius: 1)]),
               width: double.infinity,
@@ -329,7 +329,7 @@ class _BoardProfilePage extends State<BoardProfilePage> {
   @override
   void initState() {
     super.initState();
-    profileEntity = EntityProfiles(widget.profileId);
+    profileEntity = EntityProfiles("${widget.profileId}");
     profileEntity!.loadProfile().then((n) {
       mannerWidget = MannerTemperatureWidget(mannerScore: profileEntity!.mannerGroup);
       setState(() {

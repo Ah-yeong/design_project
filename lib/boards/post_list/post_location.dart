@@ -88,7 +88,6 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
                           child: GoogleMap(
                             mapToolbarEnabled: false,
                             zoomControlsEnabled: false,
-                            zoomGesturesEnabled: false,
                             myLocationButtonEnabled: false,
                             compassEnabled: false,
                             buildingsEnabled: false,
@@ -181,17 +180,24 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
             markerId: MarkerId("$markerid"),
             position: postManager.list[i].getLLName().latLng,
             onTap: () async {
-              hubLoadingStateSetter!(() {
-                hubLoadingContainerVisible = true;
-              });
-              profileEntity = EntityProfiles(postManager.list[i].getWriterId());
-              await profileEntity!.loadProfile();
-              hubLoadingStateSetter!(() {
-                hubLoadingContainerVisible = false;
-              });
-              showModalBottomSheet(
-                  context: context, builder: (BuildContext context) => _buildModalSheet(context, i), backgroundColor: Colors.transparent);
-              //postLoad(ep.getPostId());
+              try {
+                hubLoadingStateSetter!(() {
+                  hubLoadingContainerVisible = true;
+                });
+                profileEntity = EntityProfiles(postManager.list[i].getWriterId());
+                await profileEntity!.loadProfile();
+                hubLoadingStateSetter!(() {
+                  hubLoadingContainerVisible = false;
+                });
+                showModalBottomSheet(
+                    context: context, builder: (BuildContext context) => _buildModalSheet(context, i), backgroundColor: Colors.transparent);
+              } catch (e) {
+                showAlert("삭제됐거나 완료된 모임이에요!", context, colorError);
+                await postManager.reloadPages("").then((value) => _reloadMarkers());
+                hubLoadingStateSetter!(() {
+                  hubLoadingContainerVisible = false;
+                });
+              }
             },
             draggable: true,
             icon: postManager.list[i].getMarker()),
@@ -208,8 +214,10 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
 
   Future<void> _getPlaceAddress() async {
     try {
+
       final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko';
       final res = await http.get(Uri.parse(url));
+      print('https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko');
       var value = jsonDecode(res.body)['results'][0]['address_components'];
       setState(() {
         nowPosition = "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
