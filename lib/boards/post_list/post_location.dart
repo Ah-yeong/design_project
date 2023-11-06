@@ -217,7 +217,6 @@ class _BoardLocationPage extends State<BoardLocationPage> with AutomaticKeepAliv
 
       final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko';
       final res = await http.get(Uri.parse(url));
-      print('https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=AIzaSyDBMRfh4ETwbEdvkQav0Rp4PWLHCMvTE7w&language=ko');
       var value = jsonDecode(res.body)['results'][0]['address_components'];
       setState(() {
         nowPosition = "${value[3]['long_name']} ${value[2]['long_name']} ${value[1]['long_name']} ${value[0]['long_name']}";
