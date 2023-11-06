@@ -281,10 +281,16 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                   backgroundColor: Color(0xFF6ACA9A),
                 ),
                 onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
                   EvaluationManager manager = EvaluationManager();
                   await manager.evaluationCreate(members, scores, notAttendedUser, arrivals, meetingId); // notAttendedUser : 참여 인정 -> true
                   await manager.updateMannerGroup(scores);
                   await manager.evaluationEnd(meetingId);
+                  setState(() {
+                    _isLoading = false;
+                  });
                   Navigator.pop(context);
                 },
               ),
@@ -327,7 +333,8 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
       if (uuid != FirebaseAuth.instance.currentUser!.uid) {
         EntityProfiles profiles = EntityProfiles(uuid);
         await profiles.loadProfile();
-        profileList[uuid] = profiles;
+        if (profiles.isValid) profileList[uuid] = profiles;
+        else members!.remove(uuid);
       }
     }
     return profileList;
