@@ -54,7 +54,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 // 서버 토큰 받아오기
-Future<void> tokenTimestampCheck() async {
+Future<void> getServerToken() async {
   DocumentReference ref = FirebaseFirestore.instance.collection("Token").doc("accessToken");
   DocumentSnapshot snapshot = await ref.get();
   accessToken = snapshot.get("tokenValue");
@@ -356,6 +356,7 @@ class _MyHomePage extends State<MyHomePage> {
       if (FirebaseAuth.instance.currentUser != null) {
         // postManager 로딩
         if (FirebaseAuth.instance.currentUser!.emailVerified) {
+          await getServerToken();
           postManager.loadPages("");
           await _initializeFCM();
         }
@@ -477,8 +478,6 @@ class _MyHomePage extends State<MyHomePage> {
     controllerId = TextEditingController();
     controllerPw = TextEditingController();
 
-    // 서버 토큰 갱신
-    tokenTimestampCheck();
     MyIcon.loadUserIcon();
     _loadStorage().then((value) {
       _handleViewCountCoolDown();

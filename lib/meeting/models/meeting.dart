@@ -11,6 +11,7 @@ import '../../boards/post_list/post_list.dart';
 class Meeting {
   int _meetingId;
   String _organizerUuid;
+  String _meetingName;
   DateTime _meetTime;
   List<String> _memberUuids;
   LLName _meetLocation;
@@ -19,7 +20,7 @@ class Meeting {
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("Meetings");
   CollectionReference _userInstance = FirebaseFirestore.instance.collection("UserMeetings");
 
-  Meeting(this._meetingId, this._meetTime, this._memberUuids, this._meetLocation, this._isVoluntary, this._organizerUuid);
+  Meeting(this._meetingId, this._meetTime, this._memberUuids, this._meetLocation, this._isVoluntary, this._organizerUuid, this._meetingName);
 
   DocumentReference getMeetingDocument() {
     return _meetingInstance.doc(_meetingId.toString());
@@ -27,8 +28,15 @@ class Meeting {
 
   Future<void> upload({required bool? init}) async {
     if (init!) {
-      await getMeetingDocument()
-          .set({"id": _meetingId, "meetTime": _meetTime, "members": _memberUuids, "location": _meetLocation.toJson(), "isVoluntary": _isVoluntary, "organizerUuid" : _organizerUuid});
+      await getMeetingDocument().set({
+        "id": _meetingId,
+        "meetTime": _meetTime,
+        "members": _memberUuids,
+        "location": _meetLocation.toJson(),
+        "isVoluntary": _isVoluntary,
+        "organizerUuid": _organizerUuid,
+        "meetingName": _meetingName
+      });
     }
     await uploadMembers();
   }
@@ -75,9 +83,9 @@ class Meeting {
       onTap: () {
         // 모임 채팅방으로 이동
         Get.off(() => ChatScreen(
-          postId: _meetingId,
-          members: _memberUuids,
-        ));
+              postId: _meetingId,
+              members: _memberUuids,
+            ));
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -120,13 +128,17 @@ class Meeting {
                       borderRadius: BorderRadius.circular(8),
                       overlayColor: MaterialStateProperty.all(Colors.white38),
                       onTap: () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("평가하기 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                            Icon(Icons.arrow_forward_ios, color: Colors.white, size: 15,),
-                          ],
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("평가하기 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 15,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 )

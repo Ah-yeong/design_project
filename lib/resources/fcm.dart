@@ -81,7 +81,7 @@ class FCMController {
         return null;
       } else {
         if(resend == null && type != AlertType.FCM_TEST) {
-          await tokenTimestampCheck();
+          await getServerToken();
           String? result = await sendMessage(userToken: userToken, title: title, body: body, type: type, clickAction: clickAction, resend: true);
           return result;
         } else {
