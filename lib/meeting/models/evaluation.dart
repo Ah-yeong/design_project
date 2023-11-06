@@ -50,7 +50,7 @@ class Evaluation{
     }
   }
 
-  Future<void> count(int meetingId, Map<String, dynamic> notAttendedUser) async {
+  Future<void> count(int meetingId, Map<String, dynamic> notAttendedUser, int memberCount) async {
     for (String uid in notAttendedUser.keys) {
       if(notAttendedUser[uid] == true){
         DocumentReference evalDocument = _evaluationInstance.doc(uid);
@@ -66,7 +66,7 @@ class Evaluation{
             } else { // meetings에 meetingId 없음
               meetingData[meetingId.toString()] = {};
               meetingData["count"] = 1;
-              meetingData["memberCount"] = _evaluatedUsers.length;
+              meetingData["memberCount"] = memberCount;
             }
 
             if(meetingData["count"] == meetingData["memberCount"]){
@@ -77,11 +77,11 @@ class Evaluation{
             userData["meetings"] = meetingsData;
             await evalDocument.set(userData);
           } else {  // meetings 없음 user는 있을수도 ?
-            userData.addAll({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+            userData.addAll({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : memberCount}}});
             await evalDocument.set(userData);
           }
         } else {
-          await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : _evaluatedUsers.length}}});
+          await evalDocument.set({"meetings": {meetingId.toString(): {"count": 1, "memberCount" : memberCount}}});
         }
       }
     }

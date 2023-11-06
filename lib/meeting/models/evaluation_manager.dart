@@ -6,11 +6,20 @@ import 'evaluation.dart';
 class EvaluationManager {
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("EvaluatedMeetings");
 
-  Future<void> evaluationCreate(members, score, notAttendedUser, meetingId) async {
-    Evaluation newEvaluation= convertScoreToUserId(score);
+  Future<void> evaluationCreate(members, score, notAttendedUser, arrivals, meetingId) async {
+    Evaluation newEvaluation = convertScoreToUserId(score);
     await uploadUser(newEvaluation);
-    await uploadCount(Evaluation(members), notAttendedUser, meetingId);
+    int memberCount = CountArrivalsTrue(arrivals);
+    await uploadCount(Evaluation(members), notAttendedUser, meetingId, memberCount);
     return;
+  }
+
+  int CountArrivalsTrue(arrivals){
+    int cnt = 0;
+    for (String uid in arrivals.containsKey) {
+      if(arrivals[uid] == true){ cnt += 1; }
+    }
+    return cnt;
   }
 
   Evaluation convertScoreToUserId(score) {
@@ -30,10 +39,10 @@ class EvaluationManager {
     });
   }
 
-  Future<void> uploadCount(Evaluation evaluation, notAttendedUser, meetingId) async {
+  Future<void> uploadCount(Evaluation evaluation, notAttendedUser, meetingId, memberCount) async {
     DocumentReference reference = evaluation.getEvaluationDocument();
     await reference.get().then((ds) async {
-      await evaluation.count(meetingId, notAttendedUser);
+      await evaluation.count(meetingId, notAttendedUser, memberCount);
     });
   }
 

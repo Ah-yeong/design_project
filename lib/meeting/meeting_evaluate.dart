@@ -279,7 +279,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
               ),
               onPressed: () async {
                 EvaluationManager manager = EvaluationManager();
-                await manager.evaluationCreate(members, scores, notAttendedUser, meetingId); // notAttendedUser : 참여 인정 -> true
+                await manager.evaluationCreate(members, scores, notAttendedUser, arrivals, meetingId); // notAttendedUser : 참여 인정 -> true
                 await manager.updateMannerGroup(scores);
                 await manager.evaluationEnd(meetingId);
                 Navigator.pop(context);
