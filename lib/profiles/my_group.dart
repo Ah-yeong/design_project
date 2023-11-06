@@ -1,6 +1,7 @@
 import 'package:design_project/meeting/models/meeting.dart';
 import 'package:design_project/meeting/models/meeting_manager.dart';
 import 'package:design_project/resources/loading_indicator.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../boards/post.dart';
 import '../entity/entity_post.dart';
@@ -163,86 +164,43 @@ class _PageMyGroup extends State<PageMyGroup> {
 
   Widget _buildPostCard(EntityPost entity) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(
-          width: 5,
-        ),
-        Flexible(
-          fit: FlexFit.tight,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${entity.getPostHead()}', // 글 제목
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
-                      ),
-                      Padding(
-                          padding: const EdgeInsets.only(bottom: 5),
-                          child: Container(
-                            width: 60,
-                            height: 25,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              color: const Color(0xFF6ACA9A),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.emoji_people, color: Colors.white, size: 14,),
-                                      Text(getMaxPersonText(entity),
-                                          style: const TextStyle(
-                                              color: Colors.white, fontSize: 10)),
-                                    ],
-                                  )
-                              ),
-                            ),
-                          )
-                      )
-                    ],
-                  )
-              ),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 5),
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, color: colorGrey, size: 13,),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Row(children: [
+                  SizedBox(width: 35, child: Icon(CupertinoIcons.person_3_fill)),
                   Text(
-                    " ${entity.getLLName().AddressName}",
-                    style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
+                    '${entity.getPostHead()}', // 글 제목
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
                   ),
-                  SizedBox(height: 1,),
-                ],
-              ),
-              SizedBox(height: 1,),
-              Row(
-                children: [
-                  const Icon(Icons.timer_outlined, color: colorGrey, size: 13,),
-                  Text(
-                    getMeetTimeText(entity.getTime()),
-                    style: TextStyle(fontSize: 11, color: Color(0xFF858585)),
-                  ),
-                ],
-              ),
-              SizedBox(height: 5,),
-            ],
-          ),
+                ]),
+              ]),
+            ),
+            const Padding(padding: EdgeInsets.only(bottom: 5)),
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined, color: colorGrey, size: 13),
+                Text(" ${entity.getLLName().AddressName}", style: TextStyle(fontSize: 11, color: Color(0xFF858585))),
+                SizedBox(height: 1),
+              ],
+            ),
+            SizedBox(height: 5),
+          ],
         ),
-        SizedBox(width: 12,),
-        Container(
-          child: Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18,),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(getMeetTimeText(entity.getTime())+" 모임", style: const TextStyle(color: colorGrey, fontSize: 13)),
+            ),
+            Icon(Icons.arrow_forward_ios),
+          ],
         )
       ],
     );

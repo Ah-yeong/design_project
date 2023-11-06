@@ -76,7 +76,9 @@ class EvaluatedMeeting {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                     Row(children: [
                       SizedBox(width: 35, child: Icon(CupertinoIcons.person_3_fill)),
                       Text(
@@ -86,6 +88,7 @@ class EvaluatedMeeting {
                       ),
                     ]),
                   ]),
+                ),
                 const Padding(padding: EdgeInsets.only(bottom: 5)),
                 Row(
                   children: [

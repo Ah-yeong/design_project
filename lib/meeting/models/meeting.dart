@@ -75,9 +75,6 @@ class Meeting {
   Widget buildMeetingCard() {
     String timeText = getMeetTimeText(_meetTime.toString());
 
-    // 모임이 이루어지기 전인지 후인지 분류
-    bool isCompleted = timeText.contains("전");
-
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -117,40 +114,15 @@ class Meeting {
               SizedBox(height: 5),
             ],
           ),
-          isCompleted
-              ? Container(
-                  decoration: BoxDecoration(color: Colors.indigoAccent, borderRadius: BorderRadius.circular(10)),
-                  width: 90,
-                  height: 35,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      overlayColor: MaterialStateProperty.all(Colors.white38),
-                      onTap: () {},
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("평가하기 ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white,
-                            size: 15,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Text("모임 인원 ${_memberUuids.length}명", style: const TextStyle(color: colorGrey, fontSize: 13)),
-                    ),
-                    Icon(Icons.arrow_forward_ios),
-                  ],
-                )
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Text("모임 인원 ${_memberUuids.length}명", style: const TextStyle(color: colorGrey, fontSize: 13)),
+              ),
+              Icon(Icons.arrow_forward_ios),
+            ],
+          )
         ],
       ),
     );
