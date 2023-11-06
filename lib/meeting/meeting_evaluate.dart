@@ -42,7 +42,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
         Scaffold(
           appBar: AppBar(
             elevation: 1,
-            title: Text('${meetingName} 모임 평가', style: TextStyle(fontSize: 18, color: Colors.black)),
+            title: Text('모임 평가', style: TextStyle(fontSize: 18, color: Colors.black)),
             leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: const SizedBox(
@@ -65,10 +65,21 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                 const SizedBox(
                   height: 20,
                 ),
+                Center(
+                  child: Text(
+                    '"${meetingName}" 모임',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
                 const Center(
                   child: Text(
                     '모임 구성원에 대한 개별 평가가 가능해요.',
                     style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(
@@ -184,7 +195,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                               child: Center(child: Text("미참석인원")),
                             ),
                           ),
-                          ListView.builder(
+                          ListView.separated(
                             shrinkWrap: true,
                             itemCount: notAttendedProfiles.length,
                             itemBuilder: (BuildContext context, int index) {
@@ -254,13 +265,12 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
                                       ],
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
-                                    child: Divider(thickness: 1, height: 1),
-                                  )
                                 ],
                               );
                             },
+                            separatorBuilder: (BuildContext context, int index) {
+                              return const Divider();
+                            }
                           )
                         ],
                       ),
