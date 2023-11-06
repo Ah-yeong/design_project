@@ -58,6 +58,7 @@ class _PageAlert extends State<PageAlert> with AutomaticKeepAliveClientMixin {
                       hubLoadingStateSetter!(() {
                         hubLoadingContainerVisible = false;
                       });
+                      setState(() {});
                     },
                   )
                 ],
