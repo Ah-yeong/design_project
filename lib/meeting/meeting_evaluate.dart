@@ -11,11 +11,12 @@ class PageMeetingEvaluate extends StatefulWidget {
   final bool voluntary;
   final Map<String, dynamic> arrivals;
   final int meetingId;
+  final String meetingName;
 
-  const PageMeetingEvaluate({super.key, required this.members, required this.voluntary, required this.arrivals, required this.meetingId});
+  const PageMeetingEvaluate({super.key, required this.members, required this.voluntary, required this.arrivals, required this.meetingId, required this.meetingName});
 
   @override
-  State<StatefulWidget> createState() => _PageMeetingEvaluate(members, voluntary, arrivals, meetingId);
+  State<StatefulWidget> createState() => _PageMeetingEvaluate(members, voluntary, arrivals, meetingId, meetingName);
 }
 
 class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
@@ -25,8 +26,9 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
   int meetingId;
   Map<String, dynamic> arrivals;
   Map<String, dynamic> notAttendedUser = {};
+  String meetingName;
 
-  _PageMeetingEvaluate(this.members, this.voluntary, this.arrivals, this.meetingId);
+  _PageMeetingEvaluate(this.members, this.voluntary, this.arrivals, this.meetingId, this.meetingName);
 
   List<EntityProfiles> userProfileList = [];
   List<EntityProfiles> attendedProfiles = [];
@@ -40,7 +42,7 @@ class _PageMeetingEvaluate extends State<PageMeetingEvaluate> {
         Scaffold(
           appBar: AppBar(
             elevation: 1,
-            title: const Text('모임 평가', style: TextStyle(fontSize: 18, color: Colors.black)),
+            title: Text('${meetingName} 모임 평가', style: TextStyle(fontSize: 18, color: Colors.black)),
             leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: const SizedBox(

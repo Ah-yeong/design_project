@@ -13,13 +13,14 @@ class EvaluatedMeeting {
   DateTime _meetTime;
   List<String> _members;
   String _address;
+  String _meetingName;
   bool _isVoluntary;
   Map<String, dynamic> _arrivals;
 
   CollectionReference _meetingInstance = FirebaseFirestore.instance.collection("Meetings");
   CollectionReference _evalMeetingInstance = FirebaseFirestore.instance.collection("EvaluatedMeetings");
 
-  EvaluatedMeeting(this._address, this._arrivals, this._isVoluntary, this._meetTime, this._meetingId, this._members);
+  EvaluatedMeeting(this._address, this._arrivals, this._isVoluntary, this._meetTime, this._meetingId, this._members, this._meetingName);
 
   getMeetTime() {return this._meetTime;}
 
@@ -159,6 +160,7 @@ class EvaluatedMeeting {
                           voluntary: _isVoluntary,
                           arrivals: _arrivals,
                           meetingId : _meetingId,
+                          meetingName : _meetingName
                         ));
                       },
                       child: Row(

@@ -35,6 +35,7 @@ class EvaluatedMeetingManager {
           (snapshot.get("meetTime") as Timestamp).toDate(),
           snapshot.get("meetingId"),
           snapshot.get("members").cast<String>(),
+          snapshot.get("meetingName")
         );
       }
     });
