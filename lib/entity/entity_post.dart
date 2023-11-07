@@ -120,7 +120,7 @@ class EntityPost {
     }
   }
 
-  _loadField(DocumentSnapshot ds) {
+  loadField(DocumentSnapshot ds) {
     _writerId = ds.get("writer_id");
     _head = ds.get("head");
     _body = ds.get("body");
@@ -169,7 +169,7 @@ class EntityPost {
         throw Exception("게시물을 찾을 수 없음");
       }
       try {
-        await _loadField(ds);
+        await loadField(ds);
       } catch (e) {
         Map<String, dynamic> map = ds.data() as Map<String, dynamic>;
         await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -179,7 +179,7 @@ class EntityPost {
             }
           }
         });
-        await _loadField(ds);
+        await loadField(ds);
         print("오류 발생");
       }
     });

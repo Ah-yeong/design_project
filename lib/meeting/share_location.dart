@@ -171,11 +171,7 @@ class _PageShareLocation extends State<PageShareLocation> {
                                               flex: 1,
                                               child: Row(
                                                 children: [
-                                                  Image.asset(
-                                                    "assets/images/userImage.png",
-                                                    width: 20,
-                                                    height: 20,
-                                                  ),
+                                                  getAvatar(_memberProfiles[index], 10),
                                                   Text(
                                                     "  ${_memberProfiles[index].name}",
                                                     overflow: TextOverflow.clip,
@@ -238,107 +234,107 @@ class _PageShareLocation extends State<PageShareLocation> {
                               ),
                             ),
                           ),
-                          _post != null && myUuid == _post!.getWriterId()
-                              ? Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      if (_locationGroupList!.isArrivalAll()) {
-                                        // 다 도착했을 경우
-                                        showConfirmBox(context,
-                                            title: Text("구성원이 모두 도착했어요!", style: TextStyle(fontWeight: FontWeight.bold)),
-                                            body: Text(
-                                              "모임 완료 시, 일정 시간 뒤에 모임 게시글이 삭제되며, 위치 공유 서비스를 이용할 수 없어요.\n\n지금 모임을 완료할까요?",
-                                              style: TextStyle(color: colorGrey, fontSize: 15),
-                                            ),
-                                            onAccept: () => null,
-                                            onDeny: () => null);
-                                      } else {
-                                        // 다 도착하지 않았을 경우 (강제 성사)
-                                        bool readWarning = false;
-                                        showConfirmBox(context,
-                                            title: Text(
-                                              "구성원이 아직 모두 도착하지 않았어요!",
-                                              style: TextStyle(fontWeight: FontWeight.bold),
-                                            ),
-                                            body: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "도착 여부에 관계없이 모두 도착으로 처리되므로, 신중히 선택해주세요.",
-                                                  style: TextStyle(color: colorGrey, fontSize: 15),
-                                                ),
-                                                const SizedBox(
-                                                  height: 15,
-                                                ),
-                                                Text(
-                                                  "이 기능을 고의적 노쇼 및 모임 해체 목적으로 사용 시, 계정 정지 혹은 매너지수 감소 등의 불이익을 받을 수 있으니 주의하세요!",
-                                                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
-                                                ),
-                                                const SizedBox(
-                                                  height: 25,
-                                                ),
-                                                StatefulBuilder(
-                                                  builder: (BuildContext context, StateSetter dialogSetter) {
-                                                    return GestureDetector(
-                                                      child: Row(
-                                                        children: [
-                                                          Transform.scale(
-                                                              scale: 0.9,
-                                                              child: SizedBox(
-                                                                width: 24,
-                                                                height: 24,
-                                                                child: Checkbox(
-                                                                  value: readWarning,
-                                                                  onChanged: (_val) {
-                                                                    dialogSetter(() {
-                                                                      readWarning = _val!;
-                                                                    });
-                                                                  },
-                                                                  activeColor: colorSuccess,
-                                                                ),
-                                                              )),
-                                                          Text(
-                                                            " 위 내용을 읽고, 확인했어요.",
-                                                            style: TextStyle(fontSize: 15),
-                                                          )
-                                                        ],
-                                                      ),
-                                                      behavior: HitTestBehavior.translucent,
-                                                      onTap: () {
-                                                        dialogSetter(() {
-                                                          readWarning = !readWarning;
-                                                        });
-                                                      },
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                            onAccept: () {
-                                              if (!readWarning) {
-                                                showAlert("주의 사항 확인 체크가 필요해요!", context, colorError, duration: const Duration(milliseconds: 2000));
-                                                return;
-                                              } else {}
-                                            },
-                                            onDeny: () => null);
-                                      }
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(7), border: Border.all(color: colorGrey), color: Colors.indigoAccent),
-                                      height: 50,
-                                      child: Center(
-                                        child: Text(
-                                          "모임 완료",
-                                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : SizedBox(),
+                          // _post != null && myUuid == _post!.getWriterId()
+                          //     ? Padding(
+                          //         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          //         child: GestureDetector(
+                          //           onTap: () {
+                          //             if (_locationGroupList!.isArrivalAll()) {
+                          //               // 다 도착했을 경우
+                          //               showConfirmBox(context,
+                          //                   title: Text("구성원이 모두 도착했어요!", style: TextStyle(fontWeight: FontWeight.bold)),
+                          //                   body: Text(
+                          //                     "모임 완료 시, 일정 시간 뒤에 모임 게시글이 삭제되며, 위치 공유 서비스를 이용할 수 없어요.\n\n지금 모임을 완료할까요?",
+                          //                     style: TextStyle(color: colorGrey, fontSize: 15),
+                          //                   ),
+                          //                   onAccept: () => null,
+                          //                   onDeny: () => null);
+                          //             } else {
+                          //               // 다 도착하지 않았을 경우 (강제 성사)
+                          //               bool readWarning = false;
+                          //               showConfirmBox(context,
+                          //                   title: Text(
+                          //                     "구성원이 아직 모두 도착하지 않았어요!",
+                          //                     style: TextStyle(fontWeight: FontWeight.bold),
+                          //                   ),
+                          //                   body: Column(
+                          //                     crossAxisAlignment: CrossAxisAlignment.start,
+                          //                     children: [
+                          //                       Text(
+                          //                         "도착 여부에 관계없이 모두 도착으로 처리되므로, 신중히 선택해주세요.",
+                          //                         style: TextStyle(color: colorGrey, fontSize: 15),
+                          //                       ),
+                          //                       const SizedBox(
+                          //                         height: 15,
+                          //                       ),
+                          //                       Text(
+                          //                         "이 기능을 고의적 노쇼 및 모임 해체 목적으로 사용 시, 계정 정지 혹은 매너지수 감소 등의 불이익을 받을 수 있으니 주의하세요!",
+                          //                         style: TextStyle(color: Colors.redAccent, fontSize: 15),
+                          //                       ),
+                          //                       const SizedBox(
+                          //                         height: 25,
+                          //                       ),
+                          //                       StatefulBuilder(
+                          //                         builder: (BuildContext context, StateSetter dialogSetter) {
+                          //                           return GestureDetector(
+                          //                             child: Row(
+                          //                               children: [
+                          //                                 Transform.scale(
+                          //                                     scale: 0.9,
+                          //                                     child: SizedBox(
+                          //                                       width: 24,
+                          //                                       height: 24,
+                          //                                       child: Checkbox(
+                          //                                         value: readWarning,
+                          //                                         onChanged: (_val) {
+                          //                                           dialogSetter(() {
+                          //                                             readWarning = _val!;
+                          //                                           });
+                          //                                         },
+                          //                                         activeColor: colorSuccess,
+                          //                                       ),
+                          //                                     )),
+                          //                                 Text(
+                          //                                   " 위 내용을 읽고, 확인했어요.",
+                          //                                   style: TextStyle(fontSize: 15),
+                          //                                 )
+                          //                               ],
+                          //                             ),
+                          //                             behavior: HitTestBehavior.translucent,
+                          //                             onTap: () {
+                          //                               dialogSetter(() {
+                          //                                 readWarning = !readWarning;
+                          //                               });
+                          //                             },
+                          //                           );
+                          //                         },
+                          //                       ),
+                          //                     ],
+                          //                   ),
+                          //                   onAccept: () {
+                          //                     if (!readWarning) {
+                          //                       showAlert("주의 사항 확인 체크가 필요해요!", context, colorError, duration: const Duration(milliseconds: 2000));
+                          //                       return;
+                          //                     } else {}
+                          //                   },
+                          //                   onDeny: () => null);
+                          //             }
+                          //           },
+                          //           child: Container(
+                          //             width: double.infinity,
+                          //             decoration: BoxDecoration(
+                          //                 borderRadius: BorderRadius.circular(7), border: Border.all(color: colorGrey), color: Colors.indigoAccent),
+                          //             height: 50,
+                          //             child: Center(
+                          //               child: Text(
+                          //                 "모임 완료",
+                          //                 style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //       )
+                          //     : SizedBox(),
                           const SizedBox(
                             height: 50,
                           )

@@ -65,7 +65,12 @@ class PostPageManager {
       }
 
       EntityPost post = EntityPost(int.parse(ds.id));
-      await post.loadPost();
+      try {
+        post.loadField(ds);
+      } catch (e) {
+        print("load post error (postManager): $e");
+      }
+
       list.add(post);
       _loadedCount++;
       _lastLoaded = int.parse(ds.id);

@@ -1,3 +1,4 @@
+import 'package:design_project/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -119,22 +120,21 @@ class _PageMyPost extends State<PageMyPost> {
     super.initState();
     myProfileEntity!.loadProfile().then((n) async {
       if (myProfileEntity!.post != null) {
-        Future.forEach(myProfileEntity!.post, (dynamic postId) async {
-          EntityPost myPost = EntityPost(postId);
-          await myPost.loadPost().then((value) => myPostList.add(myPost));
-          if (myPostList.length == myProfileEntity!.post.length) {
-            myPostList.sort((a, b) => a.getTime().compareTo(b.getTime()));
-            Map<String, List<EntityPost>> groupedPosts= {};
-            for (var post in myPostList) {
-              final dateKey = post.getTime().substring(0, post.getTime().indexOf(' '));
-              if (!groupedPosts.containsKey(dateKey)) {
-                groupedPosts[dateKey] = [];
-              }
-              groupedPosts[dateKey]!.add(post);
-            }
-            setState(() { _groupedPosts = groupedPosts; });
-          }
+        await Future.forEach(myProfileEntity!.post, (dynamic postId) async {
+          myPostList.add(postManager.list[postManager.getIndexByPostId(postId)]);
         });
+        if (myPostList.length == myProfileEntity!.post.length) {
+          myPostList.sort((a, b) => a.getTime().compareTo(b.getTime()));
+          Map<String, List<EntityPost>> groupedPosts= {};
+          for (var post in myPostList) {
+            final dateKey = post.getTime().substring(0, post.getTime().indexOf(' '));
+            if (!groupedPosts.containsKey(dateKey)) {
+              groupedPosts[dateKey] = [];
+            }
+            groupedPosts[dateKey]!.add(post);
+          }
+          setState(() { _groupedPosts = groupedPosts; });
+        }
       }
     }).then((value) => setState(() => _isLoadingPost = false));
   }
