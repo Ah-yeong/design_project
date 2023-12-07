@@ -104,8 +104,8 @@
 ### 모임 구성원 평가
 모임 시작 6시간 이후에 모임 구성원 평가가 활성화되며, 각 모임 구성원들의 매너지수를 올리거나 내릴 수 있습니다.
 
-<img width="30%" height="60%" src=""/>
-<img width="30%" height="60%" src=""/>
+<img width="30%" height="60%" src="https://github.com/jongwone/design_project/assets/123169841/eb0d59b4-31b0-485a-aaf4-cb3893d4e7c1"/>
+<img width="28%" height="60%" src="https://github.com/jongwone/design_project/assets/123169841/87da3a34-0f73-4ac3-9717-ca91ab45caed"/>
 
 ### 실시간 채팅
 사용자의 프로필을 눌러 1:1 채팅을 하거나, 모임이 성사될 때의 그룹 채팅방으로 여러 사람들과 대화할 수 있습니다.
@@ -118,7 +118,7 @@
 모임 신청, 수락, 성사, 완료 등 일련의 과정에서 푸시 알림 및 인 앱 알림이 전송됩니다.
 
 <img width="30%" height="60%" src="https://github.com/jongwone/design_project/assets/123169841/99ce4e85-45be-48c5-9f03-72704aa48f78"/>
-<img width="30%" height="60%" src=""/>
+<img width="30%" height="60%" src="https://github.com/jongwone/design_project/assets/123169841/01a48abe-2436-4670-95cc-30d0b31de6bd"/>
 
 <br />
 
