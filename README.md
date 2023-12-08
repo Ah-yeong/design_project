@@ -42,7 +42,7 @@
 |유형|플랫폼|
 |-|-|
 |버전 관리|<img src ="https://img.shields.io/badge/Git-F05032?&style=for-the-badge&logo=Git&logoColor=white"/><img src ="https://img.shields.io/badge/GitHub-181717?&style=for-the-badge&logo=GitHub&logoColor=white"/>|
-|협업 내역|<img src ="https://img.shields.io/badge/Notion-000000?&style=for-the-badge&logo=Notion&logoColor=white"/>|
+|협업 이슈 관리|<a alt="이미지 클릭 시 연결" href="https://horse-filament-2e9.notion.site/96817249b53c4bc99ba381e7b43554b0?v=133edb02871c48da942d55ae7d7b2dc3&pvs=4"><img src ="https://img.shields.io/badge/Notion-000000?&style=for-the-badge&logo=Notion&logoColor=white"/></a></br>(클릭 시 이동)|
 
 ## 사용된 플랫폼 및 기술
 
